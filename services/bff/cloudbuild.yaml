@@ -1,0 +1,7 @@
+steps:
+- name: maven:3-openjdk-17
+  entrypoint: mvn
+  args: ["spring-boot:build-image", "-P${_TYPE}", "-DskipTests"]
+- name: gcr.io/cloud-builders/docker
+  args: ["tag", "bff-${_TYPE}", "gcr.io/$PROJECT_ID/bff-${_TYPE}"]
+images: ["gcr.io/$PROJECT_ID/bff-${_TYPE}"]

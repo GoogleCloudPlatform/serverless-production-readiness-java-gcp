@@ -1,0 +1,15 @@
+server:
+  port: ${PORT:8087}
+
+management:
+  endpoint:
+    health:
+      show-details: ALWAYS
+  health:
+    diskspace:  
+      enabled: false
+  endpoints:
+    enabled-by-default: true
+    web:
+      exposure:
+        include: "*"

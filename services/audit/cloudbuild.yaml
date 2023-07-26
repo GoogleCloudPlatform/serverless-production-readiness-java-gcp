@@ -1,0 +1,51 @@
+steps:
+  # restore Maven dependencies for faster builds
+- id: 'download-cached-maven-dependencies'
+  name: gcr.io/cloud-builders/gsutil
+  entrypoint: bash
+  volumes:
+  - name: 'maven-repository'
+    path: '/root/.m2'
+  args:
+  - '-c'
+  - |
+    gsutil cp gs://${PROJECT_ID}-cache-dependencies/cache/maven-dependencies.tgz maven-dependencies.tgz || exit 0
+    tar -zxf maven-dependencies.tgz --directory / || exit 0
+
+  # run tests first
+- id: 'test'
+  name: maven:3.9-eclipse-temurin-17
+  entrypoint: mvn
+  volumes:
+  - name: 'maven-repository'
+    path: '/root/.m2'
+  args: ["verify"]
+
+  # build service image
+- id: 'build-project'
+  name: maven:3.9-eclipse-temurin-17
+  entrypoint: mvn
+  volumes:
+  - name: 'maven-repository'
+    path: '/root/.m2'
+  args: ["spring-boot:build-image", "-DskipTests"]
+
+  # store image in registry
+- id: 'store-image'
+  name: gcr.io/cloud-builders/docker
+  args: ["tag", "audit", "gcr.io/$PROJECT_ID/audit"]
+
+  # store Maven dependencies
+- id: 'upload-cached-maven-dependencies'
+  waitFor: [ 'build-project']
+  name: gcr.io/cloud-builders/gsutil
+  entrypoint: bash
+  volumes:
+  - name: 'maven-repository'
+    path: '/root/.m2'
+  args:
+  - '-c'
+  - |
+    tar -zcf maven-dependencies.tgz /root/.m2
+    gsutil cp maven-dependencies.tgz gs://${PROJECT_ID}-cache-dependencies/cache/maven-dependencies.tgz
+images: ["gcr.io/$PROJECT_ID/audit"]

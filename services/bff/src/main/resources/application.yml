@@ -1,0 +1,24 @@
+server:
+  port: ${PORT:8080}
+
+management:
+  endpoint:
+    health:
+      show-details: ALWAYS
+  health:
+    diskspace:  
+      enabled: false
+  endpoints:
+    enabled-by-default: true
+    web:
+      exposure:
+        include: "*"
+
+# Downstream Service URLs
+quotes_url: http://localhost:8083     
+reference_url: http://localhost:8085
+faulty_url: http://localhost:8087
+
+# OKKHttp3 timeouts
+read_timeout: ${READ_TIMEOUT:10000}
+write_timeout: ${WRITE_TIMEOUT:10000}

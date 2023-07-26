@@ -1,0 +1,48 @@
+steps:
+- id: 'download-cached-maven-dependencies'
+  name: gcr.io/cloud-builders/gsutil
+  entrypoint: bash
+  volumes:
+  - name: 'maven-repository'
+    path: '/root/.m2'
+  args:
+  - '-c'
+  - |
+    gsutil cp gs://${PROJECT_ID}-cache-dependencies/cache/maven-dependencies.tgz maven-dependencies.tgz || exit 0
+    tar -zxf maven-dependencies.tgz --directory / || exit 0
+- id: 'test'
+  name: maven:3.9-eclipse-temurin-17
+  entrypoint: mvn
+  volumes:
+  - name: 'maven-repository'
+    path: '/root/.m2'
+  args: ["verify"]
+- id: 'build-project'
+  name: maven:3.9-eclipse-temurin-17
+  entrypoint: bash
+  args:
+  - '-c'
+  - |
+    bash <(curl -sL https://get.graalvm.org/jdk) graalvm-ce-java17-22.3.1
+    printenv
+    export JAVA_HOME="/workspace/graalvm-ce-java17-22.3.1"
+    gu install native-image
+    mvn spring-boot:build-image -Pnative -DskipTests
+  volumes:
+  - name: 'maven-repository'
+    path: '/root/.m2'
+- name: gcr.io/cloud-builders/docker
+  args: ["tag", "audit-native", "gcr.io/$PROJECT_ID/audit-native"]
+- id: 'upload-cached-maven-dependencies'
+  waitFor: [ 'build-project']
+  name: gcr.io/cloud-builders/gsutil
+  entrypoint: bash
+  volumes:
+  - name: 'maven-repository'
+    path: '/root/.m2'
+  args:
+  - '-c'
+  - |
+    tar -zcf maven-dependencies.tgz /root/.m2
+    gsutil cp maven-dependencies.tgz gs://${PROJECT_ID}-cache-dependencies/cache/maven-dependencies.tgz
+images: ["gcr.io/$PROJECT_ID/audit-native"]
