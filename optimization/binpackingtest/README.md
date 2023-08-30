@@ -32,6 +32,17 @@ Start the app locally from the CLI:
 ## Test
 Test from the CLI using HTTPie:
 ```shell
+# Test against the RANDOM endpoint
+# defaults values: limit items to 100, capacity of the bin to 100, weight random between 1:27
+http :8080/random
+
+# values: limit items to 100, capacity of the bin to 100, weight random defaulted to between 1:27  
+http ":8080/random?limit=100&bin=100"
+
+# values: limit items to 100, capacity of the bin to 100, weight random generated to between 1:20
+http ":8080/random?limit=100&bin=100&itemmaxweight=20"
+
+
 # Test against the FILE endpoint
 # defaults values: limit items to 100, capacity of the bin to 100, weight random between 1:27
 http :8080/file
