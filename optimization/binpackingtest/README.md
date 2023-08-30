@@ -54,3 +54,43 @@ http ":8080/file?limit=100&bin=100"
 # note: files generated for 100, 500, 750, 1000, 10000
 http ":8080/file?limit=100&bin=100&itemmaxweight=20"
 ```
+
+## Deploy to Cloud Run
+Retrieve the Project ID, as it will be required for the next GCP operations
+```shell
+export PROJECT_ID=$(gcloud config get-value project)
+echo $PROJECT_ID
+```
+
+Tag the image and store it in GCR
+```shell
+docker tag binpackingtest:0.0.1-SNAPSHOT gcr.io/${PROJECT_ID}/binpackingtest:0.0.1-SNAPSHOT
+
+docker push gcr.io/${PROJECT_ID}/binpackingtest:0.0.1-SNAPSHOT
+```
+
+Deploy to CloudRun 
+```shell
+gcloud run deploy binpackingtest \
+     --image gcr.io/${PROJECT_ID}/binpackingtest:0.0.1-SNAPSHOT \
+     --region us-central1 \
+     --memory 4Gi --cpu=1 \
+     --allow-unauthenticated
+     
+gcloud run deploy binpackingtest-tuned \
+     --image gcr.io/${PROJECT_ID}/binpackingtest:0.0.1-SNAPSHOT \
+     --region us-central1 \
+     --memory 8Gi --cpu=2 \
+     --set-env-vars=JAVA_TOOL_OPTIONS='-XX:+UseG1GC -XX:MaxRAMPercentage=75 -XX:ActiveProcessorCount=2 -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -Xss256k'\
+     --allow-unauthenticated     
+```
+
+Test with the URL returned by the deployment:
+```shell
+URL=$(gcloud run services describe binpackingtest --region us-central1 --format='value(status.URL)')
+# or
+URL=$(gcloud run services describe binpackingtest-tuned --region us-central1 --format='value(status.URL)')
+
+curl -H "Authorization: Bearer $(gcloud auth print-identity-token)" $URL/random
+curl -H "Authorization: Bearer $(gcloud auth print-identity-token)" $URL/file
+```
