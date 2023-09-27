@@ -32,7 +32,7 @@
   <description>Quotes service in Spring Boot</description>
   <properties>
     <java.version>17</java.version>
-    <testcontainers.version>1.18.3</testcontainers.version>
+    <testcontainers.version>1.19.0</testcontainers.version>
   </properties>
   <dependencies>
     <dependency>
@@ -120,7 +120,7 @@
       <plugin>
         <groupId>org.graalvm.buildtools</groupId>
         <artifactId>native-maven-plugin</artifactId>
-        <version>0.9.23</version>
+        <version>0.9.27</version>
       </plugin>
       <plugin>
         <groupId>org.springframework.boot</groupId>
@@ -141,6 +141,7 @@
           <plugin>
             <groupId>org.graalvm.buildtools</groupId>
             <artifactId>native-maven-plugin</artifactId>
+            <version>0.9.27</version>
           </plugin>
           <plugin>
             <groupId>org.springframework.boot</groupId>
@@ -164,8 +165,8 @@
             <configuration>
               <image>
                 <name>${project.artifactId}-native</name>
-                <!-- <builder>dashaun/builder:tiny</builder> -->
-                <builder>paketobuildpacks/builder:tiny</builder>
+                    <builder>dashaun/builder:tiny</builder>
+<!--                <builder>paketobuildpacks/builder:tiny</builder>-->
                 <env>
                   <BP_NATIVE_IMAGE>1</BP_NATIVE_IMAGE>
                   <BP_JVM_VERSION>17</BP_JVM_VERSION>

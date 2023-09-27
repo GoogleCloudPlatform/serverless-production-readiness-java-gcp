@@ -33,8 +33,8 @@
     <java.version>17</java.version>
     <maven.compiler.target>17</maven.compiler.target>
     <maven.compiler.source>17</maven.compiler.source>
-    <spring-cloud.version>2022.0.3</spring-cloud.version>
-    <testcontainers.version>1.18.3</testcontainers.version>
+    <spring-cloud.version>2023.0.0-M1</spring-cloud.version>
+    <testcontainers.version>1.19.0</testcontainers.version>
   </properties>
   <dependencies>
     <dependency>
@@ -112,11 +112,12 @@
       <plugin>
         <groupId>org.graalvm.buildtools</groupId>
         <artifactId>native-maven-plugin</artifactId>
-        <configuration>
-          <buildArgs>
-            <arg>-H:+RunReachabilityHandlersConcurrently</arg>
-          </buildArgs>
-        </configuration>
+        <version>0.9.27</version>
+<!--        <configuration>-->
+<!--          <buildArgs>-->
+<!--            <arg>-H:+RunReachabilityHandlersConcurrently</arg>-->
+<!--          </buildArgs>-->
+<!--        </configuration>-->
       </plugin>
       <plugin>
         <groupId>org.springframework.boot</groupId>
@@ -138,6 +139,7 @@
           <plugin>
             <groupId>org.graalvm.buildtools</groupId>
             <artifactId>native-maven-plugin</artifactId>
+            <version>0.9.27</version>
           </plugin>
           <plugin>
             <groupId>org.springframework.boot</groupId>
@@ -235,7 +237,7 @@
       <dependency>
         <groupId>com.google.cloud</groupId>
         <artifactId>libraries-bom</artifactId>
-        <version>26.18.0</version>
+        <version>26.23.0</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>

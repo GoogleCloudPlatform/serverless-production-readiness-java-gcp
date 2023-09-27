@@ -58,7 +58,7 @@ public class AuditApplicationFirestoreContainerTests {
   private static final FirestoreEmulatorContainer firestoreEmulator =
       new FirestoreEmulatorContainer(
           DockerImageName.parse(
-              "gcr.io/google.com/cloudsdktool/cloud-sdk:439.0.0-emulators"));
+              "gcr.io/google.com/cloudsdktool/google-cloud-cli:emulators"));
 
   @DynamicPropertySource
   static void emulatorProperties(DynamicPropertyRegistry registry) {
