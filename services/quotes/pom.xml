@@ -117,19 +117,20 @@
   </dependencyManagement>
   <build>
     <plugins>
-      <plugin>
-        <groupId>org.graalvm.buildtools</groupId>
-        <artifactId>native-maven-plugin</artifactId>
-        <version>0.9.27</version>
-      </plugin>
+<!--      <plugin>-->
+<!--        <groupId>org.graalvm.buildtools</groupId>-->
+<!--        <artifactId>native-maven-plugin</artifactId>-->
+<!--        <version>0.9.27</version>-->
+<!--      </plugin>-->
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
-        <configuration>
-          <image>
-            <name>${project.artifactId}</name>
-          </image>
-        </configuration>
+<!--        <configuration>-->
+<!--          <image>-->
+<!--            <name>${project.artifactId}</name>-->
+<!--            <builder>dashaun/builder:tiny</builder>-->
+<!--          </image>-->
+<!--        </configuration>-->
       </plugin>
     </plugins>
   </build>
@@ -138,17 +139,18 @@
       <id>jit</id>
       <build>
         <plugins>
-          <plugin>
-            <groupId>org.graalvm.buildtools</groupId>
-            <artifactId>native-maven-plugin</artifactId>
-            <version>0.9.27</version>
-          </plugin>
+<!--          <plugin>-->
+<!--            <groupId>org.graalvm.buildtools</groupId>-->
+<!--            <artifactId>native-maven-plugin</artifactId>-->
+<!--            <version>0.9.27</version>-->
+<!--          </plugin>-->
           <plugin>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-maven-plugin</artifactId>
             <configuration>
               <image>
                 <name>${project.artifactId}-jit</name>
+<!--                <builder>dashaun/builder:tiny</builder>-->
               </image>
             </configuration>
           </plugin>
@@ -165,7 +167,7 @@
             <configuration>
               <image>
                 <name>${project.artifactId}-native</name>
-                    <builder>dashaun/builder:tiny</builder>
+<!--                <builder>dashaun/builder:tiny</builder>-->
 <!--                <builder>paketobuildpacks/builder:tiny</builder>-->
                 <env>
                   <BP_NATIVE_IMAGE>1</BP_NATIVE_IMAGE>
