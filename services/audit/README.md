@@ -74,7 +74,7 @@ docker build -f ./containerize/Dockerfile-custom -t audit-custom .
 ./mvnw spring-boot:build-image  -DskipTests -Pnative -Dspring-boot.build-image.imageName=audit-native
 ```
 
-### Test the images on the local machine
+### Test the locally built images on the local machine
 ```shell
 docker run --rm -p 8080:8084 audit
 

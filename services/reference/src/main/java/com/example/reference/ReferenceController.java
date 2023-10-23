@@ -19,13 +19,13 @@ import com.example.reference.data.Metadata;
 import com.google.cloud.MetadataConfig;
 import java.text.SimpleDateFormat;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 public class ReferenceController {
@@ -33,7 +33,7 @@ public class ReferenceController {
   Long delay;
 
   // logger
-  private static final Log logger = LogFactory.getLog(ReferenceController.class);
+  private static final Logger logger = LoggerFactory.getLogger(ReferenceController.class);
 
   @GetMapping("start")
   String start() {

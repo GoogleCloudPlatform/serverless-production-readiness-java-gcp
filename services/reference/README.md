@@ -51,11 +51,18 @@ Java HotSpot(TM) 64-Bit Server VM Oracle GraalVM 17.0.7+8.1 (build 17.0.7+8-LTS-
 ./mvnw native:compile -Pnative
 ```
 
-### Build a JVM and Native Java Docker Image
+### Build a JIT and Native Java Docker Image with Buildpacks
 ```
-./mvnw spring-boot:build-image -Pjit
+./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=reference
 
-./mvnw spring-boot:build-image -Pnative
+./mvnw spring-boot:build-image  -DskipTests -Pnative -Dspring-boot.build-image.imageName=reference-native
+```
+
+### Test the locally built images on the local machine
+```shell
+docker run --rm -p 8080:8085 reference
+
+docker run --rm -p 8080:8085 reference-native
 ```
 
 ### Start your app with AOT enabled

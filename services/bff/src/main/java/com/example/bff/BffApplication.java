@@ -17,15 +17,16 @@ package com.example.bff;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class BffApplication {
     // logger
-    private static final Log logger = LogFactory.getLog(BffApplication.class);
+    private static final Logger logger = LoggerFactory.getLogger(BffApplication.class);
 
 	public static void main(String[] args) {
 		Runtime r = Runtime.getRuntime();

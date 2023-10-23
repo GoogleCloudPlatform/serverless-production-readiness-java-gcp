@@ -120,11 +120,16 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <image>
+            <builder>dashaun/builder:tiny</builder>
+          </image>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.graalvm.buildtools</groupId>
         <artifactId>native-maven-plugin</artifactId>
-      </plugin>    
+      </plugin>
     </plugins>  
   </build>
 

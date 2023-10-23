@@ -76,7 +76,7 @@ docker build -f ./containerize/Dockerfile-custom -t quotes-custom .
 ./mvnw spring-boot:build-image  -DskipTests -Pnative -Dspring-boot.build-image.imageName=quotes-native
 ```
 
-### Test the images on the local machine
+### Test the locally built images on the local machine
 ```shell
 docker run --rm -p 8080:8083 quotes
 

@@ -16,7 +16,6 @@
 package com.example.bff;
 
 import com.example.bff.actuator.StartupCheck;
-import com.example.bff.data.Data;
 import com.example.bff.data.Quote;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -26,8 +25,8 @@ import javax.annotation.PostConstruct;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class BffController {
   // logger
-  private static final Log logger = LogFactory.getLog(BffController.class);
+  private static final Logger logger = LoggerFactory.getLogger(BffController.class);
 
   @Value("${quotes_url}")
   String quotesURL;

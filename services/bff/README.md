@@ -45,31 +45,30 @@ Hello from your local environment!
 
 ./mvnw clean package -Pnative -DskipTests
 ```
-
-### Build a JVM and Native Java Docker Image
+### Build a JVM and Native Java application image
 ```
-./mvnw clean package -Pjvm-image -DskipTests
+./mvnw package -DskipTests 
 
-./mvnw clean package -Pnative-image -DskipTests
+./mvnw native:compile -Pnative -DskipTests
+```
+
+### Build a JIT and Native Java Docker Image with Buildpacks
+```
+./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=bff
+
+./mvnw spring-boot:build-image  -DskipTests -Pnative -Dspring-boot.build-image.imageName=bff-native
+```
+
+### Test the locally built images on the local machine
+```shell
+docker run --rm -p 8080:8080 bff
+
+docker run --rm -p 8080:8080 bff-native
 ```
 
 ### Start your app with AOT enabled
 ```shell
 java -Dspring.aot.enabled -jar target/bff-1.0.0.jar
-```
-
-### Build a JIT and Native Java Docker Image with Buildpacks
-```
-./mvnw spring-boot:build-image -Pjit -DskipTests
-
-./mvnw spring-boot:build-image -Pnative -DskipTests
-```
-
-### Build a JIT and Native Java Docker Image with Buildpacks
-```
-./mvnw spring-boot:build-image -Pjit -DskipTests
-
-./mvnw spring-boot:build-image -Pnative -DskipTests
 ```
 
 ### Build, test with CloudBuild in Cloud Build
