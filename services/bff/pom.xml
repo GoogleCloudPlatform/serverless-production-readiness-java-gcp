@@ -118,9 +118,6 @@
           <image>
             <builder>dashaun/builder:tiny</builder>
           </image>
-          <env>
-            <BP_JVM_VERSION>21</BP_JVM_VERSION>
-          </env>
         </configuration>
       </plugin>
     </plugins>
