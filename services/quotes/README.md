@@ -71,9 +71,16 @@ docker build -f ./containerize/Dockerfile-custom -t quotes-custom .
 ```
 ### Build a JIT and Native Java Docker Image with Buildpacks
 ```
-./mvnw spring-boot:build-image -Pjit -DskipTests
+./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=quotes
 
-./mvnw spring-boot:build-image -Pnative -DskipTests
+./mvnw spring-boot:build-image  -DskipTests -Pnative -Dspring-boot.build-image.imageName=quotes-native
+```
+
+### Test the images on the local machine
+```shell
+docker run --rm -p 8080:8083 quotes
+
+docker run --rm -p 8080:8083 quotes-native
 ```
 
 ### Build, test with CloudBuild in Cloud Build

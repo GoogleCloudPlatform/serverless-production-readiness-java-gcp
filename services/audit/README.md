@@ -69,9 +69,16 @@ docker build -f ./containerize/Dockerfile-custom -t audit-custom .
 ```
 ### Build a JIT and Native Java Docker Image with Buildpacks
 ```
-./mvnw spring-boot:build-image -Pjit
+./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=audit
 
-./mvnw spring-boot:build-image -Pnative
+./mvnw spring-boot:build-image  -DskipTests -Pnative -Dspring-boot.build-image.imageName=audit-native
+```
+
+### Test the images on the local machine
+```shell
+docker run --rm -p 8080:8084 audit
+
+docker run --rm -p 8080:8084 audit-native
 ```
 
 ### Build, test with CloudBuild in Cloud Build
