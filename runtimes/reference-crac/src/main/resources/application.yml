@@ -1,0 +1,17 @@
+server:
+  port: ${PORT:8085}
+
+management:
+  endpoint:
+    health:
+      show-details: ALWAYS
+  health:
+    diskspace:  
+      enabled: false
+  endpoints:
+    enabled-by-default: true
+    web:
+      exposure:
+        include: "*"
+
+delay: ${DELAY:5}
