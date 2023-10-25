@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 #
 # Copyright 2023 Google LLC
 #
@@ -14,7 +16,6 @@
 # limitations under the License.
 #
 
-#!/usr/bin/env bash
 set -e
 
 case $(uname -m) in
