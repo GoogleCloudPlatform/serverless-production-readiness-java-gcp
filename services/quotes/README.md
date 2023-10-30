@@ -31,7 +31,7 @@ Java HotSpot(TM) 64-Bit Server VM Oracle GraalVM 21+35.1 (build 21+35-jvmci-23.1
 
 ### Validate that the starter app is good to go
 ```
-./mvnw clean package spring-boot:run
+./mvnw package spring-boot:run
 ```
 
 From a terminal window, test the app
@@ -51,7 +51,7 @@ Hello from your local environment!
 
 ### Start your app with AOT enabled
 ```shell
-java -Dspring.aot.enabled -jar target/quotes-1.0.0.jar
+java -Dspring.aot.enabled=true -jar target/quotes-1.0.0.jar
 ```
 ### Build a JIT Docker image with Dockerfiles
 ```shell
@@ -131,8 +131,7 @@ gcloud run deploy quotes-native \
 ```
 
 ### Test the application
-
-Test the application locally
+Start the containerized app locally:
 ```shell
 # validate that app has started
 curl localhost:8080:/start
@@ -153,7 +152,7 @@ curl --location 'http://localhost:8080/quotes' \
 
 Test the application in Cloud Run
 ```shell
-# find the Quotes service URL is you have note noted it
+# find the Quotes URL is you have not noted it
 gcloud run services list | grep quotes
 ✔  quotes                    us-central1   https://quotes-...-uc.a.run.app       
 ✔  quotes-native             us-central1   https://quotes-native-...-uc.a.run.app
@@ -174,11 +173,11 @@ curl --location '<URL>:/quotes' \
 }'
 ```
 
-If you have deployed the service with security enabled, (no --allow-unauthenticated flag) you can test it with a Bearer token. You can use also an alternative [HTTP test client](https://httpie.io/) 
+If you have deployed the app with security enabled, (no --allow-unauthenticated flag) you can test it with a Bearer token. You can use also an alternative [HTTP test client](https://httpie.io/) 
 ```shell
 TOKEN=$(gcloud auth print-identity-token)
 
-# Get the URL of the deployed service
+# Get the URL of the deployed app
 # Test JIT image
 http -A bearer -a $TOKEN  https://<BASE_URL>/random-quote
 http -A bearer -a $TOKEN  https://<BASE_URL>/quotes

@@ -98,7 +98,7 @@
       <dependency>
         <groupId>com.google.cloud</groupId>
         <artifactId>libraries-bom</artifactId>
-        <version>26.25.0</version>
+        <version>26.26.0</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -114,11 +114,6 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
-        <configuration>
-          <image>
-            <builder>dashaun/builder:tiny</builder>
-          </image>
-        </configuration>
       </plugin>
     </plugins>
   </build>
