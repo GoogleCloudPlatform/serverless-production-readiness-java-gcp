@@ -1,4 +1,4 @@
-## Reference Service CRaC build
+## Reference Service CRaC Build & Deploy
 
 This repo leverages checkpoint/restore scripts originally provided Seb Deleuze (sdeleuze/spring-boot-crac-demo)
 It is intended to demonstrate Spring Boot 3.2+ CRaC support by creating a ready to restore container image.
@@ -29,7 +29,7 @@ Restore the application with:
 Let's build the checkpointed CRaC image and deploy it to Cloud Run.
 ```shell
 # first, build the image if you have not done so before
-./checkpoint,sh
+./checkpoint.sh
 
 # tag the image
 export PROJECT_ID=$(gcloud config list --format 'value(core.project)')
@@ -46,7 +46,7 @@ Deploy the image to Cloud Run and test it
 export PROJECT_ID=$(gcloud config list --format 'value(core.project)')
 echo   $PROJECT_ID
 
-gcloud beta run deploy reference-crac  \
+gcloud run deploy reference-crac  \
     --image=gcr.io/${PROJECT_ID}/reference-crac  \
     --execution-environment=gen2  \
     --allow-unauthenticated \

@@ -29,7 +29,7 @@ Restore the application with:
 Let's build the checkpointed CRaC image and deploy it to Cloud Run.
 ```shell
 # first, build the image if you have not done so before
-./checkpoint,sh
+./checkpoint.sh
 
 # tag the image
 export PROJECT_ID=$(gcloud config list --format 'value(core.project)')
@@ -46,7 +46,7 @@ Deploy the image to Cloud Run and test it
 export PROJECT_ID=$(gcloud config list --format 'value(core.project)')
 echo   $PROJECT_ID
 
-gcloud beta run deploy quotes-crac  \
+gcloud run deploy quotes-crac  \
     --image=gcr.io/${PROJECT_ID}/quotes-crac  \
     --execution-environment=gen2  \
     --allow-unauthenticated \
