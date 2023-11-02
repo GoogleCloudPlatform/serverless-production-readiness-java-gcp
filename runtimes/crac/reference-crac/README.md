@@ -1,4 +1,4 @@
-## Reference Service CRaC Build & Deploy
+## Reference Service CRaC Build & Deploy to Cloud Run
 
 This repo leverages checkpoint/restore scripts originally provided Seb Deleuze (sdeleuze/spring-boot-crac-demo)
 It is intended to demonstrate Spring Boot 3.2+ CRaC support by creating a ready to restore container image.
