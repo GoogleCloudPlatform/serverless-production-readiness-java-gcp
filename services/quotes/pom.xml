@@ -21,9 +21,10 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>com.example</groupId>
-    <artifactId>services</artifactId>
-    <version>1.0.0</version>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.2.0-RC2</version>
+    <relativePath/> <!-- lookup parent from repository -->
   </parent>
 
   <artifactId>quotes</artifactId>
@@ -120,11 +121,6 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
-        <configuration>
-          <image>
-            <builder>dashaun/builder:tiny</builder>
-          </image>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.graalvm.buildtools</groupId>

@@ -24,14 +24,14 @@ steps:
     gsutil cp gs://${PROJECT_ID}-cache-dependencies/cache/maven-dependencies.tgz maven-dependencies.tgz || exit 0
     tar -zxf maven-dependencies.tgz --directory / || exit 0
 - id: 'test'
-  name: maven:3.9-eclipse-temurin-17
+  name: eclipse-temurin:21.0.1_12-jre
   entrypoint: mvn
   volumes:
   - name: 'maven-repository'
     path: '/root/.m2'
   args: ["verify"]
 - id: 'build-project'
-  name: maven:3.9-eclipse-temurin-17
+  name: eclipse-temurin:21.0.1_12-jre
   entrypoint: bash
   args:
   - '-c'

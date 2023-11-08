@@ -27,7 +27,7 @@ steps:
 
   # run tests first
 - id: 'test'
-  name: maven:3.9-eclipse-temurin-17
+  name: maven:3.9.5-eclipse-temurin-21
   entrypoint: mvn
   volumes:
   - name: 'maven-repository'
@@ -36,7 +36,7 @@ steps:
 
   # build service
 - id: 'build-code'
-  name: maven:3.9-eclipse-temurin-17
+  name: maven:3.9.5-eclipse-temurin-21
   entrypoint: mvn
   volumes:
   - name: 'maven-repository'
