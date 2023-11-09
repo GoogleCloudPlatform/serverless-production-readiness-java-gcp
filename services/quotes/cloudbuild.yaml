@@ -22,7 +22,7 @@ steps:
   args:
   - '-c'
   - |
-    gsutil cp gs://${PROJECT_ID}-cache-dependencies/cache/maven-dependencies.tgz maven-dependencies.tgz || exit 0
+    gsutil cp gs://app-cache-dependencies/cache/maven-dependencies.tgz maven-dependencies.tgz || exit 0
     tar -zxf maven-dependencies.tgz --directory / || exit 0
 
   # run tests first
@@ -43,10 +43,14 @@ steps:
     path: '/root/.m2'
   args: ["spring-boot:build-image", "-DskipTests", "-Dspring-boot.build-image.imageName=quotes"]
 
-  # store image in registry
-- id: 'store-image'
+  # tag then store image in registry
+- id: 'tag-image'
   name: gcr.io/cloud-builders/docker
   args: ["tag", "quotes", "gcr.io/$PROJECT_ID/quotes"]
+  # Push the container image to Artifact Registry
+- id: 'store-image'
+  name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'gcr.io/$PROJECT_ID/quotes']
 
   # store Maven dependencies
 - id: 'upload-cached-maven-dependencies'
@@ -60,5 +64,5 @@ steps:
   - '-c'
   - |
     tar -zcf maven-dependencies.tgz /root/.m2
-    gsutil cp maven-dependencies.tgz gs://${PROJECT_ID}-cache-dependencies/cache/maven-dependencies.tgz
+    gsutil cp maven-dependencies.tgz gs://app-cache-dependencies/cache/maven-dependencies.tgz
 images: ["gcr.io/$PROJECT_ID/quotes"]

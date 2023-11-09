@@ -21,7 +21,7 @@ steps:
   args:
   - '-c'
   - |
-    gsutil cp gs://${PROJECT_ID}-cache-dependencies/cache/maven-dependencies.tgz maven-dependencies.tgz || exit 0
+    gsutil cp gs://app-cache-dependencies/cache/maven-dependencies.tgz maven-dependencies.tgz || exit 0
     tar -zxf maven-dependencies.tgz --directory / || exit 0
 - id: 'test'
   name: maven:3.9.5-eclipse-temurin-21
@@ -50,6 +50,15 @@ steps:
     path: '/root/.m2'
 - name: gcr.io/cloud-builders/docker
   args: ["tag", "quotes-native", "gcr.io/$PROJECT_ID/quotes-native"]
+  # tag then store image in registry
+- id: 'tag-image'
+  name: gcr.io/cloud-builders/docker
+  args: ["tag", "quotes-native", "gcr.io/$PROJECT_ID/quotes-native"]
+  # Push the container image to Artifact Registry
+- id: 'store-image'
+  name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'gcr.io/$PROJECT_ID/quotes-native']  
+
 - id: 'upload-cached-maven-dependencies'
   waitFor: [ 'build-project']
   name: gcr.io/cloud-builders/gsutil
@@ -61,5 +70,5 @@ steps:
   - '-c'
   - |
     tar -zcf maven-dependencies.tgz /root/.m2
-    gsutil cp maven-dependencies.tgz gs://${PROJECT_ID}-cache-dependencies/cache/maven-dependencies.tgz
+    gsutil cp maven-dependencies.tgz gs://app-cache-dependencies/cache/maven-dependencies.tgz
 images: ["gcr.io/$PROJECT_ID/quotes-native"]
