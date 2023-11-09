@@ -17,4 +17,5 @@
 #
 set -e
 
-docker run --cap-add CHECKPOINT_RESTORE --cap-add SYS_ADMIN --rm -p 8080:8085 --name reference-crac reference-crac:checkpoint
+#docker run --cap-add CHECKPOINT_RESTORE --cap-add SYS_ADMIN --rm -p 8080:8085 --name reference-crac reference-crac:checkpoint
+docker run --cap-add CHECKPOINT_RESTORE --cap-add SETPCAP --rm -p 8080:8080 --name reference-crac reference-crac:checkpoint

@@ -30,7 +30,7 @@ echo "Using CRaC enabled JDK $url"
 
 ./mvnw clean package
 docker build -t reference-crac:builder --build-arg CRAC_JDK_URL=$url .
-docker run -d --privileged --rm --name=reference-crac --ulimit nofile=1024 -p 8080:8085 -v $(pwd)/target:/opt/mnt -e FLAG=$1 reference-crac:builder
+docker run -d --privileged --rm --name=reference-crac --ulimit nofile=1024 -p 8080:8080 -v $(pwd)/target:/opt/mnt -e FLAG=$1 reference-crac:builder
 echo "Please wait during checkpoint creation..."
 sleep 10
 docker commit --change='ENTRYPOINT ["/opt/app/entrypoint.sh"]' $(docker ps -qf "name=reference-crac") reference-crac:checkpoint

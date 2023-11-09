@@ -51,7 +51,12 @@ gcloud run deploy reference-crac  \
     --execution-environment=gen2  \
     --allow-unauthenticated \
     --region=us-central1 \
-    --memory 2Gi --cpu 2 
+    --memory 2Gi --cpu 2 --args="--cap-add CHECKPOINT_RESTORE --cap-add SETPCAP -XX:+UnlockExperimentalVMOptions -XX:+IgnoreCPUFeatures"
+
+# There are cases where you would have to ignore CPUFeatures in your architecture of choice.
+# https://docs.azul.com/core/crac/cpu-features#xxignorecpufeatures
+# Add the following arguments to the deploy command
+# --args="-XX:+UnlockExperimentalVMOptions -XX:+IgnoreCPUFeatures"
 
 # observe the deploy output
 ...
