@@ -22,7 +22,7 @@ The samples within this repository leverage different runtime technologies in th
 * Upcoming technologies
   * CRaC - [samples](runtimes/crac/README.md)
   * Project Leyden - [samples](runtimes/project-leyden/README.md)
-
+Å
 ### The Sample App 
 A set of services is provided to illustrate the various concepts, following the architecture below.
 
