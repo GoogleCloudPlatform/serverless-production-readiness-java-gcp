@@ -11,6 +11,14 @@ A simple installer is available from [SDKMan](https://sdkman.io/install)
 sdk install java 21.0.1-graal
 ```
 
+## Clone the code:
+```shell
+git clone https://github.com/GoogleCloudPlatform/serverless-production-readiness-java-gcp.git
+cd genai/image-vision-vertex-langchain/
+
+git checkout java21
+```
+
 ## Install the maven wrapper
 The Maven Wrapper is an easy way to ensure a user of your Maven build has everything necessary to run your Maven build.
 
@@ -46,8 +54,8 @@ Test the executable locally:
 Check the Docker image sizes:
 ```shell
 docker images | grep image-analysis
-image-analysis-jit                        latest     6751b98f7ebf   42 years ago    329MB
-image-analysis-native                     latest     3af942985d65   42 years ago    262MB
+image-analysis-native                              latest                2a8fdab9be12   43 years ago    360MB
+image-analysis-jit                                 latest                1251d9e6a099   43 years ago    485MB
 ```
 
 Start the Docker images locally. The image naming conventions indicate whether the image was built by Maven|Gradle and contains the JIT|NATIVE version
@@ -84,16 +92,21 @@ gcloud services enable storage-component.googleapis.com
 gcloud services enable aiplatform.googleapis.com
 ```
 
-Create the bucket:
+Retrieve the Project ID and Project Number
 ```shell
 # get the Project_ID
 export PROJECT_ID=$(gcloud config list --format 'value(core.project)')
   or 
 export PROJECT_ID=$(gcloud config get-value project)
 
-# Create the GCS bucket
-export BUCKET_PICTURES=uploaded-pictures-${PROJECT_ID}
-gsutil mb -l EU gs://${BUCKET_PICTURES}
+# get the Project_Number
+export PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format='value(projectNumber)')
+```
+
+Create the GCS bucket
+```shell
+export BUCKET_PICTURES=vision-${PROJECT_ID}
+gsutil mb -l us-central1 gs://${BUCKET_PICTURES}
 gsutil uniformbucketlevelaccess set on gs://${BUCKET_PICTURES}
 gsutil iam ch allUsers:objectViewer gs://${BUCKET_PICTURES}
 ```
@@ -136,109 +149,97 @@ gcloud run deploy image-analysis-native \
 
 Set up Eventarc triggers
 ```shell
-gcloud eventarc triggers list --location=eu
+gcloud eventarc triggers list --location=us-central1
 
 gcloud eventarc triggers create image-analysis-jit-trigger \
      --destination-run-service=image-analysis-jit \
      --destination-run-region=us-central1 \
-     --location=eu \
+     --location=us-central1 \
      --event-filters="type=google.cloud.storage.object.v1.finalized" \
-     --event-filters="bucket=uploaded-pictures-${PROJECT_ID}" \
+     --event-filters="bucket=vision-${PROJECT_ID}" \
      --service-account=${PROJECT_NUMBER}-compute@developer.gserviceaccount.com
 
 gcloud eventarc triggers create image-analysis-native-trigger \
      --destination-run-service=image-analysis-native \
      --destination-run-region=us-central1 \
-     --location=eu \
+     --location=us-central1 \
      --event-filters="type=google.cloud.storage.object.v1.finalized" \
-     --event-filters="bucket=uploaded-pictures-${PROJECT_ID}" \
+     --event-filters="bucket=vision-${PROJECT_ID}" \
      --service-account=${PROJECT_NUMBER}-compute@developer.gserviceaccount.com     
 ```
 
 Test the trigger
 ```shell
-gsutil cp GeekHour.jpeg gs://uploaded-pictures-${PROJECT_ID}
-gsutil cp CloudRun.png gs://uploaded-pictures-${PROJECT_ID}
+gsutil cp images/GeekHour.jpeg gs://vision-${PROJECT_ID}
+gsutil cp images/CloudRun.png gs://vision-${PROJECT_ID}
 
 gcloud logging read "resource.labels.service_name=image-analysis-jit AND textPayload:GeekHour" --format=json
+gcloud logging read "resource.labels.service_name=image-analysis-jit AND textPayload:CloudRun" --format=json
 ```
 
---------------------
-Log capture
-```
-gcloud logging read "resource.labels.service_name=image-analysis-jit AND textPayload:GeekHour" --format=json
+Log capture:
+```shell
+ gcloud logging read "resource.labels.service_name=image-analysis-jit AND textPayload:CloudRun" --format=json
 
 ...
- {
-    "insertId": "62ebcd66000505e81968501a",
-    "labels": {
-      "instanceId": "00c527f6d474fb398874cbe473887f91c17dd370c7b10c37f1800a80d7fbfbbbc4ee7eb4fd6149691667dee7cb2f59aae11f65b798fbda01d378a74b8c468c2fe8"
-    },
-    "logName": "projects/optimize-serverless-apps/logs/run.googleapis.com%2Fstdout",
-    "receiveTimestamp": "2022-08-04T13:45:10.528219041Z",
-    "resource": {
-      "labels": {
-        "configuration_name": "image-analysis-jit",
-        "location": "us-central1",
-        "project_id": "optimize-serverless-apps",
-        "revision_name": "image-analysis-jit-00001-waf",
-        "service_name": "image-analysis-jit"
-      },
-      "type": "cloud_run_revision"
-    },
-    "textPayload": "selfLink : https://www.googleapis.com/storage/v1/b/uploaded-pictures-optimize-serverless-apps/o/GeekHour.jpeg",
-    "timestamp": "2022-08-04T13:45:10.329192Z"
-  },
   {
-    "insertId": "62ebcd66000505dddf95cc89",
+    "insertId": "65552700000bcf6d651346d3",
     "labels": {
-      "instanceId": "00c527f6d474fb398874cbe473887f91c17dd370c7b10c37f1800a80d7fbfbbbc4ee7eb4fd6149691667dee7cb2f59aae11f65b798fbda01d378a74b8c468c2fe8"
+      "instanceId": "0037d6d5d39b2d0440dde92c89a4a04cb82902d8919431fbd68fee17b20526b1e11b50283fe93ae67737ce6658a595469db6ad8fdca8225fb929b945115a2006"
     },
     "logName": "projects/optimize-serverless-apps/logs/run.googleapis.com%2Fstdout",
-    "receiveTimestamp": "2022-08-04T13:45:10.528219041Z",
+    "receiveTimestamp": "2023-11-15T20:16:00.824511791Z",
     "resource": {
       "labels": {
         "configuration_name": "image-analysis-jit",
         "location": "us-central1",
         "project_id": "optimize-serverless-apps",
-        "revision_name": "image-analysis-jit-00001-waf",
+        "revision_name": "image-analysis-jit-00001-z7g",
         "service_name": "image-analysis-jit"
       },
       "type": "cloud_run_revision"
     },
-    "textPayload": "id : uploaded-pictures-optimize-serverless-apps/GeekHour.jpeg/1659620698262814",
-    "timestamp": "2022-08-04T13:45:10.329181Z"
-  }
+    "textPayload": "id : vision-optimize-serverless-apps/CloudRun.png/1700079343391581",
+    "timestamp": "2023-11-15T20:16:00.773997Z"
+  },
+
 ...
 ```
 
 Log capture - Console
 ```
-Default
-2022-08-04T13:45:23.090834Zupdated : 2022-08-04T13:44:58.332Z
-Default
-2022-08-04T13:45:23.090861ZstorageClass : STANDARD
-Default
-2022-08-04T13:45:23.090869ZtimeStorageClassUpdated : 2022-08-04T13:44:58.332Z
-Default
-2022-08-04T13:45:23.090926Zsize : 8062
-Default
-2022-08-04T13:45:23.090942Zmd5Hash : 6Ywof9Kj21ymWv/nwHlwIw==
-Default
-2022-08-04T13:45:23.090952ZmediaLink : https://www.googleapis.com/download/storage/v1/b/uploaded-pictures-optimize-serverless-apps/o/GeekHour.jpeg?generation=1659620698262814&alt=media
-Default
-2022-08-04T13:45:23.090973ZcontentLanguage : en
-Default
-2022-08-04T13:45:23.090990Zcrc32c : l29Spw==
-Default
-2022-08-04T13:45:23.091147Zetag : CJ6auvGorfkCEAE=
-Default
-2022-08-04T13:45:23.091158ZDetected change in Cloud Storage bucket: (ce-subject) : objects/GeekHour.jpeg
-Default
-2022-08-04T13:45:23.091316Z2022-08-04 13:45:23.091 INFO 1 --- [nio-8080-exec-6] services.EventController : New picture uploaded GeekHour.jpeg
-Default
-2022-08-04T13:45:23.095471Z2022-08-04 13:45:23.095 INFO 1 --- [nio-8080-exec-6] services.EventController : Calling the Vision API...
-Info
-2022-08-04T13:45:24.137495ZPOST200723 B1.1 sAPIs-Google; (+https://developers.google.com/webmasters/APIs-Google.html) https://image-analysis-jit-6hrfwttbsa-ew.a.run.app/?__GCP_CloudEventsMode=GCS_NOTIFICATION
+2023-11-15 15:16:08.518 EST
+2023-11-15T20:16:08.518Z  INFO 1 --- [nio-8080-exec-5] services.EventController                 : - Brand
+2023-11-15 15:16:08.518 EST
+2023-11-15T20:16:08.518Z  INFO 1 --- [nio-8080-exec-5] services.EventController                 : - Sign
+2023-11-15 15:16:08.519 EST
+2023-11-15T20:16:08.519Z  INFO 1 --- [nio-8080-exec-5] services.EventController                 : Color: #1c82f5
+2023-11-15 15:16:08.519 EST
+2023-11-15T20:16:08.519Z  INFO 1 --- [nio-8080-exec-5] services.EventController                 : Is Image Safe? true
+2023-11-15 15:16:08.519 EST
+2023-11-15T20:16:08.519Z  INFO 1 --- [nio-8080-exec-5] services.EventController                 : Logo Annotations:
+2023-11-15 15:16:08.519 EST
+2023-11-15T20:16:08.519Z  INFO 1 --- [nio-8080-exec-5] services.EventController                 : Logo: Google
+2023-11-15 15:16:08.519 EST
+2023-11-15T20:16:08.519Z  INFO 1 --- [nio-8080-exec-5] services.EventController                 : Logo property list:
+2023-11-15 15:16:08.519 EST
+2023-11-15T20:16:08.519Z  INFO 1 --- [nio-8080-exec-5] services.EventController                 : Text Annotations:
+2023-11-15 15:16:08.519 EST
+2023-11-15T20:16:08.519Z  INFO 1 --- [nio-8080-exec-5] services.EventController                 : Text: >>>
+2023-11-15 15:16:08.519 EST
+Cloud Run
+2023-11-15 15:16:08.519 EST
+2023-11-15T20:16:08.519Z  INFO 1 --- [nio-8080-exec-5] services.EventController                 : Text: >>>
+2023-11-15 15:16:08.519 EST
+2023-11-15T20:16:08.519Z  INFO 1 --- [nio-8080-exec-5] services.EventController                 : Text: Cloud
+2023-11-15 15:16:08.519 EST
+2023-11-15T20:16:08.519Z  INFO 1 --- [nio-8080-exec-5] services.EventController                 : Text: Run
+2023-11-15 15:16:09.157 EST
+2023-11-15T20:16:09.157Z  INFO 1 --- [nio-8080-exec-5] services.EventController                 : Result Chat Model: Cloud Run is a serverless compute platform that lets you run stateless containers that are invocable via HTTP requests. It is designed to be fully managed, so you don't need to worry about provisioning or managing servers. You can simply deploy your code
+2023-11-15 15:16:09.832 EST
+2023-11-15T20:16:09.832Z  INFO 1 --- [nio-8080-exec-5] services.EventController                 : Result Text Model: Cloud Run is a serverless compute platform that lets you run stateless containers that are invocable via HTTP requests. It is designed to be fully managed, so you don't need to worry about provisioning or managing servers. You can simply deploy your code
+2023-11-15 15:16:09.972 EST
+2023-11-15T20:16:09.971Z  INFO 1 --- [nio-8080-exec-5] services.EventController                 : Picture metadata saved in Firestore at 2023-11-15T20:16:09.919019000Z
+Show debug panel
 ```
 
