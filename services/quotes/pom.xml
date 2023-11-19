@@ -33,7 +33,7 @@
   <description>Quotes service in Spring Boot</description>
   <properties>
     <java.version>21</java.version>
-    <testcontainers.version>1.19.1</testcontainers.version>
+    <testcontainers.version>1.19.2</testcontainers.version>
   </properties>
   <dependencies>
     <dependency>
@@ -125,6 +125,11 @@
       <plugin>
         <groupId>org.graalvm.buildtools</groupId>
         <artifactId>native-maven-plugin</artifactId>
+        <configuration>
+          <buildArgs>
+            <buildArgs>--enable-url-protocols=http</buildArgs>
+          </buildArgs>
+        </configuration>
       </plugin>
     </plugins>  
   </build>

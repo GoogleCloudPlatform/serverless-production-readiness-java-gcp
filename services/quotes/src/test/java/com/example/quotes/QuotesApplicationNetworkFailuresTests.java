@@ -26,6 +26,7 @@ import eu.rekawek.toxiproxy.model.ToxicDirection;
 import eu.rekawek.toxiproxy.model.toxic.Latency;
 import java.io.IOException;
 import java.time.Duration;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.Network;
@@ -52,22 +54,22 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 class QuotesApplicationNetworkFailuresTests {
 	private static final Logger logger = LoggerFactory.getLogger(QuotesApplicationNetworkFailuresTests.class);
 
-	// @Rule
-	private static final Network network = Network.newNetwork();
+	public static final Network network = Network.newNetwork();
 
 	private static Proxy postgresqlProxy;
 
 	@Container
+	private static final ToxiproxyContainer toxiproxy = new ToxiproxyContainer("ghcr.io/shopify/toxiproxy:2.5.0")
+			.withNetwork(network);
+
+	@Container
+	@ServiceConnection
 	private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15.3-alpine")
 			.withNetwork(network).withNetworkAliases("postgres");
 
 	@Autowired
 	private QuoteRepository quoteRepository;
 	private QuoteService quoteService;
-
-	@Container
-	private static final ToxiproxyContainer toxiproxy = new ToxiproxyContainer("ghcr.io/shopify/toxiproxy:2.5.0")
-			.withNetwork(network);
 
 	@DynamicPropertySource
 	static void sqlserverProperties(DynamicPropertyRegistry registry) throws IOException {
