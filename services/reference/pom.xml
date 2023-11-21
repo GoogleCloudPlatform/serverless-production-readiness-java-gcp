@@ -32,7 +32,7 @@
   <description>Reference Data Spring Boot service</description>
   <properties>
     <java.version>21</java.version>
-    <testcontainers.version>1.19.2</testcontainers.version>
+    <testcontainers.version>1.19.3</testcontainers.version>
   </properties>
   <dependencies>
     <dependency>
