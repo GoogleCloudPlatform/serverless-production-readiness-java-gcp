@@ -32,7 +32,7 @@
   <description>Reference Data Spring Boot service</description>
   <properties>
     <java.version>21</java.version>
-    <testcontainers.version>1.19.1</testcontainers.version>
+    <testcontainers.version>1.19.2</testcontainers.version>
   </properties>
   <dependencies>
     <dependency>
@@ -76,7 +76,7 @@
       <dependency>
         <groupId>com.google.cloud</groupId>
         <artifactId>libraries-bom</artifactId>
-        <version>26.26.0</version>
+        <version>26.27.0</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>

@@ -266,7 +266,6 @@ public class EventController {
           logger.info("Result Chat Model: " + modelResponse.content().text());
         }
 
-        // String textResponse = null;          
         if (prompt.length() > 0) {
           VextexAiLanguageModel vertexAiTextModel = VextexAiLanguageModel.builder()
                       .endpoint("us-central1-aiplatform.googleapis.com:443")

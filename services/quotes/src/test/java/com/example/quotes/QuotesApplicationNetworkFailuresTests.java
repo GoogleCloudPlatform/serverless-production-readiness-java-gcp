@@ -73,6 +73,8 @@ class QuotesApplicationNetworkFailuresTests {
 
 	@DynamicPropertySource
 	static void sqlserverProperties(DynamicPropertyRegistry registry) throws IOException {
+		postgres.start();
+		toxiproxy.start();
 		var toxiproxyClient = new ToxiproxyClient(toxiproxy.getHost(), toxiproxy.getControlPort());
 		postgresqlProxy = toxiproxyClient.createProxy("postgresql", "0.0.0.0:8666", "postgres:5432");
 

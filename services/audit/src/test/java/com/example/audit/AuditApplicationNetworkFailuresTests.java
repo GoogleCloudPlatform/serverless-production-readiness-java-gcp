@@ -93,6 +93,8 @@ public class AuditApplicationNetworkFailuresTests {
                     
   @DynamicPropertySource
   static void emulatorProperties(DynamicPropertyRegistry registry) throws IOException{
+    firestoreEmulator.start();
+    toxiproxy.start();
     var toxiproxyClient = new ToxiproxyClient(toxiproxy.getHost(), toxiproxy.getControlPort());
     firestoreProxy = toxiproxyClient.createProxy("firestore", "0.0.0.0:8666", "firestore:5637");
 
