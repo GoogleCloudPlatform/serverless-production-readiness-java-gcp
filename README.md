@@ -8,25 +8,34 @@ This material provides guidelines, best practices and samples focused on `produc
 ## Features
 There are multiple aspects to `writing effective services for serverless production environments` and they all revolve around the combination of service design, implementation, testing, configuration with environment configuration and optimization best practices.
 
-The material dives into two areas: 
-### How to think about production-readiness
-You generally think that a **production-ready cloud service must be:**
-* Stable and Reliable
-* Scalable and Performant
-* Fault Tolerant without any single point of failure
-* Properly Monitored
-* Documented and Understood
-* Properly secured
+The focus of these materials revolves around: 
+#### 🧪 [How to think about production-readiness](prod-readiness/README.md)
+You generally think that a **production-ready cloud service must be** stable, reliable, scalable, performant, Fault Tolerant (without any single point of failure), properly monitored, documented, well-understood and properly secured
 
-### How to think about optimization
-Optimizing any app for Cloud Run requires a balance of different aspects to be considered, therefore it is important to always have a clear picture of **what it is that you are optimizing for**:
-* start-up time
-* execution latency
-* resource consumption (memory & CPU)
-* concurrency
-* image size
-* easy maintainability
-* lower costs
+#### 🧪 [How to think about optimization](optimization/README.md)
+Optimizing any app for Cloud Run requires a balance of different aspects to be considered, therefore it is important to always have a clear picture of **what it is that you are optimizing for**: start-up time, execution latency, resource consumption (memory & CPU), concurrency, image size, easy maintainability and lower costs
+
+### Runtime technologies
+The samples within this repository leverage different runtime technologies in the Java space
+* Production-ready Java
+  * JIT and Native Java - [full samples](services/README.md)
+* Upcoming technologies
+  * CRaC - [samples](runtimes/crac/README.md)
+  * Project Leyden - [samples](runtimes/project-leyden/README.md)
+Å
+### The Sample App 
+A set of services is provided to illustrate the various concepts, following the architecture below.
+
+All services are documented and can be built from a single script as per [README.md](services/README.md) in the `services` folder.
+
+Each service can be built/tested/deployed individually or as part of the entire architecture
+* [Quotes](services/quotes/README.md) Service - manage quotes from famous books, persisted in CloudSQL (Postgres)
+* [Audit](services/audit/README.md) Service - audit updates (persisted in Firestore)
+* [Reference](services/reference/README.md) Service - invoked by BFF service at start-up, to read reference data
+* [Faulty](services/faulty/README.md) Service - illustrate a faulty service for resiliency purposes
+* [BFF](services/bff/README.md) Service - Backend-for-frontend service for downstream services
+
+![App](images/prod-readiness1.png)
 
 ## Getting Started
 Clone this Git repository:
@@ -42,29 +51,15 @@ or open the repo directly in Cloudshell:
   * The code is constantly being tested on MacBooks and Linux environments
   * Test in your Windows machine, if preferred
 * The `IDE` of your choice
-* `Java 17` - latest LTS 
+* `Java 21` - previous LTS
   * Install via [SDKMan](https://sdkman.io/install) or your favorite package manager
-* `GraalVM` for building Native Java Images 
-  * Install via SDKMan - `sdk install java 17.0.7-graal`
+* `GraalVM` for building Native Java Images
+  * Install via SDKMan - `sdk install java 21-graal`
   * Install directly from [GraalVM Download](https://www.graalvm.org/downloads/) site
 * `API Testing`
   * Use [cURL](https://curl.se/) or
   * [HTTPie](https://httpie.io/)
-
-### Sample services 
-A set of services is provided to illustrate the various concepts, following the architecture below.
-
-All services are documented and can be built from a single script as per [README.md](services/README.md) in the `services` folder.
-
-Each service can be built/tested/deployed individually or as part of the entire architecture
-* [Quotes](services/quotes/README.md) Service - manage quotes from famous books, persisted in CloudSQL (Postgres)
-* [Audit](services/audit/README.md) Service - audit updates (persisted in Firestore)
-* [Reference](services/reference/README.md) Service - invoked by BFF service at start-up, to read reference data
-* [Faulty](services/faulty/README.md) Service - illustrate a faulty service for resiliency purposes
-* [BFF](services/bff/README.md) Service - Backend-for-frontend service for downstream services
-
-![App](images/prod-readiness1.png)
-
+  
 ## Contributing
 
 Contributions to this library are always welcome and highly encouraged.

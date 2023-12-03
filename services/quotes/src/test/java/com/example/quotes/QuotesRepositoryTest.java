@@ -56,7 +56,6 @@ class QuotesRepositoryTest {
   @Test
   @DisplayName("A random quote is returned")
   void testRandomQuotes() {
-    // var quote = this.quoteRepository.findRandomQuote();
     var quote = this.quoteService.findRandomQuote();
     assertThat(quote).isNotNull();
   }
@@ -72,12 +71,12 @@ class QuotesRepositoryTest {
   @DisplayName("Create a quote")
   void testCreateQuote(){
     var quote = new Quote();
-    quote.setAuthor("Truman Capote");
-    quote.setQuote("Anyone who ever gave you confidence, you owe them a lot.");
-    quote.setBook("Breakfast at Tiffany''s");
+    quote.setAuthor("Alexandre Dumas");
+    quote.setQuote("All human wisdom is summed up in these two words – Wait and Hope.");
+    quote.setBook("The Count of Monte Cristo");
 
     var result = this.quoteService.createQuote(quote);
-    assertThat(result.getAuthor()).isEqualTo("Truman Capote");
+    assertThat(result.getAuthor()).isEqualTo("Alexandre Dumas");
   }
 
   @Test

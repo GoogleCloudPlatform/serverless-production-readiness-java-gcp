@@ -21,31 +21,44 @@ steps:
   args:
   - '-c'
   - |
-    gsutil cp gs://${PROJECT_ID}-cache-dependencies/cache/maven-dependencies.tgz maven-dependencies.tgz || exit 0
+    gsutil cp gs://app-cache-dependencies/cache/maven-dependencies.tgz maven-dependencies.tgz || exit 0
     tar -zxf maven-dependencies.tgz --directory / || exit 0
 - id: 'test'
-  name: maven:3.9-eclipse-temurin-17
+  name: maven:3.9.5-eclipse-temurin-21
   entrypoint: mvn
   volumes:
   - name: 'maven-repository'
     path: '/root/.m2'
   args: ["verify"]
 - id: 'build-project'
-  name: maven:3.9-eclipse-temurin-17
+  name: maven:3.9.5-eclipse-temurin-21
   entrypoint: bash
   args:
   - '-c'
   - |
-    bash <(curl -sL https://get.graalvm.org/jdk) graalvm-ce-java17-22.3.1
-    printenv
-    export JAVA_HOME="/workspace/graalvm-ce-java17-22.3.1"
-    gu install native-image
-    mvn spring-boot:build-image -Pnative -DskipTests
+    # bash <(curl -sL https://get.graalvm.org/jdk) graalvm-ce-java17-22.3.1
+    # printenv
+    # export JAVA_HOME="/workspace/graalvm-ce-java17-22.3.1"
+    # gu install native-image
+    wget https://download.oracle.com/graalvm/21/archive/graalvm-jdk-21_linux-x64_bin.tar.gz
+    tar -xzf graalvm-jdk-21_linux-x64_bin.tar.gz
+
+    export JAVA_HOME=graalvm-jdk-21+35.1 
+    mvn spring-boot:build-image  -DskipTests -Pnative -Dspring-boot.build-image.imageName=quotes-native
   volumes:
   - name: 'maven-repository'
     path: '/root/.m2'
 - name: gcr.io/cloud-builders/docker
   args: ["tag", "quotes-native", "gcr.io/$PROJECT_ID/quotes-native"]
+  # tag then store image in registry
+- id: 'tag-image'
+  name: gcr.io/cloud-builders/docker
+  args: ["tag", "quotes-native", "gcr.io/$PROJECT_ID/quotes-native"]
+  # Push the container image to Artifact Registry
+- id: 'store-image'
+  name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'gcr.io/$PROJECT_ID/quotes-native']  
+
 - id: 'upload-cached-maven-dependencies'
   waitFor: [ 'build-project']
   name: gcr.io/cloud-builders/gsutil
@@ -57,5 +70,5 @@ steps:
   - '-c'
   - |
     tar -zcf maven-dependencies.tgz /root/.m2
-    gsutil cp maven-dependencies.tgz gs://${PROJECT_ID}-cache-dependencies/cache/maven-dependencies.tgz
+    gsutil cp maven-dependencies.tgz gs://app-cache-dependencies/cache/maven-dependencies.tgz
 images: ["gcr.io/$PROJECT_ID/quotes-native"]

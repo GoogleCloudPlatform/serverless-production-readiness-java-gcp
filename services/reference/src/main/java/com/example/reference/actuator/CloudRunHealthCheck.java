@@ -17,8 +17,8 @@ package   com.example.reference.actuator;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
 import org.springframework.stereotype.Component;
@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component;
 @Endpoint(id="cloudrunhealth")
 public class CloudRunHealthCheck {
     // logger
-    private static final Log logger = LogFactory.getLog(StartupCheck.class);
+    private static final Logger logger = LoggerFactory.getLogger(StartupCheck.class);
 
     @ReadOperation
     public CustomData customEndpoint() {

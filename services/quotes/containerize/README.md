@@ -1,4 +1,4 @@
-# Understand Containerization Options, with the Quotes Service as example
+# Containerization Options for the Quotes Service
 
 The following containerization options will be analyzed:
 * Single-layer FAT Jar Docker build
@@ -8,7 +8,7 @@ The following containerization options will be analyzed:
 
 Containerize the Quotes service by using one of the four above mentioned optioins from the command-line, starting from the <repository-root>/services/quotes [`serverless-production-readiness-java-gcp/services/quotes`].
 
-**NOTE**: Check the build images and their sizes by running ```docker images | grep quotes``` 
+**NOTE**: Check the build images and their sizes by running ```docker images | grep quotes```
 
 Pull the `Ubuntu:22.04` image and analyze it's layers:
 ```shell
@@ -110,118 +110,3 @@ ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher"]
 
 ```shell
 docker build -f ./containerize/Dockerfile-custom -t quotes-custom .
-
-docker history quotes-custom
-IMAGE          CREATED        CREATED BY                                      SIZE      COMMENT
-# Multiple layers for the app and it's dependencies 
-9de844c92e5e   2 weeks ago    ENTRYPOINT ["java" "org.springframework.boot…   0B        buildkit.dockerfile.v0
-<missing>      2 weeks ago    COPY application/application/ ./ # buildkit     34.8kB    buildkit.dockerfile.v0
-<missing>      2 weeks ago    COPY application/snapshot-dependencies/ ./ #…   0B        buildkit.dockerfile.v0
-<missing>      2 weeks ago    COPY application/spring-boot-loader/ ./ # bu…   239kB     buildkit.dockerfile.v0
-<missing>      2 weeks ago    COPY application/dependencies/ ./ # buildkit    52.2MB    buildkit.dockerfile.v0
-<missing>      2 weeks ago    WORKDIR /application                            0B        buildkit.dockerfile.v0
-# Contributed by Java 17
-<missing>      6 weeks ago    /bin/sh -c #(nop)  ENTRYPOINT ["/__cacert_en…   0B        
-<missing>      6 weeks ago    /bin/sh -c #(nop) COPY file:8b8864b3e02a33a5…   1.18kB    
-<missing>      6 weeks ago    /bin/sh -c echo Verifying install ...     &&…   0B        
-<missing>      6 weeks ago    /bin/sh -c set -eux;     ARCH="$(dpkg --prin…   141MB     
-<missing>      6 weeks ago    /bin/sh -c #(nop)  ENV JAVA_VERSION=jdk-17.0…   0B        
-<missing>      6 weeks ago    /bin/sh -c apt-get update     && DEBIAN_FRON…   52.3MB    
-<missing>      6 weeks ago    /bin/sh -c #(nop)  ENV LANG=en_US.UTF-8 LANG…   0B        
-<missing>      6 weeks ago    /bin/sh -c #(nop)  ENV PATH=/opt/java/openjd…   0B        
-<missing>      6 weeks ago    /bin/sh -c #(nop)  ENV JAVA_HOME=/opt/java/o…   0B        
-# Contributed by Ubuntu
-<missing>      2 months ago   /bin/sh -c #(nop)  CMD ["/bin/bash"]            0B        
-<missing>      2 months ago   /bin/sh -c #(nop) ADD file:3fcf00866c55150f1…   69.2MB    
-<missing>      2 months ago   /bin/sh -c #(nop)  LABEL org.opencontainers.…   0B        
-<missing>      2 months ago   /bin/sh -c #(nop)  LABEL org.opencontainers.…   0B        
-<missing>      2 months ago   /bin/sh -c #(nop)  ARG LAUNCHPAD_BUILD_ARCH     0B        
-<missing>      2 months ago   /bin/sh -c #(nop)  ARG RELEASE                  0B        
-```
-## Multi-stage, multi-layer, JLink Docker Build with custom JRE
-
-Use the Dockerfile [containerize/Dockerfile-jlink]. Adapt the modules for your particular real-life application:
-```shell
-FROM eclipse-temurin:17 as builder
-
-# create a custom JRE for the boot application
-RUN $JAVA_HOME/bin/jlink \
-         --add-modules java.base,java.desktop,java.logging,java.management,java.naming,java.security.jgss,java.instrument,java.sql \
-         --strip-debug \
-         --no-man-pages \
-         --no-header-files \
-         --compress=2 \
-         --output /javaruntime
-
-# extract the layers of the boot application
-WORKDIR application
-ARG JAR_FILE=target/*.jar
-COPY ${JAR_FILE} application.jar
-RUN java -Djarmode=layertools -jar application.jar extract
-
-# Create an run image for the application
-FROM ubuntu:22.04
-ENV JAVA_HOME=/opt/java/openjdk
-ENV PATH "${JAVA_HOME}/bin:${PATH}"
-COPY --from=builder /javaruntime $JAVA_HOME
-WORKDIR application
-COPY --from=builder application/dependencies/ ./
-COPY --from=builder application/spring-boot-loader/ ./
-COPY --from=builder application/snapshot-dependencies/ ./
-COPY --from=builder application/application/ ./
-ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher"]
-```
-
-```shell
-docker build -f ./containerize/Dockerfile-jlink -t quotes-jlink .
-
-docker history quotes-jlink
-IMAGE          CREATED        CREATED BY                                      SIZE      COMMENT
-# Contributed by the application
-28740c8ab82c   2 weeks ago    ENTRYPOINT ["java" "org.springframework.boot…   0B        buildkit.dockerfile.v0
-<missing>      2 weeks ago    COPY application/application/ ./ # buildkit     34.8kB    buildkit.dockerfile.v0
-<missing>      2 weeks ago    COPY application/snapshot-dependencies/ ./ #…   0B        buildkit.dockerfile.v0
-<missing>      2 weeks ago    COPY application/spring-boot-loader/ ./ # bu…   239kB     buildkit.dockerfile.v0
-<missing>      2 weeks ago    COPY application/dependencies/ ./ # buildkit    52.2MB    buildkit.dockerfile.v0
-<missing>      2 weeks ago    WORKDIR /application                            0B        buildkit.dockerfile.v0
-# Contributed by the custome Java 17 JRE with JLink 
-<missing>      2 weeks ago    COPY /javaruntime /opt/java/openjdk # buildk…   55.8MB    buildkit.dockerfile.v0
-<missing>      2 weeks ago    ENV PATH=/opt/java/openjdk/bin:/usr/local/sb…   0B        buildkit.dockerfile.v0
-<missing>      2 weeks ago    ENV JAVA_HOME=/opt/java/openjdk                 0B        buildkit.dockerfile.v0
-# Contributed by Ubuntu
-<missing>      2 months ago   /bin/sh -c #(nop)  CMD ["/bin/bash"]            0B        
-<missing>      2 months ago   /bin/sh -c #(nop) ADD file:3fcf00866c55150f1…   69.2MB    
-<missing>      2 months ago   /bin/sh -c #(nop)  LABEL org.opencontainers.…   0B        
-<missing>      2 months ago   /bin/sh -c #(nop)  LABEL org.opencontainers.…   0B        
-<missing>      2 months ago   /bin/sh -c #(nop)  ARG LAUNCHPAD_BUILD_ARCH     0B        
-<missing>      2 months ago   /bin/sh -c #(nop)  ARG RELEASE                  0B        
-```
-
-## Cloud-native buildpacks Docker build, no more Dockerfile
-```shell
-./mvnw spring-boot:build-image -Pjit
-
-docker history quotes-jit
-IMAGE          CREATED   CREATED BY                                      SIZE      COMMENT
-bbfba1a25841   N/A       Buildpacks Process Types                        69B       
-<missing>      N/A       Buildpacks Launcher Config                      1.92kB    
-<missing>      N/A       Buildpacks Application Launcher                 2.38MB    
-<missing>      N/A       Application Slice: 5                            0B        
-<missing>      N/A       Application Slice: 4                            35kB      
-<missing>      N/A       Application Slice: 3                            0B        
-<missing>      N/A       Application Slice: 2                            239kB     
-<missing>      N/A       Application Slice: 1                            52.2MB    
-<missing>      N/A       Software Bill-of-Materials                      728kB     
-<missing>      N/A       Layer: 'web-application-type', Created by bu…   3B        
-<missing>      N/A       Layer: 'spring-cloud-bindings', Created by b…   76kB      
-<missing>      N/A       Layer: 'helper', Created by buildpack: paket…   1.7MB     
-<missing>      N/A       Layer: 'classpath', Created by buildpack: pa…   11B       
-<missing>      N/A       Layer: 'jre', Created by buildpack: paketo-b…   209MB     
-<missing>      N/A       Layer: 'java-security-properties', Created b…   214B      
-<missing>      N/A       Layer: 'helper', Created by buildpack: paket…   3.77MB    
-<missing>      N/A       Layer: 'helper', Created by buildpack: paket…   3.67MB    
-<missing>      N/A                                                       505B      
-<missing>      N/A                                                       1.42kB    
-<missing>      N/A                                                       26MB      
-<missing>      N/A                                                       77.8MB    
-```

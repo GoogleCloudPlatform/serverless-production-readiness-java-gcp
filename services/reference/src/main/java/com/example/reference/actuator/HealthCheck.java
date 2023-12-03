@@ -15,8 +15,8 @@
  */
 package  com.example.reference.actuator;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
 @Component("customHealthCheck")
 public class HealthCheck implements HealthIndicator {
     // logger
-    private static final Log logger = LogFactory.getLog(HealthCheck.class);
+    private static final Logger logger = LoggerFactory.getLogger(HealthCheck.class);
 
     @Override
     public Health health() {

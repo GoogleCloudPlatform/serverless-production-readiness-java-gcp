@@ -21,20 +21,19 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>com.example</groupId>
-    <artifactId>services</artifactId>
-    <version>1.0.0</version>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.2.0</version>
+    <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <artifactId>audit</artifactId>
   <version>1.0.0</version>
   <name>audit</name>
   <description>Spring App for Storing data in Firestore NoSQL</description>
   <properties>
-    <java.version>17</java.version>
-    <maven.compiler.target>17</maven.compiler.target>
-    <maven.compiler.source>17</maven.compiler.source>
-    <spring-cloud.version>2023.0.0-M1</spring-cloud.version>
-    <testcontainers.version>1.19.0</testcontainers.version>
+    <java.version>21</java.version>
+<!--    <spring-cloud.version>2023.0.0-RC1</spring-cloud.version>-->
+    <testcontainers.version>1.19.3</testcontainers.version>
   </properties>
   <dependencies>
     <dependency>
@@ -45,10 +44,6 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.cloud</groupId>
-      <artifactId>spring-cloud-function-web</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -110,60 +105,20 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.graalvm.buildtools</groupId>
-        <artifactId>native-maven-plugin</artifactId>
-        <version>0.9.27</version>
-<!--        <configuration>-->
-<!--          <buildArgs>-->
-<!--            <arg>-H:+RunReachabilityHandlersConcurrently</arg>-->
-<!--          </buildArgs>-->
-<!--        </configuration>-->
-      </plugin>
-      <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
-        <configuration>
+        <!-- <configuration>
           <image>
-            <name>${project.artifactId}</name>
+            <builder>dashaun/builder:tiny</builder>
           </image>
-        </configuration>
+        </configuration> -->
       </plugin>
-    </plugins>
+      <plugin>
+        <groupId>org.graalvm.buildtools</groupId>
+        <artifactId>native-maven-plugin</artifactId>
+      </plugin>    
+    </plugins>      
   </build>
-
-  <profiles>
-    <profile>
-      <id>native</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.graalvm.buildtools</groupId>
-            <artifactId>native-maven-plugin</artifactId>
-            <version>0.9.27</version>
-          </plugin>
-          <plugin>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-maven-plugin</artifactId>
-            <configuration>
-              <jvmArguments>
-                -agentlib:native-image-agent=config-output-dir=target/native-image
-              </jvmArguments>
-              <image>
-                <name>${project.artifactId}-maven-native</name>
-                <!-- <builder>dashaun/builder:tiny</builder> -->
-                <builder>paketobuildpacks/builder:tiny</builder>
-                <env>
-                  <BP_NATIVE_IMAGE>1</BP_NATIVE_IMAGE>
-                  <BP_JVM_VERSION>17</BP_JVM_VERSION>
-                  <BP_JVM_JLINK_ENABLED>true</BP_JVM_JLINK_ENABLED>
-                </env>
-              </image>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 
   <pluginRepositories>
     <pluginRepository>
@@ -221,13 +176,6 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.springframework.cloud</groupId>
-        <artifactId>spring-cloud-dependencies</artifactId>
-        <version>${spring-cloud.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
         <groupId>org.testcontainers</groupId>
         <artifactId>testcontainers-bom</artifactId>
         <version>${testcontainers.version}</version>
@@ -237,7 +185,7 @@
       <dependency>
         <groupId>com.google.cloud</groupId>
         <artifactId>libraries-bom</artifactId>
-        <version>26.23.0</version>
+        <version>26.27.0</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>

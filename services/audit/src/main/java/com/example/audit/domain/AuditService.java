@@ -27,7 +27,7 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 /**
- * Audit Domain service to persistent Quote Audit Data
+ * Audit Domain service to persistent Audit Data
  */
 @Service
 public class AuditService {

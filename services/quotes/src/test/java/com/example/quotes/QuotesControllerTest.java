@@ -59,10 +59,10 @@ public class QuotesControllerTest {
   @Test
   @DisplayName("Test returns Quotes by Author")
   void shouldReturnQuoteByAuthor() throws Exception {
-    mockMvc.perform(get("/quotes/author/George Orwell"))
+    mockMvc.perform(get("/quotes/author/Truman Capote"))
         .andExpect(status().isOk())
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$[0].author", Matchers.equalTo("George Orwell")));
+        .andExpect(jsonPath("$[0].author", Matchers.equalTo("Truman Capote")));
   }
 
   @Test
@@ -74,15 +74,15 @@ public class QuotesControllerTest {
                 .content(
                     """
                   {
-                  "author": "Isabel Allende",
-                  "quote": "The longer I live, the more uninformed I feel. Only the young have an explanation for everything.",
-                  "book": "City of the Beasts"
+                  "author": "Tennessee Williams",
+                  "quote": "Time is the longest distance between two places.",
+                  "book": "The Glass Menagerie"
                   }
                   """))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.id", Matchers.notNullValue()))
-        .andExpect(jsonPath("$.author", Matchers.equalTo("Isabel Allende")))
-        .andExpect(jsonPath("$.quote", Matchers.equalTo("The longer I live, the more uninformed I feel. Only the young have an explanation for everything.")))
-        .andExpect(jsonPath("$.book", Matchers.equalTo("City of the Beasts")));
+        .andExpect(jsonPath("$.author", Matchers.equalTo("Tennessee Williams")))
+        .andExpect(jsonPath("$.quote", Matchers.equalTo("Time is the longest distance between two places.")))
+        .andExpect(jsonPath("$.book", Matchers.equalTo("The Glass Menagerie")));
   }
 }

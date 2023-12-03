@@ -17,15 +17,15 @@ package com.example.reference;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SpringBootApplication
 public class ReferenceApplication {
     // logger
-    private static final Log logger = LogFactory.getLog(ReferenceApplication.class);
+    private static final Logger logger = LoggerFactory.getLogger(ReferenceApplication.class);
 
 	public static void main(String[] args) {
 		Runtime r = Runtime.getRuntime();
