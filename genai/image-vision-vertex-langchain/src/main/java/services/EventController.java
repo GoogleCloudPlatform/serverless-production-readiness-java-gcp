@@ -55,7 +55,7 @@ import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.output.Response;
 import dev.langchain4j.model.vertexai.VertexAiChatModel;
-import dev.langchain4j.model.vertexai.VextexAiLanguageModel;
+import dev.langchain4j.model.vertexai.VertexAiLanguageModel;
 
 // Vertex AI packages
 
@@ -267,7 +267,7 @@ public class EventController {
         }
 
         if (prompt.length() > 0) {
-          VextexAiLanguageModel vertexAiTextModel = VextexAiLanguageModel.builder()
+          VertexAiLanguageModel vertexAiTextModel = VertexAiLanguageModel.builder()
                       .endpoint("us-central1-aiplatform.googleapis.com:443")
                       .project(projectID)
                       .location(zone)

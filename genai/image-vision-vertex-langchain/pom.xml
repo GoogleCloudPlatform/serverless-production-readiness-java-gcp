@@ -17,6 +17,7 @@
     <java.version>21</java.version>
     <spring-cloud.version>2023.0.0</spring-cloud.version>
     <testcontainers.version>1.19.3</testcontainers.version>
+    <langchain4j.version>0.25.0</langchain4j.version>
   </properties>
   <dependencies>
     <dependency>
@@ -68,17 +69,17 @@
     <dependency>
       <groupId>dev.langchain4j</groupId>
       <artifactId>langchain4j-core</artifactId>
-      <version>0.23.0</version>
+      <version>${langchain4j.version}</version>
     </dependency>
     <dependency>
       <groupId>dev.langchain4j</groupId>
       <artifactId>langchain4j</artifactId>
-      <version>0.23.0</version>
+      <version>${langchain4j.version}</version>
     </dependency>
     <dependency>
       <groupId>dev.langchain4j</groupId>
       <artifactId>langchain4j-vertex-ai</artifactId>
-      <version>0.23.0</version>
+      <version>${langchain4j.version}</version>
     </dependency>
     <!-- Test -->
     <dependency>
@@ -218,7 +219,7 @@
       <dependency>
         <groupId>com.google.cloud</groupId>
         <artifactId>libraries-bom</artifactId>
-        <version>26.28.0</version>
+        <version>26.29.0</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
