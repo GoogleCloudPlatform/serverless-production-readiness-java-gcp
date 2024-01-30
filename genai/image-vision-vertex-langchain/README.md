@@ -8,15 +8,13 @@ This lab can be executed directly in a Cloud Workstation, Cloudshell or your env
 In order to build JIT or Native Java app images, please set up Java and GraalVM and the associated Java 21 distributions.
 A simple installer is available from [SDKMan](https://sdkman.io/install)
 ```shell
-sdk install java 21.0.1-graal
+sdk install java 21.0.2-graal
 ```
 
 ## Clone the code:
 ```shell
 git clone https://github.com/GoogleCloudPlatform/serverless-production-readiness-java-gcp.git
 cd genai/image-vision-vertex-langchain/
-
-git checkout java21
 ```
 
 ## Install the maven wrapper
@@ -44,6 +42,13 @@ Test the executable locally:
 ./target/image-analysis
 ```
 
+Build Native Java Tests:
+```shell
+./mvnw clean package -Pnative,nativeTest
+
+Run the native tests locally:
+./mvnw native-tests
+```
 ### Build a JIT and Native Java container Image
 ```shell
 ./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=image-analysis-jit
@@ -54,8 +59,8 @@ Test the executable locally:
 Check the Docker image sizes:
 ```shell
 docker images | grep image-analysis
-image-analysis-native                              latest                2a8fdab9be12   43 years ago    360MB
-image-analysis-jit                                 latest                1251d9e6a099   43 years ago    485MB
+image-analysis-native                                     latest                aa0f7b406966   44 years ago    372MB
+image-analysis-jit                                        latest                67b3489cbec8   44 years ago    467MB
 ```
 
 Start the Docker images locally. The image naming conventions indicate whether the image was built by Maven|Gradle and contains the JIT|NATIVE version
@@ -180,66 +185,7 @@ gcloud logging read "resource.labels.service_name=image-analysis-jit AND textPay
 Log capture:
 ```shell
  gcloud logging read "resource.labels.service_name=image-analysis-jit AND textPayload:CloudRun" --format=json
-
-...
-  {
-    "insertId": "65552700000bcf6d651346d3",
-    "labels": {
-      "instanceId": "0037d6d5d39b2d0440dde92c89a4a04cb82902d8919431fbd68fee17b20526b1e11b50283fe93ae67737ce6658a595469db6ad8fdca8225fb929b945115a2006"
-    },
-    "logName": "projects/optimize-serverless-apps/logs/run.googleapis.com%2Fstdout",
-    "receiveTimestamp": "2023-11-15T20:16:00.824511791Z",
-    "resource": {
-      "labels": {
-        "configuration_name": "image-analysis-jit",
-        "location": "us-central1",
-        "project_id": "optimize-serverless-apps",
-        "revision_name": "image-analysis-jit-00001-z7g",
-        "service_name": "image-analysis-jit"
-      },
-      "type": "cloud_run_revision"
-    },
-    "textPayload": "id : vision-optimize-serverless-apps/CloudRun.png/1700079343391581",
-    "timestamp": "2023-11-15T20:16:00.773997Z"
-  },
-
-...
+ gcloud logging read "resource.labels.service_name=image-analysis-native AND textPayload:CloudRun" --format=json
 ```
 
-Log capture - Console
-```
-2023-11-15 15:16:08.518 EST
-2023-11-15T20:16:08.518Z  INFO 1 --- [nio-8080-exec-5] services.EventController                 : - Brand
-2023-11-15 15:16:08.518 EST
-2023-11-15T20:16:08.518Z  INFO 1 --- [nio-8080-exec-5] services.EventController                 : - Sign
-2023-11-15 15:16:08.519 EST
-2023-11-15T20:16:08.519Z  INFO 1 --- [nio-8080-exec-5] services.EventController                 : Color: #1c82f5
-2023-11-15 15:16:08.519 EST
-2023-11-15T20:16:08.519Z  INFO 1 --- [nio-8080-exec-5] services.EventController                 : Is Image Safe? true
-2023-11-15 15:16:08.519 EST
-2023-11-15T20:16:08.519Z  INFO 1 --- [nio-8080-exec-5] services.EventController                 : Logo Annotations:
-2023-11-15 15:16:08.519 EST
-2023-11-15T20:16:08.519Z  INFO 1 --- [nio-8080-exec-5] services.EventController                 : Logo: Google
-2023-11-15 15:16:08.519 EST
-2023-11-15T20:16:08.519Z  INFO 1 --- [nio-8080-exec-5] services.EventController                 : Logo property list:
-2023-11-15 15:16:08.519 EST
-2023-11-15T20:16:08.519Z  INFO 1 --- [nio-8080-exec-5] services.EventController                 : Text Annotations:
-2023-11-15 15:16:08.519 EST
-2023-11-15T20:16:08.519Z  INFO 1 --- [nio-8080-exec-5] services.EventController                 : Text: >>>
-2023-11-15 15:16:08.519 EST
-Cloud Run
-2023-11-15 15:16:08.519 EST
-2023-11-15T20:16:08.519Z  INFO 1 --- [nio-8080-exec-5] services.EventController                 : Text: >>>
-2023-11-15 15:16:08.519 EST
-2023-11-15T20:16:08.519Z  INFO 1 --- [nio-8080-exec-5] services.EventController                 : Text: Cloud
-2023-11-15 15:16:08.519 EST
-2023-11-15T20:16:08.519Z  INFO 1 --- [nio-8080-exec-5] services.EventController                 : Text: Run
-2023-11-15 15:16:09.157 EST
-2023-11-15T20:16:09.157Z  INFO 1 --- [nio-8080-exec-5] services.EventController                 : Result Chat Model: Cloud Run is a serverless compute platform that lets you run stateless containers that are invocable via HTTP requests. It is designed to be fully managed, so you don't need to worry about provisioning or managing servers. You can simply deploy your code
-2023-11-15 15:16:09.832 EST
-2023-11-15T20:16:09.832Z  INFO 1 --- [nio-8080-exec-5] services.EventController                 : Result Text Model: Cloud Run is a serverless compute platform that lets you run stateless containers that are invocable via HTTP requests. It is designed to be fully managed, so you don't need to worry about provisioning or managing servers. You can simply deploy your code
-2023-11-15 15:16:09.972 EST
-2023-11-15T20:16:09.971Z  INFO 1 --- [nio-8080-exec-5] services.EventController                 : Picture metadata saved in Firestore at 2023-11-15T20:16:09.919019000Z
-Show debug panel
-```
 
