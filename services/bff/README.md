@@ -7,11 +7,6 @@
 # clone the repo
 git clone https://github.com/GoogleCloudPlatform/serverless-production-readiness-java-gcp.git
 cd services/quotes
-
-# Note: 
-# main branch - Java 17 code level
-# java21 branch - Java 21 code level
-git checkout java21
 ```
 
 ### Validate that you have Java 21 and Maven installed
