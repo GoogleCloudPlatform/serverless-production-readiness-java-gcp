@@ -12,17 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 steps:
-- id: 'download-cached-maven-dependencies'
-  name: gcr.io/cloud-builders/gsutil
-  entrypoint: bash
-  volumes:
-  - name: 'maven-repository'
-    path: '/root/.m2'
-  args:
-  - '-c'
-  - |
-    gsutil cp gs://app-cache-dependencies/cache/maven-dependencies.tgz maven-dependencies.tgz || exit 0
-    tar -zxf maven-dependencies.tgz --directory / || exit 0
 - id: 'test'
   name: maven:3.9.5-eclipse-temurin-21
   entrypoint: mvn
@@ -57,18 +46,5 @@ steps:
   # Push the container image to Artifact Registry
 - id: 'store-image'
   name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'gcr.io/$PROJECT_ID/quotes-native']  
-
-- id: 'upload-cached-maven-dependencies'
-  waitFor: [ 'build-project']
-  name: gcr.io/cloud-builders/gsutil
-  entrypoint: bash
-  volumes:
-  - name: 'maven-repository'
-    path: '/root/.m2'
-  args:
-  - '-c'
-  - |
-    tar -zcf maven-dependencies.tgz /root/.m2
-    gsutil cp maven-dependencies.tgz gs://app-cache-dependencies/cache/maven-dependencies.tgz
+  args: ['push', 'gcr.io/$PROJECT_ID/quotes-native']
 images: ["gcr.io/$PROJECT_ID/quotes-native"]
