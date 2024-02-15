@@ -24,23 +24,24 @@ steps:
     gsutil cp gs://${PROJECT_ID}-cache-dependencies/cache/maven-dependencies.tgz maven-dependencies.tgz || exit 0
     tar -zxf maven-dependencies.tgz --directory / || exit 0
 - id: 'test'
-  name: maven:3.9-eclipse-temurin-17
+  name: maven:3.9.6-eclipse-temurin-21
   entrypoint: mvn
   volumes:
   - name: 'maven-repository'
     path: '/root/.m2'
   args: ["verify"]
 - id: 'build-project'
-  name: maven:3.9-eclipse-temurin-17
+  name: maven:3.9.6-eclipse-temurin-21
   entrypoint: bash
   args:
   - '-c'
   - |
-    bash <(curl -sL https://get.graalvm.org/jdk) graalvm-ce-java17-22.3.1
+    curl -LO https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-21.0.2/graalvm-community-jdk-21.0.2_linux-x64_bin.tar.gz
+    tar xvfz graalvm-community-jdk-21.0.2_linux-x64_bin.tar.gz
+    pwd
+    export JAVA_HOME="/workspace/graalvm-community-openjdk-21.0.2+13.1"
     printenv
-    export JAVA_HOME="/workspace/graalvm-ce-java17-22.3.1"
-    gu install native-image
-    mvn spring-boot:build-image -Pnative -DskipTests
+    mvn spring-boot:build-image -Pnative -DskipTests -Dspring-boot.build-image.imageName=audit-native
   volumes:
   - name: 'maven-repository'
     path: '/root/.m2'

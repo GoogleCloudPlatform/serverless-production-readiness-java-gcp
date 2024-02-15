@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 steps:
-- name: maven:3-openjdk-17
+- name: maven:3.9.6-eclipse-temurin-21
   entrypoint: mvn
-  args: ["spring-boot:build-image", "-P${_TYPE}", "-DskipTests"]
+  args: ["spring-boot:build-image", "-P${_TYPE}", "-DskipTests", "-Dspring-boot.build-image.imageName=bff-${_TYPE}"]
 - name: gcr.io/cloud-builders/docker
   args: ["tag", "bff-${_TYPE}", "gcr.io/$PROJECT_ID/bff-${_TYPE}"]
 images: ["gcr.io/$PROJECT_ID/bff-${_TYPE}"]
