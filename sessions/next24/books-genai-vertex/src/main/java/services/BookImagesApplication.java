@@ -26,21 +26,21 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.PreDestroy;
 
 @SpringBootApplication
-public class ImageAnalysisApplication {
-	private static final Logger logger = LoggerFactory.getLogger(ImageAnalysisApplication.class);
+public class BookImagesApplication {
+	private static final Logger logger = LoggerFactory.getLogger(BookImagesApplication.class);
 
 	public static void main(String[] args) {
-		logger.info("ImageAnalysisApplication: Active processors: " + Runtime.getRuntime().availableProcessors()); 
-		logger.info("ImageAnalysisApplication app started : " + 
+		logger.info("BookImagesApplication: Active processors: " + Runtime.getRuntime().availableProcessors());
+		logger.info("BookImagesApplication app started : " +
 			new SimpleDateFormat("HH:mm:ss.SSS").format(new java.util.Date(System.currentTimeMillis())));
 
-		SpringApplication.run(ImageAnalysisApplication.class, args);
-		logger.info("ImageAnalysisApplication app  - Spring Boot FW started: " + 
+		SpringApplication.run(BookImagesApplication.class, args);
+		logger.info("BookImagesApplication app  - Spring Boot FW started: " +
 			new SimpleDateFormat("HH:mm:ss.SSS").format(new java.util.Date(System.currentTimeMillis())));
 	}
 
 	@PreDestroy
 	public void shutDown(){
-		logger.info(ImageAnalysisApplication.class.getSimpleName() + ": received SIGTERM ==> Shutting down resources !");
+		logger.info(BookImagesApplication.class.getSimpleName() + ": received SIGTERM ==> Shutting down resources !");
 	}	
 }

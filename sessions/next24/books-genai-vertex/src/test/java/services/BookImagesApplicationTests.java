@@ -33,7 +33,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest(webEnvironment = WebEnvironment.MOCK)
 @Testcontainers
 @AutoConfigureMockMvc
-public class ImageAnalysisApplicationTests {
+public class BookImagesApplicationTests {
 
 	@Autowired private MockMvc mockMvc;
 	String mockBody;

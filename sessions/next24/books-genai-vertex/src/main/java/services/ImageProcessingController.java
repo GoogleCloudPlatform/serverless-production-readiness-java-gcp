@@ -15,20 +15,37 @@
  */
 package services;
 
+import com.google.api.core.ApiFuture;
+import com.google.cloud.firestore.WriteResult;
+import com.google.cloud.vision.v1.AnnotateImageRequest;
+import com.google.cloud.vision.v1.AnnotateImageResponse;
+import com.google.cloud.vision.v1.BatchAnnotateImagesResponse;
+import com.google.cloud.vision.v1.ColorInfo;
+import com.google.cloud.vision.v1.DominantColorsAnnotation;
+import com.google.cloud.vision.v1.EntityAnnotation;
+import com.google.cloud.vision.v1.Feature;
+import com.google.cloud.vision.v1.Feature.Type;
+import com.google.cloud.vision.v1.Image;
+import com.google.cloud.vision.v1.ImageAnnotatorClient;
+import com.google.cloud.vision.v1.ImageProperties;
+import com.google.cloud.vision.v1.ImageSource;
+import com.google.cloud.vision.v1.Likelihood;
+import com.google.cloud.vision.v1.Property;
+import com.google.cloud.vision.v1.SafeSearchAnnotation;
+import dev.langchain4j.data.message.AiMessage;
+import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.model.output.Response;
+import dev.langchain4j.model.vertexai.VertexAiChatModel;
+import dev.langchain4j.model.vertexai.VertexAiLanguageModel;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.stream.*;
-
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
-
-import com.google.cloud.aiplatform.v1.Endpoint;
-import com.google.cloud.aiplatform.v1.EndpointName;
-import com.google.cloud.aiplatform.v1.EndpointServiceClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,61 +57,37 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-
 import services.actuator.StartupCheck;
 
-// Vision API packages
-import com.google.cloud.vision.v1.*;
-import com.google.cloud.vision.v1.Feature.Type;
-import com.google.cloud.MetadataConfig;
-import com.google.cloud.firestore.*;
-import com.google.api.core.ApiFuture;
-
-//LangChain4j packages
-import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.data.message.UserMessage;
-import dev.langchain4j.model.output.Response;
-import dev.langchain4j.model.vertexai.VertexAiChatModel;
-import dev.langchain4j.model.vertexai.VertexAiLanguageModel;
-
-// Vertex AI packages
-
-
 @RestController
-public class EventController {
-  private static final Logger logger = LoggerFactory.getLogger(EventController.class);
-  
-  private static final String projectID = MetadataConfig.getProjectId();
-  private static final String zone = MetadataConfig.getZone();
+public class ImageProcessingController {
+  private static final Logger logger = LoggerFactory.getLogger(ImageProcessingController.class);
 
-  private static final List<String> requiredFields = Arrays.asList("ce-id", "ce-source", "ce-type", "ce-specversion");
+  private final ImageService eventService;
 
-  @Autowired
-  private EventService eventService;
+  public ImageProcessingController(ImageService eventService) {
+    this.eventService = eventService;
+  }
 
   @PostConstruct
   public void init() {
-    logger.info("ImageAnalysisApplication: EventController Post Construct Initializer " + new SimpleDateFormat("HH:mm:ss.SSS").format(new java.util.Date(System.currentTimeMillis())));
-    logger.info("ImageAnalysisApplication: EventController Post Construct - StartupCheck can be enabled");
+    logger.info("BookImagesApplication: ImageProcessingController Post Construct Initializer " + new SimpleDateFormat("HH:mm:ss.SSS").format(new java.util.Date(System.currentTimeMillis())));
+    logger.info("BookImagesApplication: ImageProcessingController Post Construct - StartupCheck can be enabled");
 
     StartupCheck.up();
   }
 
   @GetMapping("start")
   String start(){
-    logger.info("ImageAnalysisApplication: EventController - Executed start endpoint request " + new SimpleDateFormat("HH:mm:ss.SSS").format(new java.util.Date(System.currentTimeMillis())));
-    return "EventController started";
+    logger.info("BookImagesApplication: ImageProcessingController - Executed start endpoint request " + new SimpleDateFormat("HH:mm:ss.SSS").format(new java.util.Date(System.currentTimeMillis())));
+    return "ImageProcessingController started";
   }
 
   @RequestMapping(value = "/", method = RequestMethod.POST)
   public ResponseEntity<String> receiveMessage(
     @RequestBody Map<String, Object> body, @RequestHeader Map<String, String> headers) throws IOException, InterruptedException, ExecutionException {
-
-    // Validate the number of available processors
-    logger.info("EventController: Active processors: " + Runtime.getRuntime().availableProcessors()); 
-
     System.out.println("Header elements");
-    for (String field : requiredFields) {
+    for (String field : CloudConfig.requiredFields) {
       if (headers.get(field) == null) {
         String msg = String.format("Missing expected header: %s.", field);
         System.out.println(msg);
@@ -174,12 +167,12 @@ public class EventController {
         BatchAnnotateImagesResponse result = vision.batchAnnotateImages(requests);
         List<AnnotateImageResponse> responses = result.getResponsesList();
 
-        if (responses.size() == 0) {
+        if (responses.isEmpty()) {
             logger.info("No response received from Vision API.");
             return new ResponseEntity<String>(msg, HttpStatus.BAD_REQUEST);
         }
 
-        AnnotateImageResponse response = responses.get(0);
+        AnnotateImageResponse response = responses.getFirst();
         if (response.hasError()) {
             logger.info("Error: " + response.getError().getMessage());
             return new ResponseEntity<String>(msg, HttpStatus.BAD_REQUEST);
@@ -228,12 +221,12 @@ public class EventController {
           List<Property> properties = annotation.getPropertiesList();
           logger.info("Logo property list:");
           for (Property property : properties) {
-            logger.info(String.format("Name: %s, Value: %s"), property.getName(), property.getValue());
+            logger.info("Name: %s, Value: %s", property.getName(), property.getValue());
           }
         }
 
         String prompt = "Explain the text ";
-        String textElements = "";
+        String textElements;
         
         logger.info("Text Annotations:");
         for (EntityAnnotation annotation : response.getTextAnnotationsList()) {
@@ -249,11 +242,11 @@ public class EventController {
       //  extractTextFromImage(bucketName, fileName);
 
         Response<AiMessage> modelResponse = null;          
-        if (prompt.length() > 0) {
+        if (!prompt.isEmpty()) {
           VertexAiChatModel vertexAiChatModel = VertexAiChatModel.builder()
                       .endpoint("us-central1-aiplatform.googleapis.com:443")
-                      .project(projectID)
-                      .location(zone)
+                      .project(CloudConfig.projectID)
+                      .location(CloudConfig.zone)
                       .publisher("google")
                       .modelName("chat-bison@001")
                       .temperature(0.1)
@@ -266,11 +259,11 @@ public class EventController {
           logger.info("Result Chat Model: " + modelResponse.content().text());
         }
 
-        if (prompt.length() > 0) {
+        if (!prompt.isEmpty()) {
           VertexAiLanguageModel vertexAiTextModel = VertexAiLanguageModel.builder()
                       .endpoint("us-central1-aiplatform.googleapis.com:443")
-                      .project(projectID)
-                      .location(zone)
+                      .project(CloudConfig.projectID)
+                      .location(CloudConfig.zone)
                       .publisher("google")
                       .modelName("text-bison@001")
                       .temperature(0.1)
