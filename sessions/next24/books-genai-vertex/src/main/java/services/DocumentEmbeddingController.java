@@ -32,17 +32,18 @@ import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 import services.actuator.StartupCheck;
-
+@RestController
+@RequestMapping("/document")
 public class DocumentEmbeddingController {
   private static final Logger logger = LoggerFactory.getLogger(DocumentEmbeddingController.class);
+
+  @Autowired
+  TableService tableService;
 
   @PostConstruct
   public void init() {
@@ -56,6 +57,16 @@ public class DocumentEmbeddingController {
   String start(){
     logger.info("BookImagesApplication: DocumentEmbeddingController - Executed start endpoint request " + new SimpleDateFormat("HH:mm:ss.SSS").format(new java.util.Date(System.currentTimeMillis())));
     return "DocumentEmbeddingController started";
+  }
+
+  @RequestMapping(value = "/embeddings", method = RequestMethod.GET)
+  public ResponseEntity<List<Map<String, Object>>> getTable(@RequestParam(name = "prompt") String prompt) {
+    return new ResponseEntity<List<Map<String, Object>>>(tableService.getTable(prompt), HttpStatus.OK);
+  }
+
+  @RequestMapping(value = "/insert", method = RequestMethod.POST)
+  public ResponseEntity<Integer> insertTable(@RequestBody Map<String, Object> body) {
+    return new ResponseEntity<Integer>(tableService.insertTable( (String) body.get("content")), HttpStatus.OK);
   }
 
   @RequestMapping(value = "/", method = RequestMethod.POST)
