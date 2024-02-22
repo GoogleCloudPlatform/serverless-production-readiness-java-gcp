@@ -10,20 +10,19 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class EventService {
+public class ImageService {
 
   private final FirestoreOptions firestoreOptions;
   private final Firestore firestore;
 
-  public EventService() {
+  public ImageService() {
     this.firestoreOptions = FirestoreOptions.getDefaultInstance();
     this.firestore = firestoreOptions.getService();
   }
-  public EventService(FirestoreOptions firestoreOptions, Firestore firestore) {
+  public ImageService(FirestoreOptions firestoreOptions, Firestore firestore) {
     this.firestoreOptions = firestoreOptions;
     this.firestore = firestore;
   }

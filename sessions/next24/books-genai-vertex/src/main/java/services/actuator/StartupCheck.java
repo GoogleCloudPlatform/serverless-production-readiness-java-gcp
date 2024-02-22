@@ -24,14 +24,14 @@ public class StartupCheck {
     public CustomData customEndpoint() {
         Map<String, Object> details = new LinkedHashMap<>();
         if (!status) {
-            logger.info("ImageAnalysisApplication Startup Endpoint: Application is ready to serve traffic !");
+            logger.info("BookImagesApplication Startup Endpoint: Application is ready to serve traffic !");
             return null;
         }
 
-        logger.info("ImageAnalysisApplication Startup Endpoint: Application is ready to serve traffic !");
+        logger.info("BookImagesApplication Startup Endpoint: Application is ready to serve traffic !");
 
         CustomData data = new CustomData();
-        details.put("StartupEndpoint", "ImageAnalysisApplication Startup Endpoint: Application is ready to serve traffic");
+        details.put("StartupEndpoint", "BookImagesApplication Startup Endpoint: Application is ready to serve traffic");
         data.setData(details);
 
         return data;

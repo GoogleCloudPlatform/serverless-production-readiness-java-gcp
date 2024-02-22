@@ -4,30 +4,17 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNotNull;
 
 import com.google.api.core.ApiFuture;
-import com.google.api.gax.core.CredentialsProvider;
-import com.google.api.gax.core.NoCredentialsProvider;
 import com.google.cloud.NoCredentials;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.FirestoreOptions;
 import com.google.cloud.firestore.WriteResult;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
-import javax.annotation.PostConstruct;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.testcontainers.containers.FirestoreEmulatorContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -36,7 +23,7 @@ import org.testcontainers.utility.DockerImageName;
 @SpringBootTest
 @Testcontainers
 // @ActiveProfiles("test")
-public class ImageAnalysisApplicationContainerTests {
+public class ImageServiceTests {
   @BeforeEach
   public void setup() {
     FirestoreOptions options = FirestoreOptions.getDefaultInstance().toBuilder()
@@ -46,7 +33,7 @@ public class ImageAnalysisApplicationContainerTests {
         .build();
     Firestore firestore = options.getService();
 
-    this.eventService = new EventService(options, firestore);
+    this.eventService = new ImageService(options, firestore);
   }
 
   @Container
@@ -61,7 +48,7 @@ public class ImageAnalysisApplicationContainerTests {
   }
 
   // @Autowired
-  private EventService eventService;
+  private ImageService eventService;
 
   // @Disabled("Until Spring Boot 3.1 is released")
   @Test
