@@ -34,12 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import services.actuator.StartupCheck;
 
@@ -68,6 +63,8 @@ public class EventController {
   private static final String zone = MetadataConfig.getZone();
 
   private static final List<String> requiredFields = Arrays.asList("ce-id", "ce-source", "ce-type", "ce-specversion");
+  @Autowired
+  TableService tableService;
 
   @Autowired
   private EventService eventService;
@@ -85,6 +82,16 @@ public class EventController {
     logger.info("ImageAnalysisApplication: EventController - Executed start endpoint request " + new SimpleDateFormat("HH:mm:ss.SSS").format(new java.util.Date(System.currentTimeMillis())));
     return "EventController started";
   }
+
+  @RequestMapping(value = "/table", method = RequestMethod.GET)
+  public ResponseEntity<List<Map<String, Object>>> getTable(@RequestParam(name = "prompt") String prompt) {
+      return new ResponseEntity<List<Map<String, Object>>>(tableService.getTable(prompt), HttpStatus.OK);
+  }
+
+    @RequestMapping(value = "/insertTable", method = RequestMethod.POST)
+    public ResponseEntity<Integer> insertTable(@RequestBody Map<String, Object> body) {
+        return new ResponseEntity<Integer>(tableService.insertTable( (String) body.get("content")), HttpStatus.OK);
+    }
 
   @RequestMapping(value = "/", method = RequestMethod.POST)
   public ResponseEntity<String> receiveMessage(
