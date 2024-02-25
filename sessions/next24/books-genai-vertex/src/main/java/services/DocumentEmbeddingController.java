@@ -1,34 +1,10 @@
 package services;
 
-import com.google.api.core.ApiFuture;
-import com.google.cloud.firestore.WriteResult;
-import com.google.cloud.vision.v1.AnnotateImageRequest;
-import com.google.cloud.vision.v1.AnnotateImageResponse;
-import com.google.cloud.vision.v1.BatchAnnotateImagesResponse;
-import com.google.cloud.vision.v1.ColorInfo;
-import com.google.cloud.vision.v1.DominantColorsAnnotation;
-import com.google.cloud.vision.v1.EntityAnnotation;
-import com.google.cloud.vision.v1.Feature;
-import com.google.cloud.vision.v1.Image;
-import com.google.cloud.vision.v1.ImageAnnotatorClient;
-import com.google.cloud.vision.v1.ImageProperties;
-import com.google.cloud.vision.v1.ImageSource;
-import com.google.cloud.vision.v1.Likelihood;
-import com.google.cloud.vision.v1.Property;
-import com.google.cloud.vision.v1.SafeSearchAnnotation;
-import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.data.message.UserMessage;
-import dev.langchain4j.model.output.Response;
-import dev.langchain4j.model.vertexai.VertexAiChatModel;
-import dev.langchain4j.model.vertexai.VertexAiLanguageModel;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +19,7 @@ public class DocumentEmbeddingController {
   private static final Logger logger = LoggerFactory.getLogger(DocumentEmbeddingController.class);
 
   @Autowired
-  TableService tableService;
+  BooksService booksService;
 
   @PostConstruct
   public void init() {
@@ -61,12 +37,12 @@ public class DocumentEmbeddingController {
 
   @RequestMapping(value = "/embeddings", method = RequestMethod.GET)
   public ResponseEntity<List<Map<String, Object>>> getTable(@RequestParam(name = "prompt") String prompt) {
-    return new ResponseEntity<List<Map<String, Object>>>(tableService.getTable(prompt), HttpStatus.OK);
+    return new ResponseEntity<List<Map<String, Object>>>(booksService.getTable(prompt), HttpStatus.OK);
   }
 
-  @RequestMapping(value = "/insert", method = RequestMethod.POST)
+  @RequestMapping(value = "/embeddings", method = RequestMethod.POST)
   public ResponseEntity<Integer> insertTable(@RequestBody Map<String, Object> body) {
-    return new ResponseEntity<Integer>(tableService.insertTable( (String) body.get("content")), HttpStatus.OK);
+    return new ResponseEntity<Integer>(booksService.insertPagesBook( (String) body.get("bookName")), HttpStatus.OK);
   }
 
   @RequestMapping(value = "/", method = RequestMethod.POST)

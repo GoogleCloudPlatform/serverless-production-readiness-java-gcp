@@ -25,23 +25,22 @@ public class DataAccess {
     // Perform database operations using the JdbcTemplate
     public List<Map<String, Object>> queryTable(String prompt) {
         // Query the database
+        // prompt = Give me the poems about love?
         String sql = "SELECT\n" +
-                "        cp.product_name,\n" +
-                "        left(cp.product_description,80) as description,\n" +
-                "        cp.sale_price,\n" +
-                "        cs.zip_code,\n" +
-                "        (cp.embedding <=> embedding('textembedding-gecko@003', ?)::vector) as distance\n" +
+                "        b.title,\n" +
+                "        left(p.content,500) as page,\n" +
+                "        a.name,\n" +
+                "        p.page_number,\n" +
+                "        (p.embedding <=> embedding('textembedding-gecko@003', ?)::vector) as distance\n" +
                 "FROM\n" +
-                "        cymbal_products cp\n" +
-                "JOIN cymbal_inventory ci on\n" +
-                "        ci.uniq_id=cp.uniq_id\n" +
-                "JOIN cymbal_stores cs on\n" +
-                "        cs.store_id=ci.store_id\n" +
-                "        AND ci.inventory>0\n" +
-                "        AND cs.store_id = 1583\n" +
+                "        pages p\n" +
+                "JOIN books b on\n" +
+                "        p.book_id=b.book_id\n" +
+                "JOIN authors a on\n" +
+                "       a.author_id=b.author_id\n" +
                 "ORDER BY\n" +
                 "        distance ASC\n" +
-                "LIMIT 10;\n";
+                "LIMIT 10;";
 //        String prompt ="yanni tests";
 //        String prompt ="What kind of fruit trees grow well here?";
         Object[] parameters = new Object[]{prompt};
@@ -49,7 +48,7 @@ public class DataAccess {
 
         // Iterate over the results
         for (Map<String, Object> row : rows) {
-            System.out.println(row.get("description"));
+            System.out.println(row.get("page"));
         }
         return rows;
         // Insert data into the database
@@ -57,12 +56,14 @@ public class DataAccess {
 //        jdbcTemplate.update(sql, "value1", "value2", "value3");
     }
 
-    public Integer insert(String content) {
-        String sql = "INSERT INTO public.cymbal_products (product_url, product_name, product_description, list_price, sale_price, brand, item_number, gtin, package_size, category, postal_code, available) VALUES " +
-                "('https://www.cymbalstore.com/ip/Disney-Frozen-2-Magical-Journey-Window-Valance-Walmart-Exclusive/1234', " +
-                "'Disney Frozen 2 Magical Journey Window Valance, CymbalStore Exclusive', ?, 19.99, 14.99, 'Disney+', '578491190', '0085214126180', NULL, 'Home | Decor | Curtains & Window Treatments | Curtains | Kids Curtains'" +
-                ", NULL, true);";
-        int success =jdbcTemplate.update(sql, content);
+    public Integer insert(Integer bookId, String content, Integer pageNumber) {
+        String sql = "insert into pages (\n" +
+                "book_id,\n" +
+                "content,\n" +
+                "    page_number)\n" +
+                "values (?,?,?)";
+        Object[] parameters = new Object[]{bookId, content, pageNumber};
+        int success =jdbcTemplate.update(sql, parameters);
         return success;
     }
 }
