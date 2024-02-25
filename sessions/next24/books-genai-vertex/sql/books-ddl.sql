@@ -63,7 +63,7 @@ create TABLE bookSummaries (
 select
 *
 from
-    books;
+    books where title like '%Ulysses%';
 
 select
 *

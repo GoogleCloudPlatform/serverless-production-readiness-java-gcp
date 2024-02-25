@@ -14,8 +14,8 @@ import java.util.Map;
 public class BooksService {
     @Autowired
     DataAccess dao;
-    public List<Map<String, Object>>  getTable(String prompt) {
-        return dao.queryTable(prompt);
+    public List<Map<String, Object>>  prompt(String prompt) {
+        return dao.promptForBooks(prompt);
     }
 
     public Integer insertPagesBook(String book) {
