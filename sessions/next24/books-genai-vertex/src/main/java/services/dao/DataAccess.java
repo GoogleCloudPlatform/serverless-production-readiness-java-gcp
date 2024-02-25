@@ -1,9 +1,7 @@
 package services.dao;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
@@ -22,8 +20,26 @@ public class DataAccess {
         jdbcTemplate = new JdbcTemplate(hikariDataSource);
     }
 
+    public List<Map<String, Object>> findBook(String prompt) {
+        // Query the database
+        // prompt = Give me the poems about love?
+        String sql = "select\n" +
+                "*\n" +
+                "from\n" +
+                "    books where title like '%?%'";
+        Object[] parameters = new Object[]{prompt};
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, parameters);
+
+        // Iterate over the results
+        for (Map<String, Object> row : rows) {
+            System.out.println(row.get("title"));
+        }
+        return rows;
+    }
+
+
     // Perform database operations using the JdbcTemplate
-    public List<Map<String, Object>> queryTable(String prompt) {
+    public List<Map<String, Object>> promptForBooks(String prompt) {
         // Query the database
         // prompt = Give me the poems about love?
         String sql = "SELECT\n" +

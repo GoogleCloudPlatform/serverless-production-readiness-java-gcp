@@ -37,7 +37,7 @@ public class DocumentEmbeddingController {
 
   @RequestMapping(value = "/embeddings", method = RequestMethod.GET)
   public ResponseEntity<List<Map<String, Object>>> getTable(@RequestParam(name = "prompt") String prompt) {
-    return new ResponseEntity<List<Map<String, Object>>>(booksService.getTable(prompt), HttpStatus.OK);
+    return new ResponseEntity<List<Map<String, Object>>>(booksService.prompt(prompt), HttpStatus.OK);
   }
 
   @RequestMapping(value = "/embeddings", method = RequestMethod.POST)
