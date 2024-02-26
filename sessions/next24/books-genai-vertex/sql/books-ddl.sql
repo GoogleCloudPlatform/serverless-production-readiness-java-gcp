@@ -172,7 +172,7 @@ values (
 --9	The Republic - Plato	2	Jan 1, 375, 12:00:00 AM
 --10	Ulysses - James Joyce	3	Feb 2, 1922, 12:00:00 AM
 -- prompt Fix the following sql insert statement escape ' in the summary string that is causing the insert statement to error:
-
+-- prompt Give me a summary of The Jungle Book - Rudyard Kipling in less than 10 paragraphs with no special characters, line breaks, and headings.
 select
 *
 from
