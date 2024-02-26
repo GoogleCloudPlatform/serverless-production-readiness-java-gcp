@@ -36,8 +36,8 @@ public class DocumentEmbeddingController {
   }
 
   @RequestMapping(value = "category/books", method = RequestMethod.GET)
-  public ResponseEntity<List<Map<String, Object>>> getTable(@RequestParam(name = "prompt") String prompt) {
-    return new ResponseEntity<List<Map<String, Object>>>(booksService.prompt(prompt), HttpStatus.OK);
+  public ResponseEntity<List<Map<String, Object>>> getTable(@RequestParam(name = "prompt") String prompt, @RequestParam(name = "contentCharactersLimit", defaultValue = "2000") String contentCharactersLimit) {
+    return new ResponseEntity<List<Map<String, Object>>>(booksService.prompt(prompt, Integer.parseInt(contentCharactersLimit)), HttpStatus.OK);
   }
 
   @RequestMapping(value = "category/books", method = RequestMethod.POST)

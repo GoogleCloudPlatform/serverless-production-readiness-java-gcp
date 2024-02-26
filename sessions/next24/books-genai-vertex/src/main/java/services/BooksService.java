@@ -15,7 +15,11 @@ public class BooksService {
     @Autowired
     DataAccess dao;
     public List<Map<String, Object>>  prompt(String prompt) {
-        return dao.promptForBooks(prompt);
+        return dao.promptForBooks(prompt, 0);
+    }
+
+    public List<Map<String, Object>>  prompt(String prompt, Integer characterLimit) {
+        return dao.promptForBooks(prompt, characterLimit);
     }
 
     public Integer insertPagesBook(String filePath, String bookTitle) {

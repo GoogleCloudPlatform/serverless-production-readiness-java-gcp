@@ -57,12 +57,15 @@ public class DataAccess {
 
 
     // Perform database operations using the JdbcTemplate
-    public List<Map<String, Object>> promptForBooks(String prompt) {
+    public List<Map<String, Object>> promptForBooks(String prompt, Integer characterLimit) {
         // Query the database
         // prompt = Give me the poems about love?
+        if (characterLimit == null || characterLimit == 0) {
+            characterLimit = 2000;
+        }
         String sql = "SELECT\n" +
                 "        b.title,\n" +
-                "        left(p.content,500) as page,\n" +
+                "        left(p.content,?) as page,\n" +
                 "        a.name,\n" +
                 "        p.page_number,\n" +
                 "        (p.embedding <=> embedding('textembedding-gecko@003', ?)::vector) as distance\n" +
@@ -77,7 +80,7 @@ public class DataAccess {
                 "LIMIT 10;";
 //        String prompt ="yanni tests";
 //        String prompt ="What kind of fruit trees grow well here?";
-        Object[] parameters = new Object[]{prompt};
+        Object[] parameters = new Object[]{characterLimit, prompt};
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, parameters);
 
         // Iterate over the results
