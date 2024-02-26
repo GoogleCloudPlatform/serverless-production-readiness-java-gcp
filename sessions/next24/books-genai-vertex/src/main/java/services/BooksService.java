@@ -23,6 +23,7 @@ public class BooksService {
     }
 
     public Integer insertPagesBook(String filePath, String bookTitle) {
+        //0 = failure, 1 = success
         Integer success = 0;
         if( filePath == null || filePath.equals("") || bookTitle==null || bookTitle.equals("")) {
             return success;
@@ -38,6 +39,7 @@ public class BooksService {
         Integer bookId = (Integer) book.get("book_id");
         System.out.println(filePath+" "+bookTitle+" bookId:"+bookId);
         try {
+            //replace with cloud storage eventually
             ClassPathResource classPathResource = new ClassPathResource(filePath);
             InputStream inputStream = classPathResource.getInputStream();
             reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
@@ -47,16 +49,11 @@ public class BooksService {
             if(!pages.isEmpty()) {
                 return success;
             }
-
             char[] cbuf = new char[6000];
-
             // Read 3000 characters at a time
             int charsRead;
             while ((charsRead = reader.read(cbuf)) != -1) {
-
-                // Print the characters read
                 content = new String(cbuf, 0, charsRead);
-
                 dao.insert( bookId,content,page );
                 page++;
             }
