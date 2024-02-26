@@ -18,21 +18,31 @@ public class BooksService {
         return dao.promptForBooks(prompt);
     }
 
-    public Integer insertPagesBook(String book) {
-//        content = (content==null || content.equals("") ? "random yanni test" + Math.random(): content);
+    public Integer insertPagesBook(String filePath, String bookTitle) {
         Integer success = 0;
-        if( book == null || book.equals("") ) {
+        if( filePath == null || filePath.equals("") || bookTitle==null || bookTitle.equals("")) {
+            return success;
+        }
+
+        Map<String, Object> book = dao.findBook(bookTitle);
+
+        if(book.isEmpty()){
             return success;
         }
 
         BufferedReader reader = null;
-        System.out.println(book);
+        Integer bookId = (Integer) book.get("book_id");
+        System.out.println(filePath+" "+bookTitle+" bookId:"+bookId);
         try {
-            ClassPathResource classPathResource = new ClassPathResource(book);
+            ClassPathResource classPathResource = new ClassPathResource(filePath);
             InputStream inputStream = classPathResource.getInputStream();
             reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
             String content;
             Integer page = 1;
+            List<Map<String, Object>> pages = dao.findPages(bookId);
+            if(!pages.isEmpty()) {
+                return success;
+            }
 
             char[] cbuf = new char[6000];
 
@@ -42,11 +52,9 @@ public class BooksService {
 
                 // Print the characters read
                 content = new String(cbuf, 0, charsRead);
-                dao.insert(10,content,page);
+
+                dao.insert( bookId,content,page );
                 page++;
-//                if(page==2) {
-//                    break;
-//                }
             }
             reader.close();
             success=1;

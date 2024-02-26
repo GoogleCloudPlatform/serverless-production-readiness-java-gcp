@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,13 +21,13 @@ public class DataAccess {
         jdbcTemplate = new JdbcTemplate(hikariDataSource);
     }
 
-    public List<Map<String, Object>> findBook(String prompt) {
+    public Map<String, Object> findBook(String prompt) {
         // Query the database
         // prompt = Give me the poems about love?
         String sql = "select\n" +
                 "*\n" +
                 "from\n" +
-                "    books where title like '%?%'";
+                "    books where title = ?";
         Object[] parameters = new Object[]{prompt};
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, parameters);
 
@@ -34,6 +35,23 @@ public class DataAccess {
         for (Map<String, Object> row : rows) {
             System.out.println(row.get("title"));
         }
+        return rows.size()==0 ? new HashMap<>() : rows.get(0);
+    }
+
+    public List<Map<String, Object>> findPages(Integer bookId) {
+        // Query the database
+        // prompt = Give me the poems about love?
+        String sql = "select\n" +
+                "*\n" +
+                "from\n" +
+                "    pages where book_id = ? limit 10";
+        Object[] parameters = new Object[]{bookId};
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, parameters);
+
+        // Iterate over the results
+//        for (Map<String, Object> row : rows) {
+            System.out.println("number of rows: " + rows.size());
+//        }
         return rows;
     }
 

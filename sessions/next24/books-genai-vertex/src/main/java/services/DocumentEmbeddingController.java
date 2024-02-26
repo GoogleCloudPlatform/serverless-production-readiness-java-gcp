@@ -35,14 +35,15 @@ public class DocumentEmbeddingController {
     return "DocumentEmbeddingController started";
   }
 
-  @RequestMapping(value = "/embeddings", method = RequestMethod.GET)
+  @RequestMapping(value = "category/books", method = RequestMethod.GET)
   public ResponseEntity<List<Map<String, Object>>> getTable(@RequestParam(name = "prompt") String prompt) {
     return new ResponseEntity<List<Map<String, Object>>>(booksService.prompt(prompt), HttpStatus.OK);
   }
 
-  @RequestMapping(value = "/embeddings", method = RequestMethod.POST)
+  @RequestMapping(value = "category/books", method = RequestMethod.POST)
   public ResponseEntity<Integer> insertTable(@RequestBody Map<String, Object> body) {
-    return new ResponseEntity<Integer>(booksService.insertPagesBook( (String) body.get("bookName")), HttpStatus.OK);
+    Integer success = booksService.insertPagesBook( (String) body.get("filePath"), (String) body.get("bookTitle") );
+    return new ResponseEntity<>(success == 1 ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
   }
 
   @RequestMapping(value = "/", method = RequestMethod.POST)
