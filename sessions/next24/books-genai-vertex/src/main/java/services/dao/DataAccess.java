@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,13 +21,13 @@ public class DataAccess {
         jdbcTemplate = new JdbcTemplate(hikariDataSource);
     }
 
-    public List<Map<String, Object>> findBook(String prompt) {
+    public Map<String, Object> findBook(String prompt) {
         // Query the database
         // prompt = Give me the poems about love?
         String sql = "select\n" +
                 "*\n" +
                 "from\n" +
-                "    books where title like '%?%'";
+                "    books where title = ?";
         Object[] parameters = new Object[]{prompt};
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, parameters);
 
@@ -34,17 +35,37 @@ public class DataAccess {
         for (Map<String, Object> row : rows) {
             System.out.println(row.get("title"));
         }
+        return rows.size()==0 ? new HashMap<>() : rows.get(0);
+    }
+
+    public List<Map<String, Object>> findPages(Integer bookId) {
+        // Query the database
+        // prompt = Give me the poems about love?
+        String sql = "select\n" +
+                "*\n" +
+                "from\n" +
+                "    pages where book_id = ? limit 10";
+        Object[] parameters = new Object[]{bookId};
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, parameters);
+
+        // Iterate over the results
+//        for (Map<String, Object> row : rows) {
+            System.out.println("number of rows: " + rows.size());
+//        }
         return rows;
     }
 
 
     // Perform database operations using the JdbcTemplate
-    public List<Map<String, Object>> promptForBooks(String prompt) {
+    public List<Map<String, Object>> promptForBooks(String prompt, Integer characterLimit) {
         // Query the database
         // prompt = Give me the poems about love?
+        if (characterLimit == null || characterLimit == 0) {
+            characterLimit = 2000;
+        }
         String sql = "SELECT\n" +
                 "        b.title,\n" +
-                "        left(p.content,500) as page,\n" +
+                "        left(p.content,?) as page,\n" +
                 "        a.name,\n" +
                 "        p.page_number,\n" +
                 "        (p.embedding <=> embedding('textembedding-gecko@003', ?)::vector) as distance\n" +
@@ -59,7 +80,7 @@ public class DataAccess {
                 "LIMIT 10;";
 //        String prompt ="yanni tests";
 //        String prompt ="What kind of fruit trees grow well here?";
-        Object[] parameters = new Object[]{prompt};
+        Object[] parameters = new Object[]{characterLimit, prompt};
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, parameters);
 
         // Iterate over the results
