@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import services.actuator.StartupCheck;
 import utility.FileUtility;
 @RestController
-@RequestMapping("/document")
 public class DocumentEmbeddingController {
   private static final Logger logger = LoggerFactory.getLogger(DocumentEmbeddingController.class);
 
@@ -40,12 +39,12 @@ public class DocumentEmbeddingController {
     return "DocumentEmbeddingController started";
   }
 
-  @RequestMapping(value = "category/books", method = RequestMethod.GET)
+  @RequestMapping(value = "/document/category/books", method = RequestMethod.GET)
   public ResponseEntity<List<Map<String, Object>>> getTable(@RequestParam(name = "prompt") String prompt, @RequestParam(name = "contentCharactersLimit", defaultValue = "2000") String contentCharactersLimit) {
     return new ResponseEntity<List<Map<String, Object>>>(booksService.prompt(prompt, Integer.parseInt(contentCharactersLimit)), HttpStatus.OK);
   }
 
-  @RequestMapping(value = "category/books", method = RequestMethod.POST)
+  @RequestMapping(value = "/document/category/books", method = RequestMethod.POST)
   public ResponseEntity<Integer> insertTable(@RequestBody Map<String, Object> body) {
 //    Integer success = booksService.insertBook((String) body.get("fileName"));
 //    Integer success = booksService.insertPagesBook( (String) body.get("filePath"), (String) body.get("bookTitle") );

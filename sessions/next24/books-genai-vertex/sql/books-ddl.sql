@@ -91,7 +91,15 @@ select
 *
 from
     authors;
-delete from authors where name = 'J._K._Rowling';
+
+select
+*
+from
+    pages where book_id=17;
+delete from authors where name = 'Rudyard_Kipling';
+delete from pages where book_id=17;
+delete from books where book_id=17;
+select * from pages where book_id=28;
 --delete from books where author_id= 12;
 -- update authors set name='Marcus_Aurelius_Antoninus' where author_id=6;
 

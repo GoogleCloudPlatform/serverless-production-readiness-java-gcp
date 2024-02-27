@@ -83,208 +83,208 @@ public class ImageProcessingController {
         return "ImageProcessingController started";
     }
 
-    @RequestMapping(value = "/", method = RequestMethod.POST)
-    public ResponseEntity<String> receiveMessage(
-            @RequestBody Map<String, Object> body, @RequestHeader Map<String, String> headers) throws IOException, InterruptedException, ExecutionException {
-        System.out.println("Header elements");
-        for (String field : CloudConfig.requiredFields) {
-            if (headers.get(field) == null) {
-                String msg = String.format("Missing expected header: %s.", field);
-                System.out.println(msg);
-                return new ResponseEntity<String>(msg, HttpStatus.BAD_REQUEST);
-            } else {
-                System.out.println(field + " : " + headers.get(field));
-            }
-        }
-
-        System.out.println("Body elements");
-        for (String bodyField : body.keySet()) {
-            System.out.println(bodyField + " : " + body.get(bodyField));
-        }
-
-        if (headers.get("ce-subject") == null) {
-            String msg = "Missing expected header: ce-subject.";
-            System.out.println(msg);
-            return new ResponseEntity<String>(msg, HttpStatus.BAD_REQUEST);
-        }
-
-        String ceSubject = headers.get("ce-subject");
-        String msg = "Detected change in Cloud Storage bucket: (ce-subject) : " + ceSubject;
-        System.out.println(msg);
-
-        String fileName = (String)body.get("name");
-        String bucketName = (String)body.get("bucket");
-
-        logger.info("New picture uploaded " + fileName);
-
-        if(fileName == null){
-            msg = "Missing expected body element: file name";
-            System.out.println(msg);
-            return new ResponseEntity<String>(msg, HttpStatus.BAD_REQUEST);
-        }
-
-        try (ImageAnnotatorClient vision = ImageAnnotatorClient.create()) {
-            List<AnnotateImageRequest> requests = new ArrayList<>();
-
-            ImageSource imageSource = ImageSource.newBuilder()
-                    .setGcsImageUri("gs://" + bucketName + "/" + fileName)
-                    .build();
-
-            Image image = Image.newBuilder()
-                    .setSource(imageSource)
-                    .build();
-
-            Feature featureLabel = Feature.newBuilder()
-                    .setType(Type.LABEL_DETECTION)
-                    .build();
-            Feature featureImageProps = Feature.newBuilder()
-                    .setType(Type.IMAGE_PROPERTIES)
-                    .build();
-            Feature featureSafeSearch = Feature.newBuilder()
-                    .setType(Type.SAFE_SEARCH_DETECTION)
-                    .build();
-
-            Feature featureTextDetection = Feature.newBuilder()
-                    .setType(Type.TEXT_DETECTION)
-                    .build();
-
-            Feature featureLogoDetection = Feature.newBuilder()
-                    .setType(Type.LOGO_DETECTION)
-                    .build();
-
-            AnnotateImageRequest request = AnnotateImageRequest.newBuilder()
-                    .addFeatures(featureLabel)
-                    .addFeatures(featureImageProps)
-                    .addFeatures(featureSafeSearch)
-                    .addFeatures(featureTextDetection)
-                    .addFeatures(featureLogoDetection)
-                    .setImage(image)
-                    .build();
-
-            requests.add(request);
-
-            logger.info("Calling the Vision API...");
-            BatchAnnotateImagesResponse result = vision.batchAnnotateImages(requests);
-            List<AnnotateImageResponse> responses = result.getResponsesList();
-
-            if (responses.isEmpty()) {
-                logger.info("No response received from Vision API.");
-                return new ResponseEntity<String>(msg, HttpStatus.BAD_REQUEST);
-            }
-
-            AnnotateImageResponse response = responses.getFirst();
-            if (response.hasError()) {
-                logger.info("Error: " + response.getError().getMessage());
-                return new ResponseEntity<String>(msg, HttpStatus.BAD_REQUEST);
-            }
-
-            List<String> labels = response.getLabelAnnotationsList().stream()
-                    .map(annotation -> annotation.getDescription())
-                    .collect(Collectors.toList());
-            logger.info("Annotations found by Vision API:");
-            for (String label: labels) {
-                logger.info("- " + label);
-            }
-
-            String mainColor = "#FFFFFF";
-            ImageProperties imgProps = response.getImagePropertiesAnnotation();
-            if (imgProps.hasDominantColors()) {
-                DominantColorsAnnotation colorsAnn = imgProps.getDominantColors();
-                ColorInfo colorInfo = colorsAnn.getColors(0);
-
-                mainColor = rgbHex(
-                        colorInfo.getColor().getRed(),
-                        colorInfo.getColor().getGreen(),
-                        colorInfo.getColor().getBlue());
-
-                logger.info("Color: " + mainColor);
-            }
-
-            boolean isSafe = false;
-            if (response.hasSafeSearchAnnotation()) {
-                SafeSearchAnnotation safeSearch = response.getSafeSearchAnnotation();
-
-                isSafe = Stream.of(
-                                safeSearch.getAdult(), safeSearch.getMedical(), safeSearch.getRacy(),
-                                safeSearch.getSpoof(), safeSearch.getViolence())
-                        .allMatch( likelihood ->
-                                likelihood != Likelihood.LIKELY && likelihood != Likelihood.VERY_LIKELY
-                        );
-
-                logger.info("Is Image Safe? " + isSafe);
-            }
-
-            logger.info("Logo Annotations:");
-            for (EntityAnnotation annotation : response.getLogoAnnotationsList()) {
-                logger.info("Logo: " + annotation.getDescription());
-
-                List<Property> properties = annotation.getPropertiesList();
-                logger.info("Logo property list:");
-                for (Property property : properties) {
-                    logger.info("Name: %s, Value: %s", property.getName(), property.getValue());
-                }
-            }
-
-            String prompt = "Explain the text ";
-            String textElements;
-
-            logger.info("Text Annotations:");
-            for (EntityAnnotation annotation : response.getTextAnnotationsList()) {
-                textElements = annotation.getDescription();
-                prompt += textElements + " ";
-                logger.info("Text: " + textElements);
-
-                // if(textElements.matches("^[a-zA-Z0-9]+$"))
-                prompt += textElements;
-            }
-
-            // build alternative prompt using Vertex AI
-            //  extractTextFromImage(bucketName, fileName);
-
-            Response<AiMessage> modelResponse = null;
-            if (!prompt.isEmpty()) {
-                VertexAiChatModel vertexAiChatModel = VertexAiChatModel.builder()
-                        .endpoint("us-central1-aiplatform.googleapis.com:443")
-                        .project(CloudConfig.projectID)
-                        .location(CloudConfig.zone)
-                        .publisher("google")
-                        .modelName("chat-bison@001")
-                        .temperature(0.1)
-                        .maxOutputTokens(50)
-                        .topK(0)
-                        .topP(0.0)
-                        .maxRetries(3)
-                        .build();
-                modelResponse = vertexAiChatModel.generate(UserMessage.from(prompt));
-                logger.info("Result Chat Model: " + modelResponse.content().text());
-            }
-
-            if (!prompt.isEmpty()) {
-                VertexAiLanguageModel vertexAiTextModel = VertexAiLanguageModel.builder()
-                        .endpoint("us-central1-aiplatform.googleapis.com:443")
-                        .project(CloudConfig.projectID)
-                        .location(CloudConfig.zone)
-                        .publisher("google")
-                        .modelName("text-bison@001")
-                        .temperature(0.1)
-                        .maxOutputTokens(50)
-                        .topK(0)
-                        .topP(0.0)
-                        .maxRetries(3)
-                        .build();
-                Response<String> textResponse = vertexAiTextModel.generate(prompt);
-                logger.info("Result Text Model: " + textResponse.content());
-            }
-
-            // Saving result to Firestore
-            if (isSafe && modelResponse != null) {
-                ApiFuture<WriteResult> writeResult = eventService.storeImage(fileName, labels, mainColor, modelResponse.content().text());
-                logger.info("Picture metadata saved in Firestore at " + writeResult.get().getUpdateTime());
-            }
-        }
-
-        return new ResponseEntity<String>(msg, HttpStatus.OK);
-    }
+//    @RequestMapping(value = "/", method = RequestMethod.POST)
+//    public ResponseEntity<String> receiveMessage(
+//            @RequestBody Map<String, Object> body, @RequestHeader Map<String, String> headers) throws IOException, InterruptedException, ExecutionException {
+//        System.out.println("Header elements");
+//        for (String field : CloudConfig.requiredFields) {
+//            if (headers.get(field) == null) {
+//                String msg = String.format("Missing expected header: %s.", field);
+//                System.out.println(msg);
+//                return new ResponseEntity<String>(msg, HttpStatus.BAD_REQUEST);
+//            } else {
+//                System.out.println(field + " : " + headers.get(field));
+//            }
+//        }
+//
+//        System.out.println("Body elements");
+//        for (String bodyField : body.keySet()) {
+//            System.out.println(bodyField + " : " + body.get(bodyField));
+//        }
+//
+//        if (headers.get("ce-subject") == null) {
+//            String msg = "Missing expected header: ce-subject.";
+//            System.out.println(msg);
+//            return new ResponseEntity<String>(msg, HttpStatus.BAD_REQUEST);
+//        }
+//
+//        String ceSubject = headers.get("ce-subject");
+//        String msg = "Detected change in Cloud Storage bucket: (ce-subject) : " + ceSubject;
+//        System.out.println(msg);
+//
+//        String fileName = (String)body.get("name");
+//        String bucketName = (String)body.get("bucket");
+//
+//        logger.info("New picture uploaded " + fileName);
+//
+//        if(fileName == null){
+//            msg = "Missing expected body element: file name";
+//            System.out.println(msg);
+//            return new ResponseEntity<String>(msg, HttpStatus.BAD_REQUEST);
+//        }
+//
+//        try (ImageAnnotatorClient vision = ImageAnnotatorClient.create()) {
+//            List<AnnotateImageRequest> requests = new ArrayList<>();
+//
+//            ImageSource imageSource = ImageSource.newBuilder()
+//                    .setGcsImageUri("gs://" + bucketName + "/" + fileName)
+//                    .build();
+//
+//            Image image = Image.newBuilder()
+//                    .setSource(imageSource)
+//                    .build();
+//
+//            Feature featureLabel = Feature.newBuilder()
+//                    .setType(Type.LABEL_DETECTION)
+//                    .build();
+//            Feature featureImageProps = Feature.newBuilder()
+//                    .setType(Type.IMAGE_PROPERTIES)
+//                    .build();
+//            Feature featureSafeSearch = Feature.newBuilder()
+//                    .setType(Type.SAFE_SEARCH_DETECTION)
+//                    .build();
+//
+//            Feature featureTextDetection = Feature.newBuilder()
+//                    .setType(Type.TEXT_DETECTION)
+//                    .build();
+//
+//            Feature featureLogoDetection = Feature.newBuilder()
+//                    .setType(Type.LOGO_DETECTION)
+//                    .build();
+//
+//            AnnotateImageRequest request = AnnotateImageRequest.newBuilder()
+//                    .addFeatures(featureLabel)
+//                    .addFeatures(featureImageProps)
+//                    .addFeatures(featureSafeSearch)
+//                    .addFeatures(featureTextDetection)
+//                    .addFeatures(featureLogoDetection)
+//                    .setImage(image)
+//                    .build();
+//
+//            requests.add(request);
+//
+//            logger.info("Calling the Vision API...");
+//            BatchAnnotateImagesResponse result = vision.batchAnnotateImages(requests);
+//            List<AnnotateImageResponse> responses = result.getResponsesList();
+//
+//            if (responses.isEmpty()) {
+//                logger.info("No response received from Vision API.");
+//                return new ResponseEntity<String>(msg, HttpStatus.BAD_REQUEST);
+//            }
+//
+//            AnnotateImageResponse response = responses.getFirst();
+//            if (response.hasError()) {
+//                logger.info("Error: " + response.getError().getMessage());
+//                return new ResponseEntity<String>(msg, HttpStatus.BAD_REQUEST);
+//            }
+//
+//            List<String> labels = response.getLabelAnnotationsList().stream()
+//                    .map(annotation -> annotation.getDescription())
+//                    .collect(Collectors.toList());
+//            logger.info("Annotations found by Vision API:");
+//            for (String label: labels) {
+//                logger.info("- " + label);
+//            }
+//
+//            String mainColor = "#FFFFFF";
+//            ImageProperties imgProps = response.getImagePropertiesAnnotation();
+//            if (imgProps.hasDominantColors()) {
+//                DominantColorsAnnotation colorsAnn = imgProps.getDominantColors();
+//                ColorInfo colorInfo = colorsAnn.getColors(0);
+//
+//                mainColor = rgbHex(
+//                        colorInfo.getColor().getRed(),
+//                        colorInfo.getColor().getGreen(),
+//                        colorInfo.getColor().getBlue());
+//
+//                logger.info("Color: " + mainColor);
+//            }
+//
+//            boolean isSafe = false;
+//            if (response.hasSafeSearchAnnotation()) {
+//                SafeSearchAnnotation safeSearch = response.getSafeSearchAnnotation();
+//
+//                isSafe = Stream.of(
+//                                safeSearch.getAdult(), safeSearch.getMedical(), safeSearch.getRacy(),
+//                                safeSearch.getSpoof(), safeSearch.getViolence())
+//                        .allMatch( likelihood ->
+//                                likelihood != Likelihood.LIKELY && likelihood != Likelihood.VERY_LIKELY
+//                        );
+//
+//                logger.info("Is Image Safe? " + isSafe);
+//            }
+//
+//            logger.info("Logo Annotations:");
+//            for (EntityAnnotation annotation : response.getLogoAnnotationsList()) {
+//                logger.info("Logo: " + annotation.getDescription());
+//
+//                List<Property> properties = annotation.getPropertiesList();
+//                logger.info("Logo property list:");
+//                for (Property property : properties) {
+//                    logger.info("Name: %s, Value: %s", property.getName(), property.getValue());
+//                }
+//            }
+//
+//            String prompt = "Explain the text ";
+//            String textElements;
+//
+//            logger.info("Text Annotations:");
+//            for (EntityAnnotation annotation : response.getTextAnnotationsList()) {
+//                textElements = annotation.getDescription();
+//                prompt += textElements + " ";
+//                logger.info("Text: " + textElements);
+//
+//                // if(textElements.matches("^[a-zA-Z0-9]+$"))
+//                prompt += textElements;
+//            }
+//
+//            // build alternative prompt using Vertex AI
+//            //  extractTextFromImage(bucketName, fileName);
+//
+//            Response<AiMessage> modelResponse = null;
+//            if (!prompt.isEmpty()) {
+//                VertexAiChatModel vertexAiChatModel = VertexAiChatModel.builder()
+//                        .endpoint("us-central1-aiplatform.googleapis.com:443")
+//                        .project(CloudConfig.projectID)
+//                        .location(CloudConfig.zone)
+//                        .publisher("google")
+//                        .modelName("chat-bison@001")
+//                        .temperature(0.1)
+//                        .maxOutputTokens(50)
+//                        .topK(0)
+//                        .topP(0.0)
+//                        .maxRetries(3)
+//                        .build();
+//                modelResponse = vertexAiChatModel.generate(UserMessage.from(prompt));
+//                logger.info("Result Chat Model: " + modelResponse.content().text());
+//            }
+//
+//            if (!prompt.isEmpty()) {
+//                VertexAiLanguageModel vertexAiTextModel = VertexAiLanguageModel.builder()
+//                        .endpoint("us-central1-aiplatform.googleapis.com:443")
+//                        .project(CloudConfig.projectID)
+//                        .location(CloudConfig.zone)
+//                        .publisher("google")
+//                        .modelName("text-bison@001")
+//                        .temperature(0.1)
+//                        .maxOutputTokens(50)
+//                        .topK(0)
+//                        .topP(0.0)
+//                        .maxRetries(3)
+//                        .build();
+//                Response<String> textResponse = vertexAiTextModel.generate(prompt);
+//                logger.info("Result Text Model: " + textResponse.content());
+//            }
+//
+//            // Saving result to Firestore
+//            if (isSafe && modelResponse != null) {
+//                ApiFuture<WriteResult> writeResult = eventService.storeImage(fileName, labels, mainColor, modelResponse.content().text());
+//                logger.info("Picture metadata saved in Firestore at " + writeResult.get().getUpdateTime());
+//            }
+//        }
+//
+//        return new ResponseEntity<String>(msg, HttpStatus.OK);
+//    }
 
 
     // private void extractTextFromImage(String bucketName, String fileName) throws IOException {
