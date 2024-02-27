@@ -16,6 +16,20 @@ create TABLE books (
         FOREIGN KEY(author_id)
         REFERENCES Authors(author_id)
 );
+CREATE TYPE scope_type AS ENUM ('public', 'private');
+
+ALTER TABLE books ADD COLUMN scope scope_type NOT NULL DEFAULT 'public';
+
+--CREATE TABLE books (
+--    book_id SERIAL PRIMARY KEY,
+--    title VARCHAR(255) NOT NULL,
+--    author_id INT NOT NULL,
+--    publication_year date,
+--    scope VARCHAR(7) CHECK (scope IN ('public', 'private')),
+--    CONSTRAINT fk_author
+--        FOREIGN KEY(author_id)
+--        REFERENCES Authors(author_id)
+--);
 
 -- 3. Chapters Table
 --create TABLE chapters (
@@ -63,7 +77,10 @@ create TABLE bookSummaries (
 select
 *
 from
-    books where title = 'Ulysses - James Joyce';
+    books
+     where title = 'The_Complete_Works_of_William_Shakespeare';
+
+--update books set title='The_Complete_Works_of_William_Shakespeare' where book_id=8;
 
 select
 *
@@ -74,7 +91,9 @@ select
 *
 from
     authors;
- --delete from books where book_id= 4;
+delete from authors where name = 'J._K._Rowling';
+--delete from books where author_id= 12;
+-- update authors set name='Marcus_Aurelius_Antoninus' where author_id=6;
 
 
 
@@ -85,6 +104,11 @@ insert into authors (
 values (
     'William Shakespeare was an English playwright, poet and actor. He is widely regarded as the greatest writer in the English language and the world pre-eminent dramatist. He is often called England national poet and the "Bard of Avon". ',
     'William Shakespeare');
+
+insert into authors (
+    "bio",
+    "name")
+values ('famous author', 'Yanni Shakespeare');
 
 -- update public.authors set bio = 'James Augustine Aloysius Joyce was an Irish novelist, poet, and literary critic. He contributed to the modernist avant-garde movement and is regarded as one of the most influential and important writers of the 20th century.'  where author_id = 2;
 
@@ -115,6 +139,8 @@ insert into authors (
 values (
    'Joseph Rudyard Kipling was an English novelist, short-story writer, poet, and journalist. He was born in British India, which inspired much of his work. Kipling''s works of fiction include the Jungle Book duology, Kim, the Just So Stories and many short stories, including "The Man Who Would Be King".',
    'Rudyard Kipling');
+
+-- update books set publication_year='1922-01-01' where author_id=3;
 
 insert into books (
     author_id,

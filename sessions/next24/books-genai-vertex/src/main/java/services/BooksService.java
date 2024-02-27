@@ -1,10 +1,11 @@
 package services;
 
+import domain.ScopeType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import services.dao.DataAccess;
+import utility.FileUtility;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -14,12 +15,36 @@ import java.util.Map;
 public class BooksService {
     @Autowired
     DataAccess dao;
+
+    @Autowired
+    CloudStorageService cloudStorageService;
     public List<Map<String, Object>>  prompt(String prompt) {
         return dao.promptForBooks(prompt, 0);
     }
 
     public List<Map<String, Object>>  prompt(String prompt, Integer characterLimit) {
         return dao.promptForBooks(prompt, characterLimit);
+    }
+
+    public Integer insertBook(String fileName) {
+        String author = FileUtility.getAuthor(fileName);
+        String title = FileUtility.getTitle(fileName);
+        String year = FileUtility.getYear(fileName);
+        String publicPrivate = FileUtility.getPublicPrivate(fileName);
+        Map<String, Object> book = dao.findBook(title);
+        Map<String, Object> authorMap = dao.findAuthor(author);
+        Object authorId = authorMap.get("author_id");
+        Integer bookId = 0;
+        if(!book.isEmpty()){
+            bookId = (Integer) book.get("book_id");
+        } else {
+            if(authorId==null)
+                authorId = dao.insertAuthor("famous author", author);
+            System.out.println("publicPrivate:"+publicPrivate);
+            bookId = dao.insertBook( (Integer) authorId, title, year, ScopeType.fromValue(publicPrivate));
+        }
+
+        return bookId;
     }
 
     public Integer insertPagesBook(String filePath, String bookTitle) {
@@ -43,6 +68,25 @@ public class BooksService {
             ClassPathResource classPathResource = new ClassPathResource(filePath);
             InputStream inputStream = classPathResource.getInputStream();
             reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+            success = insertPagesBook(reader, bookTitle);
+        }catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return success;
+    }
+
+    public Integer insertPagesBook(BufferedReader reader, String bookTitle) {
+        Integer success = 0;
+        Map<String, Object> book = dao.findBook(bookTitle);
+
+        if(book.isEmpty()){
+            return success;
+        }
+        Integer bookId = (Integer) book.get("book_id");
+        System.out.println("bookId:"+bookId);
+        try {
             String content;
             Integer page = 1;
             List<Map<String, Object>> pages = dao.findPages(bookId);
@@ -54,7 +98,7 @@ public class BooksService {
             int charsRead;
             while ((charsRead = reader.read(cbuf)) != -1) {
                 content = new String(cbuf, 0, charsRead);
-                dao.insert( bookId,content,page );
+                dao.insertPages( bookId,content,page );
                 page++;
             }
             reader.close();
@@ -65,6 +109,7 @@ public class BooksService {
             throw new RuntimeException(e);
         }
         return success;
+
     }
 
 

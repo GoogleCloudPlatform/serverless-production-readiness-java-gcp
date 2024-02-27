@@ -1,5 +1,6 @@
 package services;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import services.actuator.StartupCheck;
+import utility.FileUtility;
 @RestController
 @RequestMapping("/document")
 public class DocumentEmbeddingController {
@@ -20,6 +22,9 @@ public class DocumentEmbeddingController {
 
   @Autowired
   BooksService booksService;
+
+  @Autowired
+  CloudStorageService cloudStorageService;
 
   @PostConstruct
   public void init() {
@@ -42,8 +47,13 @@ public class DocumentEmbeddingController {
 
   @RequestMapping(value = "category/books", method = RequestMethod.POST)
   public ResponseEntity<Integer> insertTable(@RequestBody Map<String, Object> body) {
-    Integer success = booksService.insertPagesBook( (String) body.get("filePath"), (String) body.get("bookTitle") );
-    return new ResponseEntity<>(success == 1 ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
+//    Integer success = booksService.insertBook((String) body.get("fileName"));
+//    Integer success = booksService.insertPagesBook( (String) body.get("filePath"), (String) body.get("bookTitle") );
+    String fileName = (String) body.get("fileName");
+    BufferedReader br = cloudStorageService.readFile((String) body.get("bucketName"), fileName);
+    booksService.insertBook(fileName);
+    Integer success = booksService.insertPagesBook(br, FileUtility.getTitle(fileName));
+    return new ResponseEntity<>(success > 0 ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
   }
 
   @RequestMapping(value = "/", method = RequestMethod.POST)
@@ -87,7 +97,9 @@ public class DocumentEmbeddingController {
     }
 
     // add embedding functionality here
-
+    BufferedReader br = cloudStorageService.readFile(bucketName, fileName);
+    booksService.insertBook(fileName);
+    booksService.insertPagesBook(br, FileUtility.getTitle(fileName));
 
     // success
     return new ResponseEntity<String>(msg, HttpStatus.OK);
