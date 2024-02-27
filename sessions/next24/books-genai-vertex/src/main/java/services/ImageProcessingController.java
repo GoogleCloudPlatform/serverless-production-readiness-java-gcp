@@ -60,6 +60,7 @@ import org.springframework.web.bind.annotation.RestController;
 import services.actuator.StartupCheck;
 
 @RestController
+@RequestMapping("/images")
 public class ImageProcessingController {
     private static final Logger logger = LoggerFactory.getLogger(ImageProcessingController.class);
 
@@ -83,7 +84,7 @@ public class ImageProcessingController {
         return "ImageProcessingController started";
     }
 
-    @RequestMapping(value = "/", method = RequestMethod.POST)
+    @RequestMapping(value = "/images", method = RequestMethod.POST)
     public ResponseEntity<String> receiveMessage(
             @RequestBody Map<String, Object> body, @RequestHeader Map<String, String> headers) throws IOException, InterruptedException, ExecutionException {
         System.out.println("Header elements");
