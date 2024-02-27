@@ -84,7 +84,7 @@ public class ImageProcessingController {
         return "ImageProcessingController started";
     }
 
-    @RequestMapping(value = "/images", method = RequestMethod.POST)
+    @RequestMapping(value = "/", method = RequestMethod.POST)
     public ResponseEntity<String> receiveMessage(
             @RequestBody Map<String, Object> body, @RequestHeader Map<String, String> headers) throws IOException, InterruptedException, ExecutionException {
         System.out.println("Header elements");
