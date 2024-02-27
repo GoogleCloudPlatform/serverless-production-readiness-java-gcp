@@ -19,11 +19,12 @@ import org.testcontainers.containers.FirestoreEmulatorContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
+import services.data.FirestoreService;
 
 @SpringBootTest
 @Testcontainers
 // @ActiveProfiles("test")
-public class ImageServiceTests {
+public class FirestoreServiceTests {
   @BeforeEach
   public void setup() {
     FirestoreOptions options = FirestoreOptions.getDefaultInstance().toBuilder()
@@ -33,7 +34,7 @@ public class ImageServiceTests {
         .build();
     Firestore firestore = options.getService();
 
-    this.eventService = new ImageService(options, firestore);
+    this.eventService = new FirestoreService(options, firestore);
   }
 
   @Container
@@ -48,7 +49,7 @@ public class ImageServiceTests {
   }
 
   // @Autowired
-  private ImageService eventService;
+  private FirestoreService eventService;
 
   // @Disabled("Until Spring Boot 3.1 is released")
   @Test

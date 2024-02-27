@@ -13,23 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package services.actuator;
+package services.web.data;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonInclude;
+import java.util.List;
 
-import java.util.Map;
-
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class CustomData {
-    private Map<String, Object> data;
-
-    @JsonAnyGetter
-    public Map<String, Object> getData() {
-        return this.data;
-    }
-
-    public void setData(Map<String, Object> data) {
-        this.data = data;
-    }
+public record BookRequest(String book, String author, List<String> topics) {
 }
+

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package services;
+package services.web;
 
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.WriteResult;
@@ -48,7 +48,6 @@ import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -58,15 +57,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import services.actuator.StartupCheck;
+import services.config.CloudConfig;
+import services.data.FirestoreService;
 
 @RestController
 @RequestMapping("/images")
 public class ImageProcessingController {
     private static final Logger logger = LoggerFactory.getLogger(ImageProcessingController.class);
 
-    private final ImageService eventService;
+    private final FirestoreService eventService;
 
-    public ImageProcessingController(ImageService eventService) {
+    public ImageProcessingController(FirestoreService eventService) {
         this.eventService = eventService;
     }
 

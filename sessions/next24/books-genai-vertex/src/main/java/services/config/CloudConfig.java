@@ -13,23 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package services.actuator;
+package services.config;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonInclude;
+import com.google.cloud.MetadataConfig;
+import java.util.Arrays;
+import java.util.List;
 
-import java.util.Map;
+public class CloudConfig {
+  public static final String projectID = MetadataConfig.getProjectId();
+  public static final String zone = MetadataConfig.getZone();
 
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class CustomData {
-    private Map<String, Object> data;
-
-    @JsonAnyGetter
-    public Map<String, Object> getData() {
-        return this.data;
-    }
-
-    public void setData(Map<String, Object> data) {
-        this.data = data;
-    }
+  public static final List<String> requiredFields = Arrays.asList("ce-id", "ce-source", "ce-type", "ce-specversion");
 }
