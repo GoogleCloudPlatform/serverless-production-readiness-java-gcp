@@ -16,10 +16,14 @@ public class FileUtility {
         String [] fileNameArray = fileName.split("-");
         return fileNameArray[2]+"-01"+"-01";
     }
-
+// write a unit test to test the FileUtility class
     public static String getPublicPrivate(String fileName) {
         String [] fileNameArray = fileName.split("-");
-        return fileNameArray[3];
+        String publicPrivate = fileNameArray[3];
+        if(publicPrivate.contains(".txt")){
+            publicPrivate = publicPrivate.replaceAll("\\.txt$", "");
+        }
+        return publicPrivate;
     }
 
 }
