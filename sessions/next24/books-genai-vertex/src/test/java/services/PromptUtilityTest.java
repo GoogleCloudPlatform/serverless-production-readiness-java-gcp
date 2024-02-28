@@ -15,7 +15,7 @@ class PromptUtilityTest {
         String nothing = null;
         Object[] args = {"adventure", nothing, "coming-of-age"};
         List<String> topics = List.of("adventure", "animals", "coming-of-age", "");
-        String expectedPrompt = "Find the paragraphs mentioning adventure, animals, coming-of-age in the book";
+        String expectedPrompt = "Find the paragraphs mentioning keywords in the following list: {adventure, animals, coming-of-age} in the book.";
         String actualPrompt = PromptUtility.formatPrompt(topics);
         assertEquals(expectedPrompt, actualPrompt);
     }
@@ -23,7 +23,7 @@ class PromptUtilityTest {
     @Test
     public void testFormatPromptEmptyList() {
         List<String> topics = List.of();
-        String expectedPrompt = "Find the paragraphs mentioning any topic in the book";
+        String expectedPrompt = "Find the paragraphs mentioning any topic in the book.";
         String actualPrompt = PromptUtility.formatPrompt(topics);
         assertEquals(expectedPrompt, actualPrompt);
     }

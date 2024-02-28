@@ -95,7 +95,7 @@ from
 select
 *
 from
-    pages where book_id=19;
+    pages where book_id=19 order by page_number;
 --delete from authors where name = 'Rudyard Kipling';
 --delete from pages where book_id=17;
 --delete from books where book_id=18;
