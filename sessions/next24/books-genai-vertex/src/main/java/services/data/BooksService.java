@@ -20,7 +20,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import services.data.dao.DataAccess;
+import services.web.data.BookRequest;
 import utility.FileUtility;
+import utility.PromptUtility;
+import utility.SqlUtility;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -41,9 +44,16 @@ public class BooksService {
         return dao.promptForBooks(prompt, characterLimit);
     }
 
+    public List<Map<String, Object>>  prompt(BookRequest bookRequest, Integer characterLimit) {
+        String prompt = PromptUtility.formatPrompt(bookRequest.keyWords());
+        return dao.promptForBooks(prompt, bookRequest.book(), bookRequest.author(), characterLimit);
+    }
+
     public Integer insertBook(String fileName) {
         String author = FileUtility.getAuthor(fileName);
+        author = SqlUtility.replaceUnderscoresWithSpaces(author);
         String title = FileUtility.getTitle(fileName);
+        title = SqlUtility.replaceUnderscoresWithSpaces(title);
         String year = FileUtility.getYear(fileName);
         String publicPrivate = FileUtility.getPublicPrivate(fileName);
         Map<String, Object> book = dao.findBook(title);

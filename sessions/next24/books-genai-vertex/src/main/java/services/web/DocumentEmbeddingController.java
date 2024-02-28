@@ -34,6 +34,7 @@ import services.data.BooksService;
 import services.data.CloudStorageService;
 import utility.FileUtility;
 @RestController
+@RequestMapping("/document")
 public class DocumentEmbeddingController {
   private static final Logger logger = LoggerFactory.getLogger(DocumentEmbeddingController.class);
 
@@ -57,23 +58,23 @@ public class DocumentEmbeddingController {
     return "DocumentEmbeddingController started";
   }
 
-  @RequestMapping(value = "/document/category/books", method = RequestMethod.GET)
+  @RequestMapping(value = "/category/books", method = RequestMethod.GET)
   public ResponseEntity<List<Map<String, Object>>> getTable(@RequestParam(name = "prompt") String prompt, @RequestParam(name = "contentCharactersLimit", defaultValue = "2000") String contentCharactersLimit) {
     return new ResponseEntity<List<Map<String, Object>>>(booksService.prompt(prompt, Integer.parseInt(contentCharactersLimit)), HttpStatus.OK);
   }
 
-  @RequestMapping(value = "/document/category/books", method = RequestMethod.POST)
+  @RequestMapping(value = "/category/books", method = RequestMethod.POST)
   public ResponseEntity<Integer> insertTable(@RequestBody Map<String, Object> body) {
 //    Integer success = booksService.insertBook((String) body.get("fileName"));
 //    Integer success = booksService.insertPagesBook( (String) body.get("filePath"), (String) body.get("bookTitle") );
     String fileName = (String) body.get("fileName");
-    BufferedReader br = cloudStorageService.readFile((String) body.get("bucketName"), fileName);
+//    BufferedReader br = cloudStorageService.readFile((String) body.get("bucketName"), fileName);
     booksService.insertBook(fileName);
-    Integer success = booksService.insertPagesBook(br, FileUtility.getTitle(fileName));
-    return new ResponseEntity<>(success > 0 ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
+//    Integer success = booksService.insertPagesBook(br, FileUtility.getTitle(fileName));
+    return new ResponseEntity<>(1 > 0 ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
   }
 
-  @RequestMapping(value = "/", method = RequestMethod.POST)
+  @RequestMapping(value = "/embeddings", method = RequestMethod.POST)
   public ResponseEntity<String> receiveMessage(
       @RequestBody Map<String, Object> body, @RequestHeader Map<String, String> headers) throws IOException, InterruptedException, ExecutionException {
     System.out.println("Header elements");

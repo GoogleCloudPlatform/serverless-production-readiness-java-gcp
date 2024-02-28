@@ -16,20 +16,25 @@
 package services.web;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import javax.annotation.PostConstruct;
+
+import kotlin.collections.ArrayDeque;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import services.actuator.StartupCheck;
+import services.data.BooksService;
 import services.data.FirestoreService;
 import services.web.data.BookInquiryResponse;
 import services.web.data.BookRequest;
+import utility.PromptUtility;
 
 @RestController
 @RequestMapping("/analysis")
@@ -37,6 +42,9 @@ public class BookAnalysisController {
   private static final Logger logger = LoggerFactory.getLogger(BookAnalysisController.class);
 
   private final FirestoreService eventService;
+
+  @Autowired
+  BooksService booksService;
 
   public BookAnalysisController(FirestoreService eventService) {
     this.eventService = eventService;
@@ -62,16 +70,13 @@ public class BookAnalysisController {
     http://localhost:8080/analysis
 
    */
-  @PostMapping("/")
-  public ResponseEntity<BookInquiryResponse>processUserRequest(@RequestBody BookRequest bookRequest){
-    String analysis = "";
+  @PostMapping("")
+  public ResponseEntity<List<Map<String, Object>>>processUserRequest(@RequestBody BookRequest bookRequest, @RequestParam(name = "contentCharactersLimit", defaultValue = "2000") Integer contentCharactersLimit){
 
-    BookInquiryResponse response = new BookInquiryResponse(
-        bookRequest.book(),
-        bookRequest.author(),
-        bookRequest.topics(),
-        analysis);
+    // Create a method that takes List topics that replaces %s in String "Find the paragraphs mentioning %s in the book" and output "Find the paragraphs mentioning topic1, topic2 in the book"
 
-    return new ResponseEntity<BookInquiryResponse>(response, HttpStatus.OK);
+    List<Map<String, Object>> response = booksService.prompt(bookRequest, contentCharactersLimit);
+
+    return new ResponseEntity<List<Map<String, Object>>>(response, HttpStatus.OK);
   }
 }
