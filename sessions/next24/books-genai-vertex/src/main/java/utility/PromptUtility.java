@@ -13,14 +13,14 @@ public class PromptUtility {
                 .collect(Collectors.toList());
 
         if (params==null || params.isEmpty()) {
-            return "Find the paragraphs mentioning any topic in the book"; // Or other default message
+            return "Find the paragraphs mentioning any topic in the book."; // Or other default message
         }
 
         // Join the topics with commas
         String joinedTopics = String.join(", ", params);
 
         // Use String.format to insert the joined topics into the prompt
-        return String.format("Find the paragraphs mentioning %s in the book", joinedTopics);
+        return String.format("Find the paragraphs mentioning keywords in the following list: {%s} in the book.", joinedTopics);
     }
 
 }
