@@ -15,11 +15,6 @@ class FileUtilityTest {
     }
 
     @Test
-    public void testArray() {
-
-    }
-
-    @Test
     public void testGetAuthor() {
         String fileName = "book-author-year-public.txt";
         String expectedAuthor = "author";

@@ -33,6 +33,8 @@ import services.config.CloudConfig;
 import services.data.BooksService;
 import services.data.CloudStorageService;
 import utility.FileUtility;
+import utility.SqlUtility;
+
 @RestController
 @RequestMapping("/document")
 public class DocumentEmbeddingController {
@@ -106,7 +108,7 @@ public class DocumentEmbeddingController {
     String fileName = (String)body.get("name");
     String bucketName = (String)body.get("bucket");
 
-    logger.info("New book uploaded for embedding" + fileName);
+    logger.info("New book uploaded for embedding:" + fileName);
 
     if(fileName == null){
       msg = "Missing expected body element: file name";
@@ -117,7 +119,7 @@ public class DocumentEmbeddingController {
     // add embedding functionality here
     BufferedReader br = cloudStorageService.readFile(bucketName, fileName);
     booksService.insertBook(fileName);
-    booksService.insertPagesBook(br, FileUtility.getTitle(fileName));
+    booksService.insertPagesBook(br, SqlUtility.replaceUnderscoresWithSpaces( FileUtility.getTitle(fileName) ));
 
     // success
     return new ResponseEntity<String>(msg, HttpStatus.OK);

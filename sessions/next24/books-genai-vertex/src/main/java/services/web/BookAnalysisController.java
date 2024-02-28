@@ -71,7 +71,7 @@ public class BookAnalysisController {
 
    */
   @PostMapping("")
-  public ResponseEntity<List<Map<String, Object>>>processUserRequest(@RequestBody BookRequest bookRequest, @RequestParam(name = "contentCharactersLimit", defaultValue = "2000") Integer contentCharactersLimit){
+  public ResponseEntity<List<Map<String, Object>>>processUserRequest(@RequestBody BookRequest bookRequest, @RequestParam(name = "contentCharactersLimit", defaultValue = "6000") Integer contentCharactersLimit){
 
     // Create a method that takes List topics that replaces %s in String "Find the paragraphs mentioning %s in the book" and output "Find the paragraphs mentioning topic1, topic2 in the book"
 
