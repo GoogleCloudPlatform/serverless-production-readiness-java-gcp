@@ -27,9 +27,8 @@ import javax.sql.DataSource;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 //@ComponentScan("com.journaldev.spring")
@@ -94,9 +93,13 @@ public class DataAccess {
         return rows;
     }
 
+    public List<Map<String, Object>> promptForBooks(String prompt, Integer characterLimit) {
+        return promptForBooks(prompt, null, null, characterLimit);
+    }
+
 
     // Perform database operations using the JdbcTemplate
-    public List<Map<String, Object>> promptForBooks(String prompt, Integer characterLimit) {
+    public List<Map<String, Object>> promptForBooks(String prompt, String book, String author, Integer characterLimit) {
         // Query the database
         // prompt = Give me the poems about love?
         if (characterLimit == null || characterLimit == 0) {
@@ -113,14 +116,23 @@ public class DataAccess {
                 "JOIN books b on\n" +
                 "        p.book_id=b.book_id\n" +
                 "JOIN authors a on\n" +
-                "       a.author_id=b.author_id\n" +
-                "ORDER BY\n" +
-                "        distance ASC\n" +
+                "       a.author_id=b.author_id\n";
+        Object[] parameters = new Object[]{characterLimit, prompt, book, author};
+        List<Object> params = Arrays.stream(parameters)
+                .filter(Objects::nonNull)  // Filters out null values
+                .filter(p -> p instanceof String ? !((String) p).isEmpty() : true) // Conditional filtering
+                .collect(Collectors.toList());
+        System.out.println(params.toString());
+        if ( params.size()>2 ) {
+            sql += createWhereClause(book, author);
+        }
+        sql += " ORDER BY\n" +
+                "distance ASC\n" +
                 "LIMIT 10;";
 //        String prompt ="yanni tests";
 //        String prompt ="What kind of fruit trees grow well here?";
-        Object[] parameters = new Object[]{characterLimit, prompt};
-        List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, parameters);
+        System.out.println(sql);
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, params.toArray());
 
         // Iterate over the results
         for (Map<String, Object> row : rows) {
@@ -130,6 +142,23 @@ public class DataAccess {
         // Insert data into the database
 //        sql = "INSERT INTO table_name (column1, column2, column3) VALUES (?, ?, ?)";
 //        jdbcTemplate.update(sql, "value1", "value2", "value3");
+    }
+
+    private String createWhereClause(String book, String author) {
+        StringBuilder whereClause = new StringBuilder();
+        whereClause.append("WHERE ");
+        if (book != null) {
+            whereClause.append("b.title = ?"); // Use a parameter placeholder
+        }
+
+        if (author != null) {
+            if (whereClause.length() > 0) {
+                whereClause.append(" AND ");
+            }
+            whereClause.append("a.name = ?");  // Use a parameter placeholder
+        }
+
+        return whereClause.toString();
     }
 
     public Integer insertPages(Integer bookId, String content, Integer pageNumber) {

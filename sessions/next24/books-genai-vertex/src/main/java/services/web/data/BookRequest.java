@@ -17,6 +17,6 @@ package services.web.data;
 
 import java.util.List;
 
-public record BookRequest(String book, String author, List<String> topics) {
+public record BookRequest(String book, String author, List<String> keyWords) {
 }
 

@@ -85,7 +85,7 @@ public class ImageProcessingController {
         return "ImageProcessingController started";
     }
 
-    @RequestMapping(value = "/", method = RequestMethod.POST)
+    @RequestMapping(value = "", method = RequestMethod.POST)
     public ResponseEntity<String> receiveMessage(
             @RequestBody Map<String, Object> body, @RequestHeader Map<String, String> headers) throws IOException, InterruptedException, ExecutionException {
         System.out.println("Header elements");
@@ -250,7 +250,7 @@ public class ImageProcessingController {
                         .project(CloudConfig.projectID)
                         .location(CloudConfig.zone)
                         .publisher("google")
-                        .modelName("chat-bison@001")
+                        .modelName("chat-bison")
                         .temperature(0.1)
                         .maxOutputTokens(50)
                         .topK(0)
@@ -267,7 +267,7 @@ public class ImageProcessingController {
                         .project(CloudConfig.projectID)
                         .location(CloudConfig.zone)
                         .publisher("google")
-                        .modelName("text-bison@001")
+                        .modelName("text-bison")
                         .temperature(0.1)
                         .maxOutputTokens(50)
                         .topK(0)
