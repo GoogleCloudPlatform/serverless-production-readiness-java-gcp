@@ -28,7 +28,6 @@ public class AppConfig {
     public HikariDataSource getDataSource() {
         HikariConfig config = new HikariConfig();
         HikariDataSource ds;
-        config.setJdbcUrl("jdbc:postgresql://34.121.92.253:5000/library");
         config.addDataSourceProperty("cachePrepStmts", "true");
         config.addDataSourceProperty("prepStmtCacheSize", "250");
         config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
