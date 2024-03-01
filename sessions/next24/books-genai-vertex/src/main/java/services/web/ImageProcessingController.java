@@ -242,9 +242,7 @@ public class ImageProcessingController {
             }
 
             String prompt = "Explain the text ";
-            var ref = new Object() {
-                String textElements;
-            };
+            String textElements;
 
             logger.info("Text Annotations:");
             //put these items below into a array list
@@ -252,14 +250,14 @@ public class ImageProcessingController {
             String bookTitle = "";
 
             for (EntityAnnotation annotation : response.getTextAnnotationsList()) {
-                ref.textElements = annotation.getDescription();
-                prompt += ref.textElements + " ";
-                logger.info("Text: " + ref.textElements);
+                textElements = annotation.getDescription();
+                prompt += textElements + " ";
                 if(bookTitle.equals(""))
-                    bookTitle = books.stream().filter(b-> b.contains(ref.textElements)).findAny().map(String::toString) // Transform Optional<Book> to Optional<String> of the title
+                    bookTitle = books.stream().filter(b-> b.contains(annotation.getDescription())).findAny().map(String::toString) // Transform Optional<Book> to Optional<String> of the title
                             .orElse(""); // If not found, assign an empty string;
+                logger.info("Text: " + textElements);
                 // if(textElements.matches("^[a-zA-Z0-9]+$"))
-                prompt += ref.textElements;
+                prompt += textElements;
             }
 
             // use summary in the prompt to the llm
