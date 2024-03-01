@@ -279,7 +279,7 @@ public class ImageProcessingController {
             }
 
             String summary = booksService.getBookSummary(bookTitle);
-
+            logger.info("The summary of the book "+bookTitle+ " is: " + summary);
             // Saving result to Firestore
             if (isSafe && modelResponse != null) {
                 ApiFuture<WriteResult> writeResult = eventService.storeImage(fileName, labels, mainColor, modelResponse);
