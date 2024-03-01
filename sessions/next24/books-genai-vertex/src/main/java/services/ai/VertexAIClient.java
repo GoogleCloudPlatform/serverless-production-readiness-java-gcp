@@ -16,6 +16,7 @@ public class VertexAIClient {
     private static final Logger logger = LoggerFactory.getLogger(VertexAIClient.class);
     public String prompt(String prompt, String modelName) {
         String output =null;
+        logger.info("The prompt & model name are: " + prompt.substring(0,100) +" | "+modelName);
         if (modelName.contains("chat")) {
             VertexAiChatModel vertexAiChatModel = VertexAiChatModel.builder()
                     .endpoint("us-central1-aiplatform.googleapis.com:443")
@@ -31,7 +32,6 @@ public class VertexAIClient {
                     .build();
             Response<AiMessage> modelResponse = vertexAiChatModel.generate(UserMessage.from(prompt));
             output = modelResponse.content().text();
-            logger.info("Result Chat Model: " + modelResponse.content().text());
         } else {
             VertexAiLanguageModel vertexAiTextModel = VertexAiLanguageModel.builder()
                     .endpoint("us-central1-aiplatform.googleapis.com:443")
@@ -49,8 +49,6 @@ public class VertexAIClient {
             output = textResponse.content();
         }
 
-
-        logger.info("The prompt & model name are: " + prompt +" | "+modelName);
         logger.info(output);
         return output;
     }
