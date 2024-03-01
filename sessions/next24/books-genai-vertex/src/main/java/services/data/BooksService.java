@@ -27,6 +27,7 @@ import utility.SqlUtility;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 @Service
@@ -70,6 +71,17 @@ public class BooksService {
         }
 
         return bookId;
+    }
+
+    public String getBookSummary(String bookTitle) {
+        Map<String, Object> book = dao.findBook(bookTitle);
+        Map<String, Object> summary = new HashMap<>();
+        if(!book.isEmpty()){
+            Integer bookId = (Integer) book.get("book_id");
+            dao.findSummaries(bookId);
+            summary = dao.findSummaries(bookId);
+        }
+        return summary.isEmpty() ? "" : (String) summary.get("summary");
     }
 
     public Integer insertPagesBook(String filePath, String bookTitle) {
