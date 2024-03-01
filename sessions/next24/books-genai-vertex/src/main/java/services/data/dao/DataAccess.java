@@ -135,9 +135,9 @@ public class DataAccess {
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, params.toArray());
 
         // Iterate over the results
-        for (Map<String, Object> row : rows) {
-            System.out.println(row.get("page"));
-        }
+//        for (Map<String, Object> row : rows) {
+//            System.out.println(row.get("page"));
+//        }
         return rows;
         // Insert data into the database
 //        sql = "INSERT INTO table_name (column1, column2, column3) VALUES (?, ?, ?)";

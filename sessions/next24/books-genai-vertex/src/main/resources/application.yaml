@@ -10,3 +10,8 @@ management:
     web:
       exposure:
         include: "*"
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${MY_USER}
+    password: ${MY_PASSWORD}
