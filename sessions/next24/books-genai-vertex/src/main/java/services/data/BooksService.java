@@ -45,7 +45,7 @@ public class BooksService {
     }
 
     public List<Map<String, Object>>  prompt(BookRequest bookRequest, Integer characterLimit) {
-        String prompt = PromptUtility.formatPrompt(bookRequest.keyWords());
+        String prompt = PromptUtility.formatPromptBookKeywords(bookRequest.keyWords());
         return dao.promptForBooks(prompt, bookRequest.book(), bookRequest.author(), characterLimit);
     }
 

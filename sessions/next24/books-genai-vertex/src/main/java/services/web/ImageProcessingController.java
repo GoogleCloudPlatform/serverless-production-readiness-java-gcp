@@ -48,6 +48,7 @@ import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -57,6 +58,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import services.actuator.StartupCheck;
+import services.ai.VertexAIClient;
 import services.config.CloudConfig;
 import services.data.FirestoreService;
 
@@ -70,6 +72,9 @@ public class ImageProcessingController {
     public ImageProcessingController(FirestoreService eventService) {
         this.eventService = eventService;
     }
+
+    @Autowired
+    VertexAIClient vertexAIClient;
 
     @PostConstruct
     public void init() {
@@ -243,44 +248,20 @@ public class ImageProcessingController {
             // build alternative prompt using Vertex AI
             //  extractTextFromImage(bucketName, fileName);
 
-            Response<AiMessage> modelResponse = null;
+            String modelResponse = null;
             if (!prompt.isEmpty()) {
-                VertexAiChatModel vertexAiChatModel = VertexAiChatModel.builder()
-                        .endpoint("us-central1-aiplatform.googleapis.com:443")
-                        .project(CloudConfig.projectID)
-                        .location(CloudConfig.zone)
-                        .publisher("google")
-                        .modelName("chat-bison")
-                        .temperature(0.1)
-                        .maxOutputTokens(50)
-                        .topK(0)
-                        .topP(0.0)
-                        .maxRetries(3)
-                        .build();
-                modelResponse = vertexAiChatModel.generate(UserMessage.from(prompt));
-                logger.info("Result Chat Model: " + modelResponse.content().text());
+                modelResponse = vertexAIClient.prompt(prompt, "chat-bison");
+                logger.info("Result Chat Model: " + vertexAIClient.prompt(prompt, "chat-bison"));
             }
 
             if (!prompt.isEmpty()) {
-                VertexAiLanguageModel vertexAiTextModel = VertexAiLanguageModel.builder()
-                        .endpoint("us-central1-aiplatform.googleapis.com:443")
-                        .project(CloudConfig.projectID)
-                        .location(CloudConfig.zone)
-                        .publisher("google")
-                        .modelName("text-bison")
-                        .temperature(0.1)
-                        .maxOutputTokens(50)
-                        .topK(0)
-                        .topP(0.0)
-                        .maxRetries(3)
-                        .build();
-                Response<String> textResponse = vertexAiTextModel.generate(prompt);
-                logger.info("Result Text Model: " + textResponse.content());
+                modelResponse = vertexAIClient.prompt(prompt, "text-bison");
+                logger.info("Result Chat Model: " + vertexAIClient.prompt(prompt, "text-bison"));
             }
 
             // Saving result to Firestore
             if (isSafe && modelResponse != null) {
-                ApiFuture<WriteResult> writeResult = eventService.storeImage(fileName, labels, mainColor, modelResponse.content().text());
+                ApiFuture<WriteResult> writeResult = eventService.storeImage(fileName, labels, mainColor, modelResponse);
                 logger.info("Picture metadata saved in Firestore at " + writeResult.get().getUpdateTime());
             }
         }

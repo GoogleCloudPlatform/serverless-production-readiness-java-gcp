@@ -15,8 +15,10 @@
  */
 package services.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.web.client.RestTemplate;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -24,10 +26,16 @@ import com.zaxxer.hikari.HikariDataSource;
 @Configuration
 public class AppConfig {
 
+    @Autowired
+    private Environment environment;
+
     @Bean
     public HikariDataSource getDataSource() {
         HikariConfig config = new HikariConfig();
         HikariDataSource ds;
+        config.setJdbcUrl(environment.getProperty("spring.datasource.url"));
+        config.setUsername(environment.getProperty("spring.datasource.username"));
+        config.setPassword(environment.getProperty("spring.datasource.password"));
         config.addDataSourceProperty("cachePrepStmts", "true");
         config.addDataSourceProperty("prepStmtCacheSize", "250");
         config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");

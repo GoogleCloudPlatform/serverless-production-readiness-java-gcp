@@ -30,6 +30,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import services.actuator.StartupCheck;
+import services.ai.VertexAIClient;
 import services.data.BooksService;
 import services.data.FirestoreService;
 import services.web.data.BookInquiryResponse;
@@ -42,12 +43,12 @@ public class BookAnalysisController {
   private static final Logger logger = LoggerFactory.getLogger(BookAnalysisController.class);
 
   private final FirestoreService eventService;
-
-  @Autowired
-  BooksService booksService;
-
-  public BookAnalysisController(FirestoreService eventService) {
+  private BooksService booksService;
+  private VertexAIClient vertexAIClient;
+  public BookAnalysisController(FirestoreService eventService, BooksService booksService, VertexAIClient vertexAIClient) {
     this.eventService = eventService;
+    this.booksService = booksService;
+    this.vertexAIClient = vertexAIClient;
   }
 
   @PostConstruct
@@ -71,12 +72,15 @@ public class BookAnalysisController {
 
    */
   @PostMapping("")
-  public ResponseEntity<List<Map<String, Object>>>processUserRequest(@RequestBody BookRequest bookRequest, @RequestParam(name = "contentCharactersLimit", defaultValue = "6000") Integer contentCharactersLimit){
+  public ResponseEntity<String> processUserRequest(@RequestBody BookRequest bookRequest, @RequestParam(name = "contentCharactersLimit", defaultValue = "6000") Integer contentCharactersLimit){
 
     // Create a method that takes List topics that replaces %s in String "Find the paragraphs mentioning %s in the book" and output "Find the paragraphs mentioning topic1, topic2 in the book"
 
-    List<Map<String, Object>> response = booksService.prompt(bookRequest, contentCharactersLimit);
-
-    return new ResponseEntity<List<Map<String, Object>>>(response, HttpStatus.OK);
+    List<Map<String, Object>> responseBook = booksService.prompt(bookRequest, contentCharactersLimit);
+    String promptWithContext = PromptUtility.formatPromptBookAnalysis(responseBook, bookRequest.keyWords());
+    System.out.println(promptWithContext);
+    String response = vertexAIClient.prompt(promptWithContext, "gemini-1.0-pro-001");
+    System.out.println(response);
+    return new ResponseEntity<String>(response, HttpStatus.OK);
   }
 }
