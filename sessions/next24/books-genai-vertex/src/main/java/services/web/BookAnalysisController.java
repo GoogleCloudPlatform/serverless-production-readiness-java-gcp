@@ -81,7 +81,6 @@ public class BookAnalysisController {
 
     List<Map<String, Object>> responseBook = booksService.prompt(bookRequest, contentCharactersLimit);
     String promptWithContext = PromptUtility.formatPromptBookAnalysis(responseBook, bookRequest.keyWords());
-    System.out.println(promptWithContext);
     String model = environment.getProperty("spring.cloud.config.modelAnalysisName");
     String response = vertexAIClient.prompt(promptWithContext, model);
     return new ResponseEntity<String>(response, HttpStatus.OK);
