@@ -40,6 +40,7 @@ import dev.langchain4j.model.vertexai.VertexAiLanguageModel;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -60,6 +61,7 @@ import org.springframework.web.bind.annotation.RestController;
 import services.actuator.StartupCheck;
 import services.ai.VertexAIClient;
 import services.config.CloudConfig;
+import services.data.BooksService;
 import services.data.FirestoreService;
 
 @RestController
@@ -69,11 +71,14 @@ public class ImageProcessingController {
 
     private final FirestoreService eventService;
 
-    public ImageProcessingController(FirestoreService eventService) {
+    private BooksService booksService;
+
+    public ImageProcessingController(FirestoreService eventService, BooksService booksService, VertexAIClient vertexAIClient) {
         this.eventService = eventService;
+        this.booksService = booksService;
+        this.vertexAIClient = vertexAIClient;
     }
 
-    @Autowired
     VertexAIClient vertexAIClient;
 
     @PostConstruct
@@ -233,17 +238,27 @@ public class ImageProcessingController {
             }
 
             String prompt = "Explain the text ";
-            String textElements;
+            var ref = new Object() {
+                String textElements;
+            };
 
             logger.info("Text Annotations:");
-            for (EntityAnnotation annotation : response.getTextAnnotationsList()) {
-                textElements = annotation.getDescription();
-                prompt += textElements + " ";
-                logger.info("Text: " + textElements);
+            //put these items below into a array list
+            ArrayList<String> books = new ArrayList<>(Arrays.asList("Ulysses", "Meditations", "The Republic", "The Complete Works of William Shakespeare", "The Jungle Book"));
+            String bookTitle = "";
 
+            for (EntityAnnotation annotation : response.getTextAnnotationsList()) {
+                ref.textElements = annotation.getDescription();
+                prompt += ref.textElements + " ";
+                logger.info("Text: " + ref.textElements);
+                if(bookTitle.equals(""))
+                    bookTitle = books.stream().filter(b-> b.contains(ref.textElements)).findAny().get();
                 // if(textElements.matches("^[a-zA-Z0-9]+$"))
-                prompt += textElements;
+                prompt += ref.textElements;
             }
+
+            // use summary in the prompt to the llm
+            String summary = booksService.getBookSummary(bookTitle);
 
             // build alternative prompt using Vertex AI
             //  extractTextFromImage(bucketName, fileName);

@@ -76,6 +76,23 @@ public class DataAccess {
         return rows.size()==0 ? new HashMap<>() : rows.get(0);
     }
 
+    public Map<String, Object> findSummaries(Integer bookId) {
+        // Query the database
+        // prompt = Give me the poems about love?
+        String sql = "select\n" +
+                "*\n" +
+                "from\n" +
+                "    bookSummaries where book_id = ? limit 10";
+        Object[] parameters = new Object[]{bookId};
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, parameters);
+
+        // Iterate over the results
+//        for (Map<String, Object> row : rows) {
+        System.out.println("number of rows: " + rows.size());
+//        }
+        return rows.size()==0 ? new HashMap<>() : rows.get(0);
+    }
+
     public List<Map<String, Object>> findPages(Integer bookId) {
         // Query the database
         // prompt = Give me the poems about love?
