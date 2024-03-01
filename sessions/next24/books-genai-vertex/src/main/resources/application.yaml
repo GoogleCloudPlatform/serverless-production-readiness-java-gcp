@@ -15,3 +15,7 @@ spring:
     url: ${DB_URL}
     username: ${MY_USER}
     password: ${MY_PASSWORD}
+  cloud:
+    config:
+      modelAnalysisName: ${MODEL_ANALYSIS_NAME}
+      modelImageProName: ${MODEL_IMAGE_PRO_NAME}

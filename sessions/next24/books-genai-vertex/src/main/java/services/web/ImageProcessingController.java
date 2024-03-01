@@ -50,6 +50,7 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -73,10 +74,13 @@ public class ImageProcessingController {
 
     private BooksService booksService;
 
-    public ImageProcessingController(FirestoreService eventService, BooksService booksService, VertexAIClient vertexAIClient) {
+    private Environment environment;
+
+    public ImageProcessingController(FirestoreService eventService, BooksService booksService, VertexAIClient vertexAIClient, Environment environment) {
         this.eventService = eventService;
         this.booksService = booksService;
         this.vertexAIClient = vertexAIClient;
+        this.environment = environment;
     }
 
     VertexAIClient vertexAIClient;
@@ -271,7 +275,8 @@ public class ImageProcessingController {
 
             if (!prompt.isEmpty()) {
                 modelResponse = vertexAIClient.prompt(prompt, "text-bison");
-                logger.info("Result Chat Model: " + vertexAIClient.prompt(prompt, "text-bison"));
+                String model = environment.getProperty("spring.cloud.config.modelImageProName");
+                logger.info("Result Chat Model: " + vertexAIClient.prompt(prompt, model));
             }
 
             // Saving result to Firestore
