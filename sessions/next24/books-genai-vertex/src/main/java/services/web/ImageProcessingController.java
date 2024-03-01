@@ -256,14 +256,13 @@ public class ImageProcessingController {
                 prompt += ref.textElements + " ";
                 logger.info("Text: " + ref.textElements);
                 if(bookTitle.equals(""))
-                    bookTitle = books.stream().filter(b-> b.contains(ref.textElements)).findAny().get();
+                    bookTitle = books.stream().filter(b-> b.contains(ref.textElements)).findAny().map(String::toString) // Transform Optional<Book> to Optional<String> of the title
+                            .orElse(""); // If not found, assign an empty string;
                 // if(textElements.matches("^[a-zA-Z0-9]+$"))
                 prompt += ref.textElements;
             }
 
             // use summary in the prompt to the llm
-            String summary = booksService.getBookSummary(bookTitle);
-
             // build alternative prompt using Vertex AI
             //  extractTextFromImage(bucketName, fileName);
 
@@ -278,6 +277,8 @@ public class ImageProcessingController {
                 String model = environment.getProperty("spring.cloud.config.modelImageProName");
                 logger.info("Result Chat Model: " + vertexAIClient.prompt(prompt, model));
             }
+
+            String summary = booksService.getBookSummary(bookTitle);
 
             // Saving result to Firestore
             if (isSafe && modelResponse != null) {
