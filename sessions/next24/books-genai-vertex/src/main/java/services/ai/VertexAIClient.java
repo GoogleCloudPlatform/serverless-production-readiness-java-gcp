@@ -27,7 +27,7 @@ public class VertexAIClient {
                 .maxRetries(3)
                 .build();
 
-        logger.info("The prompt: " + prompt);
+        logger.info("The prompt & model name are: " + prompt +" | "+modelName);
 
 
         Response<AiMessage> modelResponse = vertexAiChatModel.generate(UserMessage.from(prompt));
