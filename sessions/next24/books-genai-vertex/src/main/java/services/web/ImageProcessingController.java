@@ -269,13 +269,13 @@ public class ImageProcessingController {
             String modelResponse = null;
             if (!prompt.isEmpty()) {
                 modelResponse = vertexAIClient.prompt(prompt, "chat-bison");
-                logger.info("Result Chat Model: " + vertexAIClient.prompt(prompt, "chat-bison"));
+                logger.info("Result Chat Model: " + modelResponse);
             }
 
             if (!prompt.isEmpty()) {
-                modelResponse = vertexAIClient.prompt(prompt, "text-bison");
                 String model = environment.getProperty("spring.cloud.config.modelImageProName");
-                logger.info("Result Chat Model: " + vertexAIClient.prompt(prompt, model));
+                modelResponse = vertexAIClient.prompt(prompt, model);
+                logger.info("Result Chat Model: " + modelResponse);
             }
 
             String summary = booksService.getBookSummary(bookTitle);
