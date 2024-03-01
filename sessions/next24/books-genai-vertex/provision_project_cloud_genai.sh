@@ -7,7 +7,8 @@ gcloud resource-manager org-policies set-policy policy.yaml --organization=41971
 
 export SERVICE_ACCOUNT=48099017975-compute@developer.gserviceaccount.com
 
-gcloud run deploy books-genai-jit      --image us-docker.pkg.dev/next24-genai-app/books-genai-jit/books-genai:latest --region us-central1      --memory 2Gi --allow-unauthenticated
+gcloud run deploy books-genai-jit --set-env-vars MY_PASSWORD=${MY_PASSWORD}, MY_USER=${MY_USER}, DB_URL=${DB_URL} \
+    --image us-docker.pkg.dev/next24-genai-app/books-genai-jit/books-genai:latest --region us-central1 --memory 2Gi --allow-unauthenticated
 
 gcloud eventarc triggers list --location=us-central1
 
