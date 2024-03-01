@@ -26,6 +26,7 @@ import kotlin.collections.ArrayDeque;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -45,10 +46,12 @@ public class BookAnalysisController {
   private final FirestoreService eventService;
   private BooksService booksService;
   private VertexAIClient vertexAIClient;
-  public BookAnalysisController(FirestoreService eventService, BooksService booksService, VertexAIClient vertexAIClient) {
+  private Environment environment;
+  public BookAnalysisController(FirestoreService eventService, BooksService booksService, VertexAIClient vertexAIClient, Environment environment) {
     this.eventService = eventService;
     this.booksService = booksService;
     this.vertexAIClient = vertexAIClient;
+    this.environment = environment;
   }
 
   @PostConstruct
@@ -79,8 +82,8 @@ public class BookAnalysisController {
     List<Map<String, Object>> responseBook = booksService.prompt(bookRequest, contentCharactersLimit);
     String promptWithContext = PromptUtility.formatPromptBookAnalysis(responseBook, bookRequest.keyWords());
     System.out.println(promptWithContext);
-    String response = vertexAIClient.prompt(promptWithContext, "gemini-1.0-pro-001");
-    System.out.println(response);
+    String model = environment.getProperty("spring.cloud.config.modelAnalysisName");
+    String response = vertexAIClient.prompt(promptWithContext, model);
     return new ResponseEntity<String>(response, HttpStatus.OK);
   }
 }
