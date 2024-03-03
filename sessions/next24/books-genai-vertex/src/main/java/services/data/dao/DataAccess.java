@@ -37,6 +37,7 @@ public class DataAccess {
     JdbcTemplate jdbcTemplate;
 
     // Inject HikariDataSource as a bean dependency
+    // AlloyDB reference: https://codelabs.developers.google.com/codelabs/alloydb-ai-embedding#7
     @Autowired
     public DataAccess(DataSource hikariDataSource) {
         jdbcTemplate = new JdbcTemplate(hikariDataSource);
