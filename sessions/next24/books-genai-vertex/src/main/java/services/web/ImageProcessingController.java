@@ -242,7 +242,6 @@ public class ImageProcessingController {
             }
 
             String prompt = "Explain the text ";
-            String textElements;
 
             logger.info("Text Annotations:");
             //put these items below into a array list
@@ -250,11 +249,13 @@ public class ImageProcessingController {
             String bookTitle = "";
 
             for (EntityAnnotation annotation : response.getTextAnnotationsList()) {
-                textElements = annotation.getDescription();
+                String textElements = annotation.getDescription();
                 prompt += textElements + " ";
-                if(bookTitle.equals(""))
-                    bookTitle = books.stream().filter(b-> b.contains(annotation.getDescription())).findAny().map(String::toString) // Transform Optional<Book> to Optional<String> of the title
+                if(bookTitle.equals("")) {
+                    bookTitle = books.stream().filter(b -> textElements.toLowerCase().contains(b.toLowerCase())).findAny().map(String::toString) // Transform Optional<Book> to Optional<String> of the title
                             .orElse(""); // If not found, assign an empty string;
+                    logger.info("found bookTitle: " + bookTitle);
+                }
                 logger.info("Text: " + textElements);
                 // if(textElements.matches("^[a-zA-Z0-9]+$"))
                 prompt += textElements;
