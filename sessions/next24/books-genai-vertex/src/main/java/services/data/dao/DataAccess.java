@@ -71,7 +71,7 @@ public class DataAccess {
 
         // Iterate over the results
         for (Map<String, Object> row : rows) {
-            System.out.println(row.get("title"));
+            System.out.println(row.get("name"));
         }
         return rows.size()==0 ? new HashMap<>() : rows.get(0);
     }
