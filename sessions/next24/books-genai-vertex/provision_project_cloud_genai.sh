@@ -1,13 +1,19 @@
-# turn proxy instance on for alloy db and change security for cloud run Allow unauthenticated invocations on UI
-#constraint: constraints/iam.allowedPolicyMemberDomains
-#listPolicy:
-# allValues: ALLOW
+#configure org policies, service accounts with permissions
+
+cat <<EOF > policy.yaml
+constraint: constraints/iam.allowedPolicyMemberDomains
+listPolicy:
+  allValues: ALLOW
+EOF
+export MY_PASSWORD=next24-12345!
+export MY_USER=postgres
+export DB_URL=jdbc:postgresql://34.121.92.253:5000/library
 
 gcloud resource-manager org-policies set-policy policy.yaml --organization=419713829424
 
 export SERVICE_ACCOUNT=48099017975-compute@developer.gserviceaccount.com
 
-gcloud run deploy books-genai-jit --set-env-vars MY_PASSWORD=${MY_PASSWORD}, MY_USER=${MY_USER}, DB_URL=${DB_URL} \
+gcloud run deploy books-genai-jit --set-env-vars MY_PASSWORD=next24-12345!, MY_USER=postgres, DB_URL=jdbc:postgresql://34.121.92.253:5000/library \
     --image us-docker.pkg.dev/next24-genai-app/books-genai-jit/books-genai:latest --region us-central1 --memory 2Gi --allow-unauthenticated
 
 gcloud eventarc triggers list --location=us-central1
@@ -59,3 +65,20 @@ gcloud projects add-iam-policy-binding next24-genai-app \
 gcloud firestore databases create --region=us-central1;
 
 gcloud projects add-iam-policy-binding ${PROJECT_ID}     --member="serviceAccount:${SERVICE_ACCOUNT}"     --role='roles/storage.objectViewer'
+
+#Deployment steps:
+git pull
+rm -rf target/
+docker rmi books-genai-jit:latest
+docker rmi us-docker.pkg.dev/next24-genai-app/books-genai-jit/books-genai:latest
+./mvnw package -Dmaven.test.skip
+./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=books-genai-jit -Dmaven.test.skip
+docker tag books-genai-jit:latest us-docker.pkg.dev/next24-genai-app/books-genai-jit/books-genai:latest
+gcloud artifacts docker images delete "us-docker.pkg.dev/next24-genai-app/books-genai-jit/books-genai:latest" --project=next24-genai-app
+docker push us-docker.pkg.dev/next24-genai-app/books-genai-jit/books-genai:latest
+gcloud run deploy books-genai-jit \
+    --set-env-vars='MY_PASSWORD=pword,MY_USER=pguser,DB_URL=uri_jdbc,MODEL_ANALYSIS_NAME=text-bison-32k,MODEL_IMAGE_PRO_NAME=text-bison-32k' \
+    --image us-docker.pkg.dev/next24-genai-app/books-genai-jit/books-genai:latest \
+    --region us-central1 \
+    --memory 2Gi \
+    --allow-unauthenticated
