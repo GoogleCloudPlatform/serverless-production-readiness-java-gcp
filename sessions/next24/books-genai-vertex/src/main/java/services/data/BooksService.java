@@ -78,7 +78,6 @@ public class BooksService {
         Map<String, Object> summary = new HashMap<>();
         if(!book.isEmpty()){
             Integer bookId = (Integer) book.get("book_id");
-            dao.findSummaries(bookId);
             summary = dao.findSummaries(bookId);
         }
         return summary.isEmpty() ? "" : (String) summary.get("summary");
