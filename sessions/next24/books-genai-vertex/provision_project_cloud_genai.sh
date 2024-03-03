@@ -5,19 +5,11 @@ constraint: constraints/iam.allowedPolicyMemberDomains
 listPolicy:
   allValues: ALLOW
 EOF
-export MY_PASSWORD=next24-12345!
-export MY_USER=postgres
-export DB_URL=jdbc:postgresql://34.121.92.253:5000/library
+
 
 gcloud resource-manager org-policies set-policy policy.yaml --organization=419713829424
-
 export SERVICE_ACCOUNT=48099017975-compute@developer.gserviceaccount.com
-
-gcloud run deploy books-genai-jit --set-env-vars MY_PASSWORD=next24-12345!, MY_USER=postgres, DB_URL=jdbc:postgresql://34.121.92.253:5000/library \
-    --image us-docker.pkg.dev/next24-genai-app/books-genai-jit/books-genai:latest --region us-central1 --memory 2Gi --allow-unauthenticated
-
 gcloud eventarc triggers list --location=us-central1
-
 gcloud eventarc triggers create books-genai-jit-trigger-public \
      --destination-run-service=books-genai-jit \
      --destination-run-region=us-central1 \
