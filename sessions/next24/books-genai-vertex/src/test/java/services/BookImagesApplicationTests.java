@@ -39,9 +39,6 @@ import services.config.AppConfig;
 @SpringBootTest(webEnvironment = WebEnvironment.MOCK)
 @Testcontainers
 @AutoConfigureMockMvc
-@ContextConfiguration(classes = TestConfig.class)
-// @ComponentScan(excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = AppConfig.class)) 
-@ActiveProfiles("test")
 public class BookImagesApplicationTests {
 
 	@Autowired private MockMvc mockMvc;
