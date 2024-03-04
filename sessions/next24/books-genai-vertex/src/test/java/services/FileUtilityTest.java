@@ -1,6 +1,7 @@
 package services;
 import org.junit.jupiter.api.Test;
-import utility.FileUtility;
+
+import services.utility.FileUtility;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

@@ -30,10 +30,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import services.actuator.StartupCheck;
 import services.config.CloudConfig;
-import services.data.BooksService;
-import services.data.CloudStorageService;
-import utility.FileUtility;
-import utility.SqlUtility;
+import services.domain.BooksService;
+import services.domain.CloudStorageService;
+import services.utility.FileUtility;
+import services.utility.SqlUtility;
 
 @RestController
 @RequestMapping("/document")

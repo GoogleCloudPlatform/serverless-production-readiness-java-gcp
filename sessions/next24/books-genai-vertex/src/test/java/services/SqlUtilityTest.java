@@ -1,7 +1,8 @@
 package services;
 
 import org.junit.jupiter.api.Test;
-import utility.SqlUtility;
+
+import services.utility.SqlUtility;
 
 import static org.junit.jupiter.api.Assertions.*;
 

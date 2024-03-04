@@ -32,11 +32,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import services.actuator.StartupCheck;
 import services.ai.VertexAIClient;
-import services.data.BooksService;
-import services.data.FirestoreService;
+import services.domain.BooksService;
+import services.domain.FirestoreService;
+import services.utility.PromptUtility;
 import services.web.data.BookInquiryResponse;
 import services.web.data.BookRequest;
-import utility.PromptUtility;
 
 @RestController
 @RequestMapping("/analysis")

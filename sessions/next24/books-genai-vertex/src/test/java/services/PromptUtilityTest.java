@@ -1,8 +1,9 @@
 package services;
 
 import org.junit.jupiter.api.Test;
-import utility.FileUtility;
-import utility.PromptUtility;
+
+import services.utility.FileUtility;
+import services.utility.PromptUtility;
 
 import java.util.List;
 

@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package services.data;
+package services.domain;
 
-import domain.ScopeType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
-import services.data.dao.DataAccess;
+
+import services.domain.dao.DataAccess;
+import services.domain.util.ScopeType;
+import services.utility.FileUtility;
+import services.utility.PromptUtility;
+import services.utility.SqlUtility;
 import services.web.data.BookRequest;
-import utility.FileUtility;
-import utility.PromptUtility;
-import utility.SqlUtility;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

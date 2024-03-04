@@ -1,4 +1,4 @@
-package utility;
+package services.utility;
 
 public class SqlUtility {
 

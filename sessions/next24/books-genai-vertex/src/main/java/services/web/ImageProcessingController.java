@@ -62,8 +62,8 @@ import org.springframework.web.bind.annotation.RestController;
 import services.actuator.StartupCheck;
 import services.ai.VertexAIClient;
 import services.config.CloudConfig;
-import services.data.BooksService;
-import services.data.FirestoreService;
+import services.domain.BooksService;
+import services.domain.FirestoreService;
 
 @RestController
 @RequestMapping("/images")

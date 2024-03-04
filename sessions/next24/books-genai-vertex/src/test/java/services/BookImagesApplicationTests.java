@@ -19,6 +19,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.context.annotation.ComponentScan;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -27,12 +29,19 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.context.annotation.FilterType;
+import services.config.AppConfig;
 
 @SpringBootTest(webEnvironment = WebEnvironment.MOCK)
 @Testcontainers
 @AutoConfigureMockMvc
+@ContextConfiguration(classes = TestConfig.class)
+// @ComponentScan(excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = AppConfig.class)) 
+@ActiveProfiles("test")
 public class BookImagesApplicationTests {
 
 	@Autowired private MockMvc mockMvc;
@@ -51,20 +60,20 @@ public class BookImagesApplicationTests {
 	
 	@Test
 	public void addEmptyBody() throws Exception {
-	  mockMvc.perform(post("/")).andExpect(status().isBadRequest());
+	  mockMvc.perform(post("/images")).andExpect(status().isBadRequest());
 	}
   
 	@Test
 	public void addNoMessage() throws Exception {
 	  mockMvc
-		  .perform(post("/").contentType(MediaType.APPLICATION_JSON).content("{}"))
+		  .perform(post("/images").contentType(MediaType.APPLICATION_JSON).content("{}"))
 		  .andExpect(status().isBadRequest());
 	}
   
 	@Test
 	public void addInvalidMimetype() throws Exception {
 	  mockMvc
-		  .perform(post("/").contentType(MediaType.TEXT_HTML).content(mockBody))
+		  .perform(post("/images").contentType(MediaType.TEXT_HTML).content(mockBody))
 		  .andExpect(status().isUnsupportedMediaType());
 	}
   
@@ -72,7 +81,7 @@ public class BookImagesApplicationTests {
 	public void addRequiredHeaders() throws Exception {
 	  mockMvc
 		  .perform(
-			  post("/")
+			  post("/images")
 				  .contentType(MediaType.APPLICATION_JSON)
 				  .content(mockBody)
 				  .header("ce-id", "test")
@@ -87,7 +96,7 @@ public class BookImagesApplicationTests {
 	public void missingRequiredHeaders() throws Exception {
 	  mockMvc
 		  .perform(
-			  post("/")
+			  post("/images")
 				  .contentType(MediaType.APPLICATION_JSON)
 				  .content(mockBody)
 				  .header("ce-source", "test")
@@ -98,7 +107,7 @@ public class BookImagesApplicationTests {
   
 	  mockMvc
 		  .perform(
-			  post("/")
+			  post("/images")
 				  .contentType(MediaType.APPLICATION_JSON)
 				  .content(mockBody)
 				  .header("ce-id", "test")
