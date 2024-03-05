@@ -1,4 +1,5 @@
 #configure org policies, service accounts with permissions
+# setup alloy db follow these steps on codelabs https://codelabs.developers.google.com/codelabs/alloydb-ai-embedding#4
 
 cat <<EOF > policy.yaml
 constraint: constraints/iam.allowedPolicyMemberDomains
