@@ -154,7 +154,7 @@ public class BookAnalysisGeminiController {
 //      String imageUri = "gs://library_next24_images/TheJungleBook.jpg";
 
       ResponseStream<GenerateContentResponse> responseStream = model.generateContentStream(contents, safetySettings);
-        
+      response = responseStream.iterator().next();
       System.out.println(response.toString());
     }
     return new ResponseEntity<String>(HttpStatus.OK);
