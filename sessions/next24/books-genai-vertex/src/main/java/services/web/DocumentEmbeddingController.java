@@ -118,8 +118,8 @@ public class DocumentEmbeddingController {
 
     // add embedding functionality here
     BufferedReader br = cloudStorageService.readFile(bucketName, fileName);
-    booksService.insertBook(fileName);
-    booksService.insertPagesBook(br, SqlUtility.replaceUnderscoresWithSpaces( FileUtility.getTitle(fileName) ));
+    Integer bookId = booksService.insertBook(fileName);
+    booksService.insertPagesBook(br, bookId);
 
     // success
     return new ResponseEntity<String>(msg, HttpStatus.OK);

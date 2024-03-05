@@ -114,15 +114,8 @@ public class BooksService {
         return success;
     }
 
-    public Integer insertPagesBook(BufferedReader reader, String bookTitle) {
+    public Integer insertPagesBook(BufferedReader reader, Integer bookId) {
         Integer success = 0;
-        Map<String, Object> book = dao.findBook(bookTitle);
-
-        if(book.isEmpty()){
-            return success;
-        }
-        Integer bookId = (Integer) book.get("book_id");
-        System.out.println("bookId:"+bookId);
         try {
             String content;
             Integer page = 1;
@@ -145,6 +138,20 @@ public class BooksService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        return success;
+
+    }
+
+    public Integer insertPagesBook(BufferedReader reader, String bookTitle) {
+        Integer success = 0;
+        Map<String, Object> book = dao.findBook(bookTitle);
+
+        if(book.isEmpty()){
+            return success;
+        }
+        Integer bookId = (Integer) book.get("book_id");
+        System.out.println("bookId:"+bookId);
+        success = insertPagesBook(reader, bookId);
         return success;
 
     }
