@@ -17,12 +17,13 @@ package services.web;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import javax.annotation.PostConstruct;
 
+import com.google.cloud.vertexai.api.GenerationConfig;
+import com.google.cloud.vertexai.api.HarmCategory;
+import com.google.cloud.vertexai.api.SafetySetting;
+import com.google.cloud.vertexai.generativeai.ResponseStream;
 import kotlin.collections.ArrayDeque;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,13 +32,16 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import java.io.BufferedReader;
 import com.google.cloud.vertexai.api.GenerateContentResponse;
 import com.google.cloud.vertexai.VertexAI;
+import com.google.cloud.vertexai.api.Content;
+import com.google.cloud.vertexai.api.Part;
+import com.google.cloud.vertexai.api.Blob;
 import com.google.cloud.vertexai.generativeai.ContentMaker;
 import com.google.cloud.vertexai.generativeai.GenerativeModel;
 import com.google.cloud.vertexai.generativeai.PartMaker;
-
+import com.google.protobuf.ByteString;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ImageContent;
 import dev.langchain4j.data.message.TextContent;
@@ -50,6 +54,7 @@ import services.actuator.StartupCheck;
 import services.ai.VertexAIClient;
 import services.config.CloudConfig;
 import services.domain.BooksService;
+import services.domain.CloudStorageService;
 import services.domain.FirestoreService;
 import services.utility.PromptUtility;
 import services.web.data.BookInquiryResponse;
@@ -65,11 +70,14 @@ public class BookAnalysisGeminiController {
   private VertexAIClient vertexAIClient;
   private Environment environment;
 
-  public BookAnalysisGeminiController(FirestoreService eventService, BooksService booksService, VertexAIClient vertexAIClient, Environment environment) {
+  private CloudStorageService cloudStorageService;
+
+  public BookAnalysisGeminiController(FirestoreService eventService, BooksService booksService, VertexAIClient vertexAIClient, Environment environment, CloudStorageService cloudStorageService) {
     this.eventService = eventService;
     this.booksService = booksService;
     this.vertexAIClient = vertexAIClient;
     this.environment = environment;
+    this.cloudStorageService = cloudStorageService;
   }
 
   @PostConstruct
@@ -111,13 +119,38 @@ public class BookAnalysisGeminiController {
 
     GenerateContentResponse response = null;
     try (VertexAI vertexAI = new VertexAI(projectId, location)) {
-      String imageUri = "gs://library_next24_images/TheJungleBook.jpg";
-      GenerativeModel model = new GenerativeModel(modelName, vertexAI);
-      
-      response = model.generateContent(ContentMaker.fromMultiModalData(
-          PartMaker.fromMimeTypeAndData("image/jpg", imageUri),
-          "Extract the author and book name from this image"
-      ));
+      GenerationConfig generationConfig =
+              GenerationConfig.newBuilder()
+                      .setMaxOutputTokens(2048)
+                      .setTemperature(0.4F)
+                      .setTopK(32)
+                      .setTopP(1F)
+                      .build();
+      GenerativeModel model = new GenerativeModel("gemini-1.0-pro-vision-001", generationConfig, vertexAI);
+      List<SafetySetting> safetySettings = Arrays.asList(
+              SafetySetting.newBuilder()
+                      .setCategory(HarmCategory.HARM_CATEGORY_HATE_SPEECH)
+                      .setThreshold(SafetySetting.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE)
+                      .build(),
+              SafetySetting.newBuilder()
+                      .setCategory(HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT)
+                      .setThreshold(SafetySetting.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE)
+                      .build(),
+              SafetySetting.newBuilder()
+                      .setCategory(HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT)
+                      .setThreshold(SafetySetting.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE)
+                      .build(),
+              SafetySetting.newBuilder()
+                      .setCategory(HarmCategory.HARM_CATEGORY_HARASSMENT)
+                      .setThreshold(SafetySetting.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE)
+                      .build()
+      );
+      List<Content> contents = new ArrayList<>();
+      byte[] bytes = cloudStorageService.readFileAsByteString("library_next24_images", "TheJungleBook.jpg");
+      contents.add(Content.newBuilder().setRole("user").addParts(Part.newBuilder().setInlineData(Blob.newBuilder().setMimeType("image/png").setData(ByteString.copyFrom(bytes)))).build());
+//      String imageUri = "gs://library_next24_images/TheJungleBook.jpg";
+
+      ResponseStream<GenerateContentResponse> responseStream = model.generateContentStream(contents, safetySettings);
         
       System.out.println(response.toString());
     }
