@@ -72,13 +72,14 @@ gcloud compute networks vpc-access connectors create alloy-connector \
   --network default \
   --range 10.100.0.0/28  # Optional if you have a free /28 subnet
 gcloud run deploy books-genai-jit \
-    --set-env-vars='MY_PASSWORD=pword,MY_USER=pguser,DB_URL=uri_jdbc,MODEL_ANALYSIS_NAME=text-bison-32k,MODEL_IMAGE_PRO_NAME=text-bison-32k' \
+    --set-env-vars='MY_PASSWORD=pword,MY_USER=pguser,DB_URL=jdbc:postgresql://0.0.0.0:8000/db,MODEL_ANALYSIS_NAME=text-bison-32k,MODEL_IMAGE_PRO_NAME=text-bison-32k' \
     --image us-docker.pkg.dev/next24-genai-app/books-genai-jit/books-genai:latest \
     --region us-central1 \
     --memory 2Gi \
-    --allow-unauthenticated
+    --allow-unauthenticated \
+    --vpc-connector alloy-connector
 gcloud run deploy books-genai-native \
-    --set-env-vars='MY_PASSWORD=pword,MY_USER=pguser,DB_URL=jdbc:postgresql://0.0.0.0:8000/library,MODEL_ANALYSIS_NAME=text-bison-32k,MODEL_IMAGE_PRO_NAME=text-bison-32k' \
+    --set-env-vars='MY_PASSWORD=pword,MY_USER=pguser,DB_URL=jdbc:postgresql://0.0.0.0:8000/db,MODEL_ANALYSIS_NAME=text-bison-32k,MODEL_IMAGE_PRO_NAME=text-bison-32k' \
     --image us-docker.pkg.dev/next24-genai-app/books-genai-native/books-genai:latest \
     --region us-central1 \
     --memory 2Gi \
