@@ -45,7 +45,7 @@ public class CloudStorageService {
         return br;
     }
 
-    public String readFileAsByteString(String bucket, String fileName) throws IOException {
+    public byte[]  readFileAsByteString(String bucket, String fileName) throws IOException {
         // Create a Storage client.
         Storage storage = StorageOptions.getDefaultInstance().getService();
 
@@ -62,6 +62,6 @@ public class CloudStorageService {
             }
         }
 
-        return outputStream.toString("UTF-8"); // Convert bytes to String using UTF-8
+        return outputStream.toByteArray(); // Convert bytes to String using UTF-8
     }
 }

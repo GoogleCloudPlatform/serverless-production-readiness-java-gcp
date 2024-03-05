@@ -146,8 +146,8 @@ public class BookAnalysisGeminiController {
                       .build()
       );
       List<Content> contents = new ArrayList<>();
-      String bytes = cloudStorageService.readFileAsByteString("library_next24_images", "TheJungleBook.jpg");
-      contents.add(Content.newBuilder().setRole("user").addParts(Part.newBuilder().setInlineData(Blob.newBuilder().setMimeType("image/png").setData(ByteString.copyFrom(Base64.getDecoder().decode(bytes))))).build());
+      byte[] bytes = cloudStorageService.readFileAsByteString("library_next24_images", "TheJungleBook.jpg");
+      contents.add(Content.newBuilder().setRole("user").addParts(Part.newBuilder().setInlineData(Blob.newBuilder().setMimeType("image/png").setData(ByteString.copyFrom(bytes)))).build());
 //      String imageUri = "gs://library_next24_images/TheJungleBook.jpg";
 
       ResponseStream<GenerateContentResponse> responseStream = model.generateContentStream(contents, safetySettings);
