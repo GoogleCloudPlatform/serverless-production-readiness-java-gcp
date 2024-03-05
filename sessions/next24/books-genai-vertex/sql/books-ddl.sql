@@ -1,3 +1,5 @@
+-- setup alloy db follow these steps on codelabs https://codelabs.developers.google.com/codelabs/alloydb-ai-embedding#4
+
 -- 1. Authors Table
 create TABLE authors (
     author_id SERIAL PRIMARY KEY,
