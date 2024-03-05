@@ -6,7 +6,6 @@ listPolicy:
   allValues: ALLOW
 EOF
 
-
 gcloud resource-manager org-policies set-policy policy.yaml --organization=419713829424
 export SERVICE_ACCOUNT=48099017975-compute@developer.gserviceaccount.com
 gcloud eventarc triggers list --location=us-central1
@@ -68,9 +67,21 @@ docker rmi us-docker.pkg.dev/next24-genai-app/books-genai-jit/books-genai:latest
 docker tag books-genai-jit:latest us-docker.pkg.dev/next24-genai-app/books-genai-jit/books-genai:latest
 gcloud artifacts docker images delete "us-docker.pkg.dev/next24-genai-app/books-genai-jit/books-genai:latest" --project=next24-genai-app
 docker push us-docker.pkg.dev/next24-genai-app/books-genai-jit/books-genai:latest
+gcloud compute networks vpc-access connectors create alloy-connector \
+  --region us-central1 \
+  --network default \
+  --range 10.100.0.0/28  # Optional if you have a free /28 subnet
 gcloud run deploy books-genai-jit \
     --set-env-vars='MY_PASSWORD=pword,MY_USER=pguser,DB_URL=uri_jdbc,MODEL_ANALYSIS_NAME=text-bison-32k,MODEL_IMAGE_PRO_NAME=text-bison-32k' \
     --image us-docker.pkg.dev/next24-genai-app/books-genai-jit/books-genai:latest \
     --region us-central1 \
     --memory 2Gi \
     --allow-unauthenticated
+gcloud run deploy books-genai-native \
+    --set-env-vars='MY_PASSWORD=pword,MY_USER=pguser,DB_URL=jdbc:postgresql://0.0.0.0:8000/library,MODEL_ANALYSIS_NAME=text-bison-32k,MODEL_IMAGE_PRO_NAME=text-bison-32k' \
+    --image us-docker.pkg.dev/next24-genai-app/books-genai-native/books-genai:latest \
+    --region us-central1 \
+    --memory 2Gi \
+    --cpu 2 \
+    --allow-unauthenticated \
+    --vpc-connector alloy-connector
