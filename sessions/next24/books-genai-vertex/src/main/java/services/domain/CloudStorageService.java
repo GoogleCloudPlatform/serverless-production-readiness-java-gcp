@@ -21,6 +21,7 @@ import com.google.cloud.storage.StorageOptions;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 @Service
@@ -42,5 +43,25 @@ public class CloudStorageService {
         // Do something with the byte array.
         // System.out.println(new String(bytes));
         return br;
+    }
+
+    public String readFileAsByteString(String bucket, String fileName) throws IOException {
+        // Create a Storage client.
+        Storage storage = StorageOptions.getDefaultInstance().getService();
+
+        // Get the blob.
+        Blob blob = storage.get(BlobId.of(bucket, fileName));
+
+        // Use ByteArrayOutputStream to efficiently read bytes
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        try (ReadableByteChannel channel = blob.reader()) {
+            byte[] buffer = new byte[1024]; // Read data in chunks
+            int bytesRead;
+            while ((bytesRead = channel.read(ByteBuffer.wrap(buffer))) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+        }
+
+        return outputStream.toString("UTF-8"); // Convert bytes to String using UTF-8
     }
 }
