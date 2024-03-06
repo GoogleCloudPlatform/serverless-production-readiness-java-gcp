@@ -161,9 +161,9 @@ public class ImageProcessingController {
 //                "labels": []
 //        }
         Map<String, Object> jsonMap = new HashMap<>();
-        String bookTitle = (String) jsonMap.get("bookName");
-        String mainColor = (String) jsonMap.get("mainColor");
-        String author = (String) jsonMap.get("author");
+        String bookTitle = "";
+        String mainColor = "";
+        String author = "";
         List<String> labels = new ArrayList<>();
 
         for (Candidate candidate : response.getCandidatesList()) {
@@ -192,6 +192,10 @@ public class ImageProcessingController {
                 // if(textElements.matches("^[a-zA-Z0-9]+$"))
                 prompt += textElements;
         }
+
+        bookTitle = (String) jsonMap.get("bookName");
+        mainColor = (String) jsonMap.get("mainColor");
+        author = (String) jsonMap.get("author");
 
             // use summary in the prompt to the llm
             // build alternative prompt using Vertex AI
