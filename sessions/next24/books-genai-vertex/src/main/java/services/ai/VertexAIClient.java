@@ -1,8 +1,14 @@
 package services.ai;
 
 import com.google.cloud.vertexai.VertexAI;
-import com.google.cloud.vertexai.api.*;
+import com.google.cloud.vertexai.api.Content;
 import com.google.cloud.vertexai.generativeai.GenerativeModel;
+import com.google.cloud.vertexai.api.GenerateContentResponse;
+import com.google.cloud.vertexai.api.GenerationConfig;
+import com.google.cloud.vertexai.api.SafetySetting;
+import com.google.cloud.vertexai.api.HarmCategory;
+import com.google.cloud.vertexai.api.Part;
+import com.google.cloud.vertexai.api.Blob;
 import com.google.cloud.vertexai.generativeai.ResponseStream;
 import com.google.protobuf.ByteString;
 import dev.langchain4j.data.message.AiMessage;
@@ -14,8 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import services.config.CloudConfig;
-import services.web.ImageProcessingController;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
