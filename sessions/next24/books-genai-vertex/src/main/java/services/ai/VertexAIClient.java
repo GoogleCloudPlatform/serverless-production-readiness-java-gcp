@@ -39,7 +39,7 @@ public class VertexAIClient {
         GenerateContentResponse response = null;
         String modelName = "gemini-1.0-pro-vision";
         if(prompt== null ||prompt.isBlank())
-            prompt = "Extract the book name, and author strictly in JSON format.";
+            prompt = "Extract the book name, labels, main color and author strictly in JSON format.";
         String location = CloudUtility.extractRegion(CloudConfig.zone);
         try (VertexAI vertexAI = new VertexAI(CloudConfig.projectID, location)) {
             GenerationConfig generationConfig =
@@ -73,8 +73,8 @@ public class VertexAIClient {
                             .setData(ByteString.copyFrom(image))))
                     .addParts(Part.newBuilder().setText(prompt))
                     .build());
-            ResponseStream<GenerateContentResponse> responseStream = model.generateContentStream(contents, safetySettings);
-            response = responseStream.iterator().next();
+//            ResponseStream<GenerateContentResponse> responseStream = model.generateContentStream(contents, safetySettings);
+            response = model.generateContent(contents, safetySettings);
             logger.info(response.toString());
         }
         return response;
