@@ -32,7 +32,7 @@ public class VertexAIClient {
     public GenerateContentResponse promptOnImage(byte[] image) throws IOException {
         GenerateContentResponse response = null;
         String modelName = "gemini-1.0-pro-vision";
-        String prompt = "Extract the book and author name";
+        String prompt = "Extract the book name, main color, labels, and author. Return the result in the form of json String e.g. {\"bookName\":\"value\", \"mainColor\":\"value\", \"author\":\"value\", \"labels\":[]}";
         String location = "us-central1";
         try (VertexAI vertexAI = new VertexAI(CloudConfig.projectID, location)) {
             GenerationConfig generationConfig =
