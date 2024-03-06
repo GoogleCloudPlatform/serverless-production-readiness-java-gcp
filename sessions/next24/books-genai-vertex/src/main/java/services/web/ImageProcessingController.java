@@ -147,7 +147,8 @@ public class ImageProcessingController {
         }
 
         byte[] image = cloudStorageService.readFileAsByteString(bucketName, fileName);
-        GenerateContentResponse response  = vertexAIClient.promptOnImage(image);
+        String promptImage = environment.getProperty("spring.cloud.config.promptImage", "");
+        GenerateContentResponse response  = vertexAIClient.promptOnImage(image, promptImage);
 
         String prompt = "Explain the text ";
 
