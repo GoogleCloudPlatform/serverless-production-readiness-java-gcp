@@ -17,6 +17,9 @@ package services.web;
 
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.WriteResult;
+import com.google.cloud.vertexai.api.Candidate;
+import com.google.cloud.vertexai.api.GenerateContentResponse;
+import com.google.cloud.vertexai.api.Part;
 import com.google.cloud.vision.v1.AnnotateImageRequest;
 import com.google.cloud.vision.v1.AnnotateImageResponse;
 import com.google.cloud.vision.v1.BatchAnnotateImagesResponse;
@@ -39,10 +42,7 @@ import dev.langchain4j.model.vertexai.VertexAiChatModel;
 import dev.langchain4j.model.vertexai.VertexAiLanguageModel;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -50,6 +50,7 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.json.GsonJsonParser;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -63,6 +64,7 @@ import services.actuator.StartupCheck;
 import services.ai.VertexAIClient;
 import services.config.CloudConfig;
 import services.domain.BooksService;
+import services.domain.CloudStorageService;
 import services.domain.FirestoreService;
 
 @RestController
@@ -76,11 +78,14 @@ public class ImageProcessingController {
 
     private Environment environment;
 
-    public ImageProcessingController(FirestoreService eventService, BooksService booksService, VertexAIClient vertexAIClient, Environment environment) {
+    private CloudStorageService cloudStorageService;
+
+    public ImageProcessingController(FirestoreService eventService, BooksService booksService, VertexAIClient vertexAIClient, CloudStorageService cloudStorageService, Environment environment) {
         this.eventService = eventService;
         this.booksService = booksService;
         this.vertexAIClient = vertexAIClient;
         this.environment = environment;
+        this.cloudStorageService = cloudStorageService;
     }
 
     VertexAIClient vertexAIClient;
@@ -139,151 +144,77 @@ public class ImageProcessingController {
             return new ResponseEntity<String>(msg, HttpStatus.BAD_REQUEST);
         }
 
-        try (ImageAnnotatorClient vision = ImageAnnotatorClient.create()) {
-            List<AnnotateImageRequest> requests = new ArrayList<>();
+        byte[] image = cloudStorageService.readFileAsByteString(bucketName, fileName);
+        GenerateContentResponse response  = vertexAIClient.promptOnImage(image);
 
-            ImageSource imageSource = ImageSource.newBuilder()
-                    .setGcsImageUri("gs://" + bucketName + "/" + fileName)
-                    .build();
+        String prompt = "Explain the text ";
 
-            Image image = Image.newBuilder()
-                    .setSource(imageSource)
-                    .build();
+        logger.info("Text Annotations:");
+        //put these items below into a array list
+//        ArrayList<String> books = new ArrayList<>(Arrays.asList("Ulysses", "Meditations", "The Republic", "The Complete Works of William Shakespeare", "The Jungle Book"));
+        String jsonResponse = "";
+//        example of the json Map from gemini
+//        {
+//            "bookName": "The Jungle Book",
+//                "mainColor": "green",
+//                "author": "Rudyard Kipling",
+//                "labels": []
+//        }
+        Map<String, Object> jsonMap = new HashMap<>();
+        String bookTitle = (String) jsonMap.get("bookName");
+        String mainColor = (String) jsonMap.get("mainColor");
+        String author = (String) jsonMap.get("author");
+        List<String> labels = new ArrayList<>();
 
-            Feature featureLabel = Feature.newBuilder()
-                    .setType(Type.LABEL_DETECTION)
-                    .build();
-            Feature featureImageProps = Feature.newBuilder()
-                    .setType(Type.IMAGE_PROPERTIES)
-                    .build();
-            Feature featureSafeSearch = Feature.newBuilder()
-                    .setType(Type.SAFE_SEARCH_DETECTION)
-                    .build();
-
-            Feature featureTextDetection = Feature.newBuilder()
-                    .setType(Type.TEXT_DETECTION)
-                    .build();
-
-            Feature featureLogoDetection = Feature.newBuilder()
-                    .setType(Type.LOGO_DETECTION)
-                    .build();
-
-            AnnotateImageRequest request = AnnotateImageRequest.newBuilder()
-                    .addFeatures(featureLabel)
-                    .addFeatures(featureImageProps)
-                    .addFeatures(featureSafeSearch)
-                    .addFeatures(featureTextDetection)
-                    .addFeatures(featureLogoDetection)
-                    .setImage(image)
-                    .build();
-
-            requests.add(request);
-
-            logger.info("Calling the Vision API...");
-            BatchAnnotateImagesResponse result = vision.batchAnnotateImages(requests);
-            List<AnnotateImageResponse> responses = result.getResponsesList();
-
-            if (responses.isEmpty()) {
-                logger.info("No response received from Vision API.");
-                return new ResponseEntity<String>(msg, HttpStatus.BAD_REQUEST);
-            }
-
-            AnnotateImageResponse response = responses.getFirst();
-            if (response.hasError()) {
-                logger.info("Error: " + response.getError().getMessage());
-                return new ResponseEntity<String>(msg, HttpStatus.BAD_REQUEST);
-            }
-
-            List<String> labels = response.getLabelAnnotationsList().stream()
-                    .map(annotation -> annotation.getDescription())
-                    .collect(Collectors.toList());
-            logger.info("Annotations found by Vision API:");
-            for (String label: labels) {
-                logger.info("- " + label);
-            }
-
-            String mainColor = "#FFFFFF";
-            ImageProperties imgProps = response.getImagePropertiesAnnotation();
-            if (imgProps.hasDominantColors()) {
-                DominantColorsAnnotation colorsAnn = imgProps.getDominantColors();
-                ColorInfo colorInfo = colorsAnn.getColors(0);
-
-                mainColor = rgbHex(
-                        colorInfo.getColor().getRed(),
-                        colorInfo.getColor().getGreen(),
-                        colorInfo.getColor().getBlue());
-
-                logger.info("Color: " + mainColor);
-            }
-
-            boolean isSafe = false;
-            if (response.hasSafeSearchAnnotation()) {
-                SafeSearchAnnotation safeSearch = response.getSafeSearchAnnotation();
-
-                isSafe = Stream.of(
-                                safeSearch.getAdult(), safeSearch.getMedical(), safeSearch.getRacy(),
-                                safeSearch.getSpoof(), safeSearch.getViolence())
-                        .allMatch( likelihood ->
-                                likelihood != Likelihood.LIKELY && likelihood != Likelihood.VERY_LIKELY
-                        );
-
-                logger.info("Is Image Safe? " + isSafe);
-            }
-
-            logger.info("Logo Annotations:");
-            for (EntityAnnotation annotation : response.getLogoAnnotationsList()) {
-                logger.info("Logo: " + annotation.getDescription());
-
-                List<Property> properties = annotation.getPropertiesList();
-                logger.info("Logo property list:");
-                for (Property property : properties) {
-                    logger.info("Name: %s, Value: %s", property.getName(), property.getValue());
+        for (Candidate candidate : response.getCandidatesList()) {
+                List<Part> parts = candidate.getContent().getPartsList();
+                String textElements = "";
+                if(parts.size() == 0) {
+                    continue;
                 }
-            }
-
-            String prompt = "Explain the text ";
-
-            logger.info("Text Annotations:");
-            //put these items below into a array list
-            ArrayList<String> books = new ArrayList<>(Arrays.asList("Ulysses", "Meditations", "The Republic", "The Complete Works of William Shakespeare", "The Jungle Book"));
-            String bookTitle = "";
-
-            for (EntityAnnotation annotation : response.getTextAnnotationsList()) {
-                String textElements = annotation.getDescription();
+                for(Part p : parts) {
+                    if(p.getText()!=null && p.getText().length() > 0) {
+                        jsonResponse = p.getText();
+                        try {
+                            GsonJsonParser gsonJsonParser = new GsonJsonParser();
+                            jsonMap = gsonJsonParser.parseMap(jsonResponse);
+                            labels = ((List<Object>) jsonMap.get("labels")).stream()
+                                    .map(object -> (String) object) // Cast each object to String
+                                    .collect(Collectors.toList());
+                        } catch (Exception e) {
+                           logger.warn(e.toString());
+                        }
+                    }
+                    textElements += p.getText() + " ";
+                }
                 prompt += textElements + " ";
-                if(bookTitle.equals("")) {
-                    bookTitle = books.stream().filter(b -> textElements.toLowerCase().contains(b.toLowerCase())).findAny().map(String::toString) // Transform Optional<Book> to Optional<String> of the title
-                            .orElse(""); // If not found, assign an empty string;
-                    logger.info("found bookTitle: " + bookTitle);
-                }
                 logger.info("Text: " + textElements);
                 // if(textElements.matches("^[a-zA-Z0-9]+$"))
                 prompt += textElements;
-            }
+        }
 
             // use summary in the prompt to the llm
             // build alternative prompt using Vertex AI
             //  extractTextFromImage(bucketName, fileName);
 
-            String modelResponse = null;
-            if (!prompt.isEmpty()) {
-                modelResponse = vertexAIClient.prompt(prompt, "chat-bison");
-                logger.info("Result Chat Model: " + modelResponse);
-            }
+        String modelResponse = null;
+        if (!prompt.isEmpty()) {
+            modelResponse = vertexAIClient.prompt(prompt, "chat-bison");
+            logger.info("Result Chat Model: " + modelResponse);
+        }
 
-            if (!prompt.isEmpty()) {
-                String model = environment.getProperty("spring.cloud.config.modelImageProName");
-                modelResponse = vertexAIClient.prompt(prompt, model);
-                logger.info("Result Chat Model: " + modelResponse);
-            }
+        if (!prompt.isEmpty()) {
+            String model = environment.getProperty("spring.cloud.config.modelImageProName");
+            modelResponse = vertexAIClient.prompt(prompt, model);
+            logger.info("Result Chat Model: " + modelResponse);
+        }
 
-            String summary = booksService.getBookSummary(bookTitle);
-            logger.info("The summary of the book "+bookTitle+ " is: " + summary);
-            // Saving result to Firestore
-            if (isSafe && modelResponse != null) {
-                ApiFuture<WriteResult> writeResult = eventService.storeImage(fileName, labels, mainColor, modelResponse);
-                logger.info("Picture metadata saved in Firestore at " + writeResult.get().getUpdateTime());
-            }
+        String summary = booksService.getBookSummary(bookTitle);
+        logger.info("The summary of the book "+bookTitle+ " is: " + summary);
+        // Saving result to Firestore
+        if (modelResponse != null) {
+            ApiFuture<WriteResult> writeResult = eventService.storeImage(fileName, labels, mainColor, modelResponse);
+            logger.info("Picture metadata saved in Firestore at " + writeResult.get().getUpdateTime());
         }
 
         return new ResponseEntity<String>(msg, HttpStatus.OK);
