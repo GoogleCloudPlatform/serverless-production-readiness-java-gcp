@@ -29,7 +29,8 @@ public class VertexAIClient {
         GenerateContentResponse response = null;
         String modelName = "gemini-1.0-pro-vision";
         String prompt = "Extract the book and author name";
-        try (VertexAI vertexAI = new VertexAI(CloudConfig.projectID, CloudConfig.zone)) {
+        String location = "us-central1";
+        try (VertexAI vertexAI = new VertexAI(CloudConfig.projectID, location)) {
             GenerationConfig generationConfig =
                     GenerationConfig.newBuilder()
                             .setMaxOutputTokens(2048)
