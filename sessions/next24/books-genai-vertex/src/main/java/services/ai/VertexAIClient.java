@@ -20,6 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import services.config.CloudConfig;
+import services.utility.CloudUtility;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,8 +34,8 @@ public class VertexAIClient {
     public GenerateContentResponse promptOnImage(byte[] image) throws IOException {
         GenerateContentResponse response = null;
         String modelName = "gemini-1.0-pro-vision";
-        String prompt = "Extract the book name, main color, labels, and author. Return the result in the form of json String e.g. {\"bookName\":\"value\", \"mainColor\":\"value\", \"author\":\"value\", \"labels\":[]}";
-        String location = "us-central1";
+        String prompt = "Extract the book name, main color, labels, and author strictly in JSON format. The JSON format should be: {\"bookName\":\"value\", \"mainColor\":\"value\", \"author\":\"value\", \"labels\":[]}";
+        String location = CloudUtility.extractRegion(CloudConfig.zone);
         try (VertexAI vertexAI = new VertexAI(CloudConfig.projectID, location)) {
             GenerationConfig generationConfig =
                     GenerationConfig.newBuilder()
