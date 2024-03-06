@@ -32,9 +32,14 @@ public class VertexAIClient {
     private static final Logger logger = LoggerFactory.getLogger(VertexAIClient.class);
 
     public GenerateContentResponse promptOnImage(byte[] image) throws IOException {
+        return promptOnImage(image, "");
+    }
+
+    public GenerateContentResponse promptOnImage(byte[] image, String prompt) throws IOException {
         GenerateContentResponse response = null;
         String modelName = "gemini-1.0-pro-vision";
-        String prompt = "Extract the book name, and author strictly in JSON format.";
+        if(prompt== null ||prompt.isBlank())
+            prompt = "Extract the book name, and author strictly in JSON format.";
         String location = CloudUtility.extractRegion(CloudConfig.zone);
         try (VertexAI vertexAI = new VertexAI(CloudConfig.projectID, location)) {
             GenerationConfig generationConfig =

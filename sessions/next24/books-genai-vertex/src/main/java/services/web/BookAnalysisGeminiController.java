@@ -65,7 +65,8 @@ public class BookAnalysisGeminiController {
   public ResponseEntity<String> processUserRequest(@RequestBody BookRequest bookRequest, 
                                                    @RequestParam(name = "contentCharactersLimit", defaultValue = "6000") Integer contentCharactersLimit) throws IOException{
     byte[] image = cloudStorageService.readFileAsByteString("library_next24_images", "TheJungleBook.jpg");
-    GenerateContentResponse response  = vertexAIClient.promptOnImage(image);
+    String promptImage = environment.getProperty("spring.cloud.config.promptImage", "");
+    GenerateContentResponse response  = vertexAIClient.promptOnImage(image, promptImage);
     return new ResponseEntity<String>(response.toString(), HttpStatus.OK);
   }
 }

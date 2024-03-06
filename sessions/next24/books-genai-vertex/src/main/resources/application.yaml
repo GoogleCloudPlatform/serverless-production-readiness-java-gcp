@@ -19,3 +19,4 @@ spring:
     config:
       modelAnalysisName: ${MODEL_ANALYSIS_NAME}
       modelImageProName: ${MODEL_IMAGE_PRO_NAME}
+      promptImage: ${PROMPT_IMAGE}
