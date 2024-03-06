@@ -194,6 +194,7 @@ public class ImageProcessingController {
         bookTitle = (String) jsonMap.get("book");
         mainColor = (String) jsonMap.get("mainColor");
         author = (String) jsonMap.get("author");
+        labels = (List) jsonMap.get("labels");
 
             // use summary in the prompt to the llm
             // build alternative prompt using Vertex AI
