@@ -37,6 +37,7 @@ import com.google.cloud.vision.v1.Property;
 import com.google.cloud.vision.v1.SafeSearchAnnotation;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.internal.Json;
 import dev.langchain4j.model.output.Response;
 import dev.langchain4j.model.vertexai.VertexAiChatModel;
 import dev.langchain4j.model.vertexai.VertexAiLanguageModel;
@@ -66,6 +67,7 @@ import services.config.CloudConfig;
 import services.domain.BooksService;
 import services.domain.CloudStorageService;
 import services.domain.FirestoreService;
+import services.utility.JsonUtility;
 
 @RestController
 @RequestMapping("/images")
@@ -176,11 +178,7 @@ public class ImageProcessingController {
                     if(p.getText()!=null && p.getText().length() > 0) {
                         jsonResponse = p.getText();
                         try {
-                            GsonJsonParser gsonJsonParser = new GsonJsonParser();
-                            jsonMap = gsonJsonParser.parseMap(jsonResponse);
-                            labels = ((List<Object>) jsonMap.get("labels")).stream()
-                                    .map(object -> (String) object) // Cast each object to String
-                                    .collect(Collectors.toList());
+                            jsonMap = JsonUtility.parseJsonToMap(jsonResponse);
                         } catch (Exception e) {
                            logger.warn(e.toString());
                         }
@@ -193,7 +191,7 @@ public class ImageProcessingController {
                 prompt += textElements;
         }
 
-        bookTitle = (String) jsonMap.get("bookName");
+        bookTitle = (String) jsonMap.get("book");
         mainColor = (String) jsonMap.get("mainColor");
         author = (String) jsonMap.get("author");
 
