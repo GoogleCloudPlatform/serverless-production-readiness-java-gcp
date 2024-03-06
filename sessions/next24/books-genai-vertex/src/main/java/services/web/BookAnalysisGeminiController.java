@@ -91,72 +91,8 @@ public class BookAnalysisGeminiController {
   @PostMapping("")
   public ResponseEntity<String> processUserRequest(@RequestBody BookRequest bookRequest, 
                                                    @RequestParam(name = "contentCharactersLimit", defaultValue = "6000") Integer contentCharactersLimit) throws IOException{
-    // given
-    // ChatLanguageModel visionModel = VertexAiGeminiChatModel.builder()
-    //         .endpoint("us-central1-aiplatform.googleapis.com:443")
-    //         .project("next24-genai-app")
-    //         .location("us-central1")
-    //         .modelName("gemini-pro-vision")
-    //         .publisher("google")
-    //         .build();
-
-    // VertexAiChatModel visionModel = VertexAiChatModel.builder()
-    //     .endpoint("us-central1-aiplatform.googleapis.com:443")
-    //     .project(CloudConfig.projectID)
-    //     .location(CloudConfig.zone)
-    //     .publisher("google")
-    //     .modelName("gemini-1.0-pro-vision")
-    //     .temperature(0.1)
-    //     .maxOutputTokens(1000)
-    //     .topK(0)
-    //     .topP(0.0)
-    //     .maxRetries(3)
-    //     .build();
-
-    String projectId = CloudConfig.projectID;
-    String location = "us-central1";
-    String modelName = "gemini-1.0-pro-vision";
-
-    GenerateContentResponse response = null;
-    try (VertexAI vertexAI = new VertexAI(projectId, location)) {
-      GenerationConfig generationConfig =
-              GenerationConfig.newBuilder()
-                      .setMaxOutputTokens(2048)
-                      .setTemperature(0.4F)
-                      .setTopK(32)
-                      .setTopP(1F)
-                      .build();
-      GenerativeModel model = new GenerativeModel("gemini-1.0-pro-vision-001", generationConfig, vertexAI);
-      List<SafetySetting> safetySettings = Arrays.asList(
-              SafetySetting.newBuilder()
-                      .setCategory(HarmCategory.HARM_CATEGORY_HATE_SPEECH)
-                      .setThreshold(SafetySetting.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE)
-                      .build(),
-              SafetySetting.newBuilder()
-                      .setCategory(HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT)
-                      .setThreshold(SafetySetting.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE)
-                      .build(),
-              SafetySetting.newBuilder()
-                      .setCategory(HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT)
-                      .setThreshold(SafetySetting.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE)
-                      .build(),
-              SafetySetting.newBuilder()
-                      .setCategory(HarmCategory.HARM_CATEGORY_HARASSMENT)
-                      .setThreshold(SafetySetting.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE)
-                      .build()
-      );
-      List<Content> contents = new ArrayList<>();
-      byte[] bytes = cloudStorageService.readFileAsByteString("library_next24_images", "TheJungleBook.jpg");
-      contents.add(Content.newBuilder().setRole("user").addParts(Part.newBuilder().setInlineData(Blob.newBuilder().setMimeType("image/png")
-              .setData(ByteString.copyFrom(bytes))))
-              .addParts(Part.newBuilder().setText("Extract the book and author name"))
-              .build());
-//      String imageUri = "gs://library_next24_images/TheJungleBook.jpg";
-
-      ResponseStream<GenerateContentResponse> responseStream = model.generateContentStream(contents, safetySettings);
-      response = responseStream.iterator().next();
-      System.out.println(response.toString());
-    }
-    return new ResponseEntity<String>(HttpStatus.OK);
+    byte[] image = cloudStorageService.readFileAsByteString("library_next24_images", "TheJungleBook.jpg");
+    GenerateContentResponse response  = vertexAIClient.promptOnImage(image);
+    return new ResponseEntity<String>(response.toString(), HttpStatus.OK);
   }
 }
