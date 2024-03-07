@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.json.GsonJsonParser;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
@@ -59,6 +60,9 @@ public class ImageProcessingController {
     private Environment environment;
 
     private CloudStorageService cloudStorageService;
+
+    @Value("${prompts.promptImage}")
+    private String promptImage;
 
     public ImageProcessingController(FirestoreService eventService, BooksService booksService, VertexAIClient vertexAIClient, CloudStorageService cloudStorageService, Environment environment) {
         this.eventService = eventService;
@@ -125,7 +129,7 @@ public class ImageProcessingController {
         }
 
         byte[] image = cloudStorageService.readFileAsByteString(bucketName, fileName);
-        GenerateContentResponse response  = vertexAIClient.promptOnImageWithVertex(image);
+        GenerateContentResponse response  = vertexAIClient.promptOnImageWithVertex(image, promptImage);
 
         String prompt = "Explain the text ";
 
