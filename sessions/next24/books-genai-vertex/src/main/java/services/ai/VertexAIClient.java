@@ -33,7 +33,7 @@ public class VertexAIClient {
     private static final Logger logger = LoggerFactory.getLogger(VertexAIClient.class);
 
     public GenerateContentResponse promptOnImageWithVertex(byte[] image) throws IOException {
-        return promptOnImage(image, "");
+        return promptOnImageWithVertex(image, "");
     }
 
 
