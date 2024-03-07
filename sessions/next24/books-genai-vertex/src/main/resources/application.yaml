@@ -34,3 +34,4 @@ spring:
 
 prompts:
   bookanalysis: ${PROMPT_BOOK_ANALYSIS:Extract the main ideas from the book The Jungle Book by Rudyard Kipling}
+  promptImage: ${PROMPT_IMAGE}

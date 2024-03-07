@@ -45,6 +45,7 @@ import services.config.CloudConfig;
 import services.domain.BooksService;
 import services.domain.CloudStorageService;
 import services.domain.FirestoreService;
+import services.utility.JsonUtility;
 
 @RestController
 @RequestMapping("/images")
@@ -155,11 +156,7 @@ public class ImageProcessingController {
                     if(p.getText()!=null && p.getText().length() > 0) {
                         jsonResponse = p.getText();
                         try {
-                            GsonJsonParser gsonJsonParser = new GsonJsonParser();
-                            jsonMap = gsonJsonParser.parseMap(jsonResponse);
-                            labels = ((List<Object>) jsonMap.get("labels")).stream()
-                                    .map(object -> (String) object) // Cast each object to String
-                                    .collect(Collectors.toList());
+                            jsonMap = JsonUtility.parseJsonToMap(jsonResponse);
                         } catch (Exception e) {
                            logger.warn(e.toString());
                         }
@@ -175,11 +172,12 @@ public class ImageProcessingController {
         bookTitle = (String) jsonMap.get("bookName");
         mainColor = (String) jsonMap.get("mainColor");
         author = (String) jsonMap.get("author");
+        labels = (List) jsonMap.get("labels");
 
             // use summary in the prompt to the llm
             // build alternative prompt using Vertex AI
             //  extractTextFromImage(bucketName, fileName);
-
+        logger.info("Result bookTitle: " + bookTitle +" mainColor: "+mainColor+" labels: "+labels);
         String modelResponse = null;
         if (!prompt.isEmpty()) {
             modelResponse = vertexAIClient.promptWithLangchain4J(prompt, VertexModels.CHAT_BISON);
