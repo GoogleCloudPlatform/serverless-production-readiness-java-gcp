@@ -19,3 +19,15 @@ spring:
     config:
       modelAnalysisName: ${MODEL_ANALYSIS_NAME}
       modelImageProName: ${MODEL_IMAGE_PRO_NAME}
+  ai:
+    vertex:
+      ai: 
+        gemini:
+          project-id: ${VERTEX_AI_GEMINI_PROJECT_ID}
+          location: ${VERTEX_AI_GEMINI_LOCATION}
+          chat: 
+            options:
+              model: gemini-pro
+  threads:
+    virtual: 
+      enabled: true      
