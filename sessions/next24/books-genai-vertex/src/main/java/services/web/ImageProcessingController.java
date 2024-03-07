@@ -192,7 +192,7 @@ public class ImageProcessingController {
                 prompt += textElements;
         }
 
-        bookTitle = (String) jsonMap.get("book");
+        bookTitle = (String) jsonMap.get("bookName");
         mainColor = (String) jsonMap.get("mainColor");
         author = (String) jsonMap.get("author");
         labels = (List) jsonMap.get("labels");
@@ -200,7 +200,7 @@ public class ImageProcessingController {
             // use summary in the prompt to the llm
             // build alternative prompt using Vertex AI
             //  extractTextFromImage(bucketName, fileName);
-
+        logger.info("Result bookTitle: " + bookTitle +" mainColor: "+mainColor+" labels: "+labels);
         String modelResponse = null;
         if (!prompt.isEmpty()) {
             modelResponse = vertexAIClient.prompt(prompt, "chat-bison");
