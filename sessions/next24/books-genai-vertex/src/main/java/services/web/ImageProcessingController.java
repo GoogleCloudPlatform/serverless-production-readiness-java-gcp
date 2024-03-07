@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,10 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.json.GsonJsonParser;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -57,18 +55,15 @@ public class ImageProcessingController {
 
     private BooksService booksService;
 
-    private Environment environment;
-
     private CloudStorageService cloudStorageService;
 
     @Value("${prompts.promptImage}")
     private String promptImage;
 
-    public ImageProcessingController(FirestoreService eventService, BooksService booksService, VertexAIClient vertexAIClient, CloudStorageService cloudStorageService, Environment environment) {
+    public ImageProcessingController(FirestoreService eventService, BooksService booksService, VertexAIClient vertexAIClient, CloudStorageService cloudStorageService) {
         this.eventService = eventService;
         this.booksService = booksService;
         this.vertexAIClient = vertexAIClient;
-        this.environment = environment;
         this.cloudStorageService = cloudStorageService;
     }
 
@@ -129,21 +124,12 @@ public class ImageProcessingController {
         }
 
         byte[] image = cloudStorageService.readFileAsByteString(bucketName, fileName);
-        GenerateContentResponse response  = vertexAIClient.promptOnImageWithVertex(image, promptImage);
+        GenerateContentResponse response  = vertexAIClient.promptOnImage(image, promptImage);
 
         String prompt = "Explain the text ";
 
         logger.info("Text Annotations:");
-        //put these items below into a array list
-//        ArrayList<String> books = new ArrayList<>(Arrays.asList("Ulysses", "Meditations", "The Republic", "The Complete Works of William Shakespeare", "The Jungle Book"));
         String jsonResponse = "";
-//        example of the json Map from gemini
-//        {
-//            "bookName": "The Jungle Book",
-//                "mainColor": "green",
-//                "author": "Rudyard Kipling",
-//                "labels": []
-//        }
         Map<String, Object> jsonMap = new HashMap<>();
         String bookTitle = "";
         String mainColor = "";
@@ -176,24 +162,14 @@ public class ImageProcessingController {
         bookTitle = (String) jsonMap.get("bookName");
         mainColor = (String) jsonMap.get("mainColor");
         author = (String) jsonMap.get("author");
-        labels = (List) jsonMap.get("labels");
+        labels = (List<String>)jsonMap.get("labels");
 
-            // use summary in the prompt to the llm
-            // build alternative prompt using Vertex AI
-            //  extractTextFromImage(bucketName, fileName);
         logger.info("Result bookTitle: " + bookTitle +" mainColor: "+mainColor+" labels: "+labels);
         String modelResponse = null;
         if (!prompt.isEmpty()) {
-            modelResponse = vertexAIClient.promptWithLangchain4J(prompt, VertexModels.CHAT_BISON);
+            modelResponse = vertexAIClient.promptModel(prompt, VertexModels.CHAT_BISON);
             logger.info("Result Chat Model: " + modelResponse);
         }
-
-        // dead code?
-        // if (!prompt.isEmpty()) {
-        //     String model = environment.getProperty("spring.cloud.config.modelImageProName");
-        //     modelResponse = vertexAIClient.promptWithLangchain4J(prompt, model);
-        //     logger.info("Result Chat Model: " + modelResponse);
-        // }
 
         String summary = booksService.getBookSummary(bookTitle);
         logger.info("The summary of the book "+bookTitle+ " is: " + summary);
@@ -206,19 +182,4 @@ public class ImageProcessingController {
         return new ResponseEntity<String>(msg, HttpStatus.OK);
     }
 
-
-    // private void extractTextFromImage(String bucketName, String fileName) throws IOException {
-    //     try (EndpointServiceClient endpointServiceClient = EndpointServiceClient.create()) {
-    //         EndpointName name =
-    //                 EndpointName.ofProjectLocationEndpointName("[PROJECT]", "[LOCATION]", "[ENDPOINT]");
-    //         Endpoint response = endpointServiceClient.getEndpoint(name);
-    //         logger.info("Endpoint description: " +response.getDescription());
-    //     }
-    // }
-
-    private static String rgbHex(float red, float green, float blue) {
-        return String.format("#%02x%02x%02x", (int)red, (int)green, (int)blue);
-    }
-
 }
-// [END eventarc_audit_storage_handler]

@@ -1,3 +1,18 @@
+/*
+ * Copyright 2024 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package services.ai;
 
 import com.google.cloud.vertexai.VertexAI;
@@ -9,7 +24,6 @@ import com.google.cloud.vertexai.api.SafetySetting;
 import com.google.cloud.vertexai.api.HarmCategory;
 import com.google.cloud.vertexai.api.Part;
 import com.google.cloud.vertexai.api.Blob;
-import com.google.cloud.vertexai.generativeai.ResponseStream;
 import com.google.protobuf.ByteString;
 
 import dev.langchain4j.data.message.AiMessage;
@@ -32,12 +46,12 @@ import java.util.List;
 public class VertexAIClient {
     private static final Logger logger = LoggerFactory.getLogger(VertexAIClient.class);
 
-    public GenerateContentResponse promptOnImageWithVertex(byte[] image) throws IOException {
-        return promptOnImageWithVertex(image, "");
+    public GenerateContentResponse promptOnImage(byte[] image) throws IOException {
+        return promptOnImage(image, "");
     }
 
 
-    public GenerateContentResponse promptOnImageWithVertex(byte[] image, String prompt) throws IOException {
+    public GenerateContentResponse promptOnImage(byte[] image, String prompt) throws IOException {
         GenerateContentResponse response = null;
         if(prompt== null ||prompt.isBlank())
             prompt = "Extract the book name, labels, main color and author strictly in JSON format.";
@@ -81,7 +95,7 @@ public class VertexAIClient {
         return response;
     }
 
-    public String promptWithLangchain4J(String prompt, String modelName) {
+    public String promptModel(String prompt, String modelName) {
         String output =null;
         logger.info("The prompt & model name are: " + prompt.substring(0,100) +" | "+modelName);
         if (modelName.contains("chat")) {

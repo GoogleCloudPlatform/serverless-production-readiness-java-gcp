@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,20 +58,18 @@ public class DocumentEmbeddingController {
     return "DocumentEmbeddingController started";
   }
 
+  // used for testing
   @RequestMapping(value = "/category/books", method = RequestMethod.GET)
   public ResponseEntity<List<Map<String, Object>>> getTable(@RequestParam(name = "prompt") String prompt, @RequestParam(name = "contentCharactersLimit", defaultValue = "2000") String contentCharactersLimit) {
     return new ResponseEntity<List<Map<String, Object>>>(booksService.prompt(prompt, Integer.parseInt(contentCharactersLimit)), HttpStatus.OK);
   }
 
+  // used for testing
   @RequestMapping(value = "/category/books", method = RequestMethod.POST)
   public ResponseEntity<Integer> insertTable(@RequestBody Map<String, Object> body) {
-//    Integer success = booksService.insertBook((String) body.get("fileName"));
-//    Integer success = booksService.insertPagesBook( (String) body.get("filePath"), (String) body.get("bookTitle") );
     String fileName = (String) body.get("fileName");
-//    BufferedReader br = cloudStorageService.readFile((String) body.get("bucketName"), fileName);
     booksService.insertBook(fileName);
-//    Integer success = booksService.insertPagesBook(br, FileUtility.getTitle(fileName));
-    return new ResponseEntity<>(1 > 0 ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @RequestMapping(value = "/embeddings", method = RequestMethod.POST)

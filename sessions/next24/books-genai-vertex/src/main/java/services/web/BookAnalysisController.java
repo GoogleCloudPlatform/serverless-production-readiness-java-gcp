@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,7 +32,6 @@ import org.springframework.beans.factory.annotation.Value;
 import services.actuator.StartupCheck;
 import services.ai.VertexAIClient;
 import services.domain.BooksService;
-import services.domain.FirestoreService;
 import services.utility.PromptUtility;
 import services.web.data.BookRequest;
 
@@ -42,15 +40,11 @@ import services.web.data.BookRequest;
 public class BookAnalysisController {
   private static final Logger logger = LoggerFactory.getLogger(BookAnalysisController.class);
 
-  private final FirestoreService eventService;
   private BooksService booksService;
   private VertexAIClient vertexAIClient;
-  private Environment environment;
-  public BookAnalysisController(FirestoreService eventService, BooksService booksService, VertexAIClient vertexAIClient, Environment environment) {
-    this.eventService = eventService;
+  public BookAnalysisController(BooksService booksService, VertexAIClient vertexAIClient) {
     this.booksService = booksService;
     this.vertexAIClient = vertexAIClient;
-    this.environment = environment;
   }
 
   @Value("${spring.cloud.config.modelAnalysisName}")
@@ -74,8 +68,8 @@ public class BookAnalysisController {
     String promptWithContext = PromptUtility.formatPromptBookAnalysis(responseBook, bookRequest.keyWords());
 
     System.out.println("Model: " + model);
-    // submit prompt using Langchain4J
-    String response = vertexAIClient.promptWithLangchain4J(promptWithContext, model);
+    // submit prompt to the LLM via framework
+    String response = vertexAIClient.promptModel(promptWithContext, model);
 
     // return the response to the caller
     return new ResponseEntity<String>(response, HttpStatus.OK);

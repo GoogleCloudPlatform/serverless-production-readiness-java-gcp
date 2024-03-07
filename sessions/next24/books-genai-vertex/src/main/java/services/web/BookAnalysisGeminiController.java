@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,7 +97,7 @@ public class BookAnalysisGeminiController {
   public ResponseEntity<String> processUserRequest(@RequestBody BookRequest bookRequest, 
                                                    @RequestParam(name = "contentCharactersLimit", defaultValue = "6000") Integer contentCharactersLimit) throws IOException{
     long start = System.currentTimeMillis();
-    // String prompt = "Extract the main ideas from the book The Jungle Book by Rudyard Kipling";
+    prompt = "Extract the main ideas from the book The Jungle Book by Rudyard Kipling";
     ChatResponse chatResponse = chatSpringClient.call(new Prompt(prompt,
                                                       VertexAiGeminiChatOptions.builder()
                                                           .withTemperature(0.4f)
