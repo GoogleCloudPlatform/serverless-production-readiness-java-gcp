@@ -2,7 +2,6 @@ package services;
 
 import org.junit.jupiter.api.Test;
 
-import services.utility.FileUtility;
 import services.utility.PromptUtility;
 
 import java.util.List;
@@ -13,8 +12,6 @@ class PromptUtilityTest {
 
     @Test
     public void testFormatPrompt() {
-        String nothing = null;
-        Object[] args = {"adventure", nothing, "coming-of-age"};
         List<String> topics = List.of("adventure", "animals", "coming-of-age", "");
         String expectedPrompt = "Find the paragraphs mentioning keywords in the following list: {adventure, animals, coming-of-age} in the book.";
         String actualPrompt = PromptUtility.formatPromptBookKeywords(topics);

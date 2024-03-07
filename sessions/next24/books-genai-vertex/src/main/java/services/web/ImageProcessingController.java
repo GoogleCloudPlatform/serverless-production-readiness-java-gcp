@@ -20,37 +20,14 @@ import com.google.cloud.firestore.WriteResult;
 import com.google.cloud.vertexai.api.Candidate;
 import com.google.cloud.vertexai.api.GenerateContentResponse;
 import com.google.cloud.vertexai.api.Part;
-import com.google.cloud.vision.v1.AnnotateImageRequest;
-import com.google.cloud.vision.v1.AnnotateImageResponse;
-import com.google.cloud.vision.v1.BatchAnnotateImagesResponse;
-import com.google.cloud.vision.v1.ColorInfo;
-import com.google.cloud.vision.v1.DominantColorsAnnotation;
-import com.google.cloud.vision.v1.EntityAnnotation;
-import com.google.cloud.vision.v1.Feature;
-import com.google.cloud.vision.v1.Feature.Type;
-import com.google.cloud.vision.v1.Image;
-import com.google.cloud.vision.v1.ImageAnnotatorClient;
-import com.google.cloud.vision.v1.ImageProperties;
-import com.google.cloud.vision.v1.ImageSource;
-import com.google.cloud.vision.v1.Likelihood;
-import com.google.cloud.vision.v1.Property;
-import com.google.cloud.vision.v1.SafeSearchAnnotation;
-import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.data.message.UserMessage;
-import dev.langchain4j.internal.Json;
-import dev.langchain4j.model.output.Response;
-import dev.langchain4j.model.vertexai.VertexAiChatModel;
-import dev.langchain4j.model.vertexai.VertexAiLanguageModel;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.json.GsonJsonParser;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
@@ -63,6 +40,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import services.actuator.StartupCheck;
 import services.ai.VertexAIClient;
+import services.ai.VertexModels;
 import services.config.CloudConfig;
 import services.domain.BooksService;
 import services.domain.CloudStorageService;
@@ -147,8 +125,7 @@ public class ImageProcessingController {
         }
 
         byte[] image = cloudStorageService.readFileAsByteString(bucketName, fileName);
-        String promptImage = environment.getProperty("spring.cloud.config.promptImage", "");
-        GenerateContentResponse response  = vertexAIClient.promptOnImage(image, promptImage);
+        GenerateContentResponse response  = vertexAIClient.promptOnImageWithVertex(image);
 
         String prompt = "Explain the text ";
 
@@ -203,15 +180,16 @@ public class ImageProcessingController {
         logger.info("Result bookTitle: " + bookTitle +" mainColor: "+mainColor+" labels: "+labels);
         String modelResponse = null;
         if (!prompt.isEmpty()) {
-            modelResponse = vertexAIClient.prompt(prompt, "chat-bison");
+            modelResponse = vertexAIClient.promptWithLangchain4J(prompt, VertexModels.CHAT_BISON);
             logger.info("Result Chat Model: " + modelResponse);
         }
 
-        if (!prompt.isEmpty()) {
-            String model = environment.getProperty("spring.cloud.config.modelImageProName");
-            modelResponse = vertexAIClient.prompt(prompt, model);
-            logger.info("Result Chat Model: " + modelResponse);
-        }
+        // dead code?
+        // if (!prompt.isEmpty()) {
+        //     String model = environment.getProperty("spring.cloud.config.modelImageProName");
+        //     modelResponse = vertexAIClient.promptWithLangchain4J(prompt, model);
+        //     logger.info("Result Chat Model: " + modelResponse);
+        // }
 
         String summary = booksService.getBookSummary(bookTitle);
         logger.info("The summary of the book "+bookTitle+ " is: " + summary);

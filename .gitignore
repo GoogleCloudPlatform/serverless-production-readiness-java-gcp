@@ -54,3 +54,6 @@ crash.*.log
 **/target/*
 genai/image-vision-vertex-langchain/test-results-native/test/TEST-junit-jupiter.xml
 sessions/next24/books-genai-vertex/.vscode/settings.json
+
+# ignore build files
+build.sh
