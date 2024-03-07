@@ -19,8 +19,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -35,6 +33,7 @@ import org.springframework.ai.parser.BeanOutputParser;
 import org.springframework.ai.vertexai.gemini.MimeTypeDetector;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatClient;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatOptions;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Description;
 import org.springframework.core.env.Environment;
@@ -47,12 +46,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.google.cloud.vertexai.api.GenerateContentResponse;
-
 import reactor.core.publisher.Flux;
 
 import services.actuator.StartupCheck;
 import services.ai.VertexAIClient;
+import services.ai.VertexModels;
 import services.domain.BooksService;
 import services.domain.CloudStorageService;
 import services.domain.FirestoreService;
@@ -69,6 +67,9 @@ public class BookAnalysisGeminiController {
   private Environment environment;
   private CloudStorageService cloudStorageService;
   private VertexAiGeminiChatClient chatSpringClient;
+
+  @Value("${prompts.bookanalysis}")
+  private String prompt;
 
   public BookAnalysisGeminiController(FirestoreService eventService, 
                                       BooksService booksService, 
@@ -96,11 +97,11 @@ public class BookAnalysisGeminiController {
   public ResponseEntity<String> processUserRequest(@RequestBody BookRequest bookRequest, 
                                                    @RequestParam(name = "contentCharactersLimit", defaultValue = "6000") Integer contentCharactersLimit) throws IOException{
     long start = System.currentTimeMillis();
-    String prompt = "Extract the main ideas from the book The Jungle Book by Rudyard Kipling";
+    // String prompt = "Extract the main ideas from the book The Jungle Book by Rudyard Kipling";
     ChatResponse chatResponse = chatSpringClient.call(new Prompt(prompt,
                                                       VertexAiGeminiChatOptions.builder()
                                                           .withTemperature(0.4f)
-                                                          .withModel("gemini-pro")
+                                                          .withModel(VertexModels.GEMINI_PRO)
                                                           .build())
             );
     System.out.println("Elapsed time: " + (System.currentTimeMillis() - start) + "ms");
@@ -118,7 +119,7 @@ public class BookAnalysisGeminiController {
         List.of(new MediaData(MimeTypeDetector.getMimeType(imageURL), imageURL)));
 
     ChatResponse multiModalResponse = chatSpringClient.call(new Prompt(List.of(multiModalUserMessage),
-            VertexAiGeminiChatOptions.builder().withModel("gemini-pro-vision").build()));
+            VertexAiGeminiChatOptions.builder().withModel(VertexModels.GEMINI_PRO_VISION).build()));
 
     System.out.println("MULTI-MODAL RESPONSE: " + multiModalResponse.getResult().getOutput().getContent());
 
@@ -146,16 +147,7 @@ public class BookAnalysisGeminiController {
   }
 
   /* 
-  @PostMapping("")
-  public ResponseEntity<String> processUserRequest(@RequestBody BookRequest bookRequest, 
-                                                   @RequestParam(name = "contentCharactersLimit", defaultValue = "6000") Integer contentCharactersLimit) throws IOException{
-    byte[] image = cloudStorageService.readFileAsByteString("library_next24_images", "TheJungleBook.jpg");
-    GenerateContentResponse response  = vertexAIClient.promptOnImage(image);
-
-    return new ResponseEntity<String>(response.toString(), HttpStatus.OK);
-  }
-  */
-
+  
   //-----------------------
   // @PostMapping("")
   // public ResponseEntity<String> processUserRequest(@RequestBody BookRequest bookRequest, 
@@ -181,19 +173,12 @@ public class BookAnalysisGeminiController {
 
   //   return new ResponseEntity<String>(outputString, HttpStatus.OK);
   // }
+  */
 
   public static String removeMarkdownTags(String text) {
-    return text.replaceAll("```json", "").replaceAll("```", "");
-    // String JSON_CODE_BLOCK_PATTERN = "(?s)`{3}(.*)`{3}";
-    // Pattern pattern = Pattern.compile(JSON_CODE_BLOCK_PATTERN);
-    // Matcher matcher = pattern.matcher(text);
-
-    // if (matcher.find()) {
-    //     return matcher.group(1); // Extract the JSON content
-    // } else {
-    //     // Handle the case where no JSON code block is found (optional)
-    //     return null;
-    // }
+    // String response = text.replaceAll("```json", " ");
+    // return response = response.replaceAll("```", " ");
+    return text.replaceAll("```json", "").replaceAll("```", "").replace("'", "\"");
   }
 
   public record BookData(String author, String title) {

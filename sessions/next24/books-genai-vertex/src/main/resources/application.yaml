@@ -17,8 +17,8 @@ spring:
     password: ${MY_PASSWORD}
   cloud:
     config:
-      modelAnalysisName: ${MODEL_ANALYSIS_NAME}
-      modelImageProName: ${MODEL_IMAGE_PRO_NAME}
+      modelAnalysisName: ${MODEL_ANALYSIS_NAME:text-bison-32k}
+      modelImageProName: ${MODEL_IMAGE_PRO_NAME:text-bison-32k}
   ai:
     vertex:
       ai: 
@@ -31,3 +31,6 @@ spring:
   threads:
     virtual: 
       enabled: true      
+
+prompts:
+  bookanalysis: ${PROMPT_BOOK_ANALYSIS:Extract the main ideas from the book The Jungle Book by Rudyard Kipling}

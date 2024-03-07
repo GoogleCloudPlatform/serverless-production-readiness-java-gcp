@@ -11,6 +11,7 @@ import com.google.cloud.vertexai.api.Part;
 import com.google.cloud.vertexai.api.Blob;
 import com.google.cloud.vertexai.generativeai.ResponseStream;
 import com.google.protobuf.ByteString;
+
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.output.Response;
@@ -29,9 +30,8 @@ import java.util.List;
 public class VertexAIClient {
     private static final Logger logger = LoggerFactory.getLogger(VertexAIClient.class);
 
-    public GenerateContentResponse promptOnImage(byte[] image) throws IOException {
+    public GenerateContentResponse promptOnImageWithVertex(byte[] image) throws IOException {
         GenerateContentResponse response = null;
-        String modelName = "gemini-1.0-pro-vision";
         String prompt = "Extract the book name, main color, labels, and author. Return the result in the form of json String e.g. {\"bookName\":\"value\", \"mainColor\":\"value\", \"author\":\"value\", \"labels\":[]}";
         String location = "us-central1";
         try (VertexAI vertexAI = new VertexAI(CloudConfig.projectID, location)) {
@@ -42,7 +42,7 @@ public class VertexAIClient {
                             .setTopK(32)
                             .setTopP(1F)
                             .build();
-            GenerativeModel model = new GenerativeModel(modelName, generationConfig, vertexAI);
+            GenerativeModel model = new GenerativeModel(VertexModels.GEMINI_PRO_VISION_VERSION, generationConfig, vertexAI);
             List<SafetySetting> safetySettings = Arrays.asList(
                     SafetySetting.newBuilder()
                             .setCategory(HarmCategory.HARM_CATEGORY_HATE_SPEECH)
@@ -72,7 +72,8 @@ public class VertexAIClient {
         }
         return response;
     }
-    public String prompt(String prompt, String modelName) {
+
+    public String promptWithLangchain4J(String prompt, String modelName) {
         String output =null;
         logger.info("The prompt & model name are: " + prompt.substring(0,100) +" | "+modelName);
         if (modelName.contains("chat")) {
