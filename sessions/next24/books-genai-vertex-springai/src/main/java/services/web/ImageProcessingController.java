@@ -186,7 +186,6 @@ public class ImageProcessingController {
         return new ResponseEntity<String>(msg, HttpStatus.OK);
     }
 
-        //-----------------------
     @Bean
     @Description("Get availability of book in the book store")
     public Function<BookStoreService.Request, BookStoreService.Response> bookStoreAvailability() {
@@ -208,7 +207,7 @@ public class ImageProcessingController {
         @Override
         public Response apply(Request request) {
             System.out.println("BookStore availability request: " + request);
-            return new Response(request.title(), request.author(), "The book is available for purchase in the book store in hard copy");
+            return new Response(request.title(), request.author(), "The book is available for purchase in the book store in paperback format.");
         }
     }
 
@@ -222,5 +221,4 @@ public class ImageProcessingController {
         }
 
     }
-    //-----------------------    
 }

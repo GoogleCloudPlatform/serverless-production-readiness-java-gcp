@@ -80,7 +80,7 @@ public class VertexAIClient {
         logger.info("Elapsed time (chat model, with SpringAI): " + (System.currentTimeMillis() - start) + "ms");
 
         String output = chatResponse.getResult().getOutput().getContent();
-        logger.info("Chat Model output: ", output);
+        logger.info("Chat Model output: " + output);
 
         // return model response in String format
         return output;
@@ -100,7 +100,7 @@ public class VertexAIClient {
         logger.info("Elapsed time (chat model, with SpringAI): " + (System.currentTimeMillis() - start) + "ms");
 
         String output = chatResponse.getResult().getOutput().getContent();
-        logger.info("Chat Model output with Function Call: ", output);
+        logger.info("Chat Model output with Function Call: " + output);
 
         // return model response in String format
         return output;
