@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.ChatResponse;
 import org.springframework.ai.chat.messages.MediaData;
+import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.vertexai.gemini.MimeTypeDetector;
@@ -84,4 +85,25 @@ public class VertexAIClient {
         // return model response in String format
         return output;
     }
+
+    public String promptModelwithFunctionCalls(SystemMessage systemMessage,
+                                               UserMessage userMessage,
+                                               String functionName,
+                                               String modelName) {
+        long start = System.currentTimeMillis();
+
+        ChatResponse chatResponse = chatClient.call(new Prompt(List.of(systemMessage, userMessage),
+                                                    VertexAiGeminiChatOptions.builder()
+                                                        .withModel("gemini-pro")
+                                                        .withFunction(functionName).build()));
+        
+        logger.info("Elapsed time (chat model, with SpringAI): " + (System.currentTimeMillis() - start) + "ms");
+
+        String output = chatResponse.getResult().getOutput().getContent();
+        logger.info("Chat Model output with Function Call: ", output);
+
+        // return model response in String format
+        return output;
+    }
+
 }

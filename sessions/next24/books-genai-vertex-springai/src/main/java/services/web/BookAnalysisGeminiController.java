@@ -130,6 +130,22 @@ public class BookAnalysisGeminiController {
     System.out.println("Book title: " + bookData.title());
     System.out.println("Book author: " + bookData.author());
 
+    //-----------------------
+    // Functiop calling BookStoreService
+    // var systemMessage = new SystemMessage("""
+    //         Use Multi-turn function calling.
+    //         Answer with precision.
+    //         If the information was not fetched call the function again. Repeat at most 3 times.
+    //         """);
+    // UserMessage userMessage = new UserMessage(
+    //     String.format("Please find out if the book with the title %s by author %s is available in the University bookstore.",
+    //                     bookData.title(), bookData.author()));
+
+    // ChatResponse bookStoreResponse = chatSpringClient.call(new Prompt(List.of(systemMessage, userMessage),
+    //     VertexAiGeminiChatOptions.builder().withFunction("bookStoreAvailability").build()));
+    // System.out.println("Book availability: " + bookStoreResponse.getResult().getOutput().getContent());
+    //-----------------------
+
     // Function calling
     var systemMessage = new SystemMessage("""
       Use Multi-turn function calling.
@@ -146,34 +162,6 @@ public class BookAnalysisGeminiController {
     return new ResponseEntity<String>(chatResponse.getResult().getOutput().getContent(), HttpStatus.OK);
   }
 
-  /* 
-  
-  //-----------------------
-  // @PostMapping("")
-  // public ResponseEntity<String> processUserRequest(@RequestBody BookRequest bookRequest, 
-  //                                                  @RequestParam(name = "contentCharactersLimit", defaultValue = "6000") Integer contentCharactersLimit) throws IOException{
-
-  //   ChatLanguageModel visionModel = VertexAiGeminiChatModel.builder()
-  //           .project(CloudConfig.projectID)
-  //           .location(CloudConfig.zone)
-  //           .modelName("gemini-pro-vision")
-  //           .build();
-
-  //   // byte[] image = cloudStorageService.readFileAsByteString("library_next24_images", "TheJungleBook.jpg");            
-  //   UserMessage userMessage = UserMessage.from(
-  //           // ImageContent.from(Base64.getEncoder().encodeToString(image)),
-  //           ImageContent.from("gs://vision-optimize-serverless-apps/TheJungleBook.jpg"),
-  //           TextContent.from("Extract the author and title from the book cover, return as map, remove all markdown annotations")
-  //   );
-
-  //   // when
-  //   Response<AiMessage> response = visionModel.generate(userMessage);
-  //   String outputString = response.content().text();
-  //   System.out.println(outputString);
-
-  //   return new ResponseEntity<String>(outputString, HttpStatus.OK);
-  // }
-  */
 
   public static String removeMarkdownTags(String text) {
     // String response = text.replaceAll("```json", " ");
@@ -217,5 +205,43 @@ public class BookAnalysisGeminiController {
         }
 
     }
+
+    // //-----------------------
+    // @Bean
+    // @Description("Get availability of book in the book store")
+    // public Function<BookStoreService.Request, BookStoreService.Response> bookStoreAvailability() {
+    //     return new BookStoreService();
+    // }
+    // public static class BookStoreService
+    //     implements Function<BookStoreService.Request, BookStoreService.Response> {
+
+    //     @JsonInclude(Include.NON_NULL)
+    //     @JsonClassDescription("BookStore API Request")
+    //     public record Request(
+    //         @JsonProperty(required = true, value = "title") @JsonPropertyDescription("The title of the book") String title,
+    //         @JsonProperty(required = true, value = "author") @JsonPropertyDescription("The author of the book") String author) {
+    //     }
+    //     @JsonInclude(Include.NON_NULL)
+    //     public record Response(String title, String author, String availability) {
+    //     }
+
+    //     @Override
+    //     public Response apply(Request request) {
+    //         System.out.println("BookStore availability request: " + request);
+    //         return new Response(request.title(), request.author(), "The book is available for purchase in the book store in hard copy");
+    //     }
+    // }
+
+    // public static class BookStoreServiceRuntimeHints implements RuntimeHintsRegistrar {
+    //     @Override
+    //     public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+    //         // Register method for reflection
+    //         var mcs = MemberCategory.values();
+    //         hints.reflection().registerType(BookStoreService.Request.class, mcs);
+    //         hints.reflection().registerType(BookStoreService.Response.class, mcs);
+    //     }
+
+    // }
+    // //-----------------------    
 
 }

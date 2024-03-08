@@ -54,4 +54,16 @@ public class FirestoreService {
     return doc.set(data, SetOptions.merge());
   }
 
+  public ApiFuture<WriteResult> storeBookInfo(String fileName, String title, String author, String summary, String modelResponse) {
+    DocumentReference doc = firestore.collection("pictures").document(fileName);
+
+    Map<String, Object> data = new HashMap<>();
+    data.put("title", title);
+    data.put("author", author);
+    data.put("summary", summary);
+    data.put("modelResponse", modelResponse);
+    data.put("created", new Date());
+
+    return doc.set(data, SetOptions.merge());
+  }
 }
