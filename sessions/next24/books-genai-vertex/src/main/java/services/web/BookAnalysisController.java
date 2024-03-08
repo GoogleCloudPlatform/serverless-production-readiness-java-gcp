@@ -65,7 +65,7 @@ public class BookAnalysisController {
     List<Map<String, Object>> responseBook = booksService.prompt(bookRequest, contentCharactersLimit);
 
     // build prompt to query LLM with the augmented context
-    String promptWithContext = PromptUtility.formatPromptBookAnalysis(responseBook, bookRequest.keyWords());
+    String promptWithContext = PromptUtility.formatPromptBookAnalysis(responseBook, bookRequest);
 
     System.out.println("Model: " + model);
     // submit prompt to the LLM via framework

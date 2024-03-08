@@ -15,6 +15,8 @@
  */
 package services.utility;
 
+import services.web.data.BookRequest;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -39,14 +41,14 @@ public class PromptUtility {
         return String.format("Find the paragraphs mentioning keywords in the following list: {%s} in the book.", joinedTopics);
     }
 
-    public static String formatPromptBookAnalysis(List<Map<String, Object>> bookPages, List<String> keywords) {
+    public static String formatPromptBookAnalysis(List<Map<String, Object>> bookPages, BookRequest bookRequest) {
         String promptBookAnalysis = "Provide an analysis of the %s by %s " +
                 "with the skills of a literary critic." +
                 "What factor do the following %s " +
                 "play in the narrative of the book. " +
                 "Please use these paragraphs delimited by triple backquotes from the book :\n" +
                 "```%s```";
-
+        List<String> keywords = bookRequest.keyWords();
         // Check for an empty topics list
         List<String> params = keywords.stream()
                 .filter(Objects::nonNull)  // Filters out null values
@@ -59,8 +61,8 @@ public class PromptUtility {
 
         System.out.println(params);
 
-        String book = (String) bookPages.get(0).get("title");
-        String author = (String) bookPages.get(0).get("author");
+        String book = bookRequest.book();
+        String author = bookRequest.author();
         String context = "";
         for(Map<String, Object> page: bookPages) {
             context += page.get("page")+" ";
