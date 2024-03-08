@@ -54,7 +54,7 @@ public class VertexAIClient {
     public GenerateContentResponse promptOnImage(byte[] image, String prompt) throws IOException {
         GenerateContentResponse response = null;
         if(prompt== null ||prompt.isBlank())
-            prompt = "Extract the book name, labels, main color and author strictly in JSON format.";
+            prompt = "Extract the book name, labels, main color, and author strictly in JSON format. The json output strictly have property names bookName, mainColor, author, and labels.";
         String location = CloudUtility.extractRegion(CloudConfig.zone);
         try (VertexAI vertexAI = new VertexAI(CloudConfig.projectID, location)) {
             GenerationConfig generationConfig =
