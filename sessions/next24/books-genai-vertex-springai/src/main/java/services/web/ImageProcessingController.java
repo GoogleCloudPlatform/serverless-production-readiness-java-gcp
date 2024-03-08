@@ -15,11 +15,6 @@
  */
 package services.web;
 
-import com.google.api.core.ApiFuture;
-import com.google.cloud.firestore.WriteResult;
-import com.google.cloud.vertexai.api.Candidate;
-import com.google.cloud.vertexai.api.GenerateContentResponse;
-import com.google.cloud.vertexai.api.Part;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -28,7 +23,6 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,7 +33,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import services.actuator.StartupCheck;
 import services.ai.VertexAIClient;
-import services.ai.VertexModels;
 import services.config.CloudConfig;
 import services.domain.BooksService;
 import services.domain.CloudStorageService;
@@ -85,7 +78,7 @@ public class ImageProcessingController {
 
     @RequestMapping(value = "", method = RequestMethod.POST)
     public ResponseEntity<String> receiveMessage(
-            @RequestBody Map<String, Object> body, @RequestHeader Map<String, String> headers) throws IOException, InterruptedException, ExecutionException {
+        @RequestBody Map<String, Object> body, @RequestHeader Map<String, String> headers) throws IOException, InterruptedException, ExecutionException {
         System.out.println("Header elements");
         for (String field : CloudConfig.requiredFields) {
             if (headers.get(field) == null) {
@@ -123,61 +116,33 @@ public class ImageProcessingController {
             return new ResponseEntity<String>(msg, HttpStatus.BAD_REQUEST);
         }
 
-        byte[] image = cloudStorageService.readFileAsByteString(bucketName, fileName);
-        GenerateContentResponse response  = vertexAIClient.promptOnImage(image, promptImage);
+        // multi-modal call to retrieve text from the uploaded image
+        String response = vertexAIClient.promptOnImage(promptImage, bucketName, fileName);
 
-        String prompt = "Explain the text ";
+        // parse the response and extract the data
+        Map<String, Object> jsonMap = JsonUtility.parseJsonToMap(response);
 
-        logger.info("Text Annotations:");
-        String jsonResponse = "";
-        Map<String, Object> jsonMap = new HashMap<>();
-        String bookTitle = "";
-        String mainColor = "";
-        String author = "";
-        List<String> labels = new ArrayList<>();
+        String title = (String) jsonMap.get("title");
+        String author = (String) jsonMap.get("author");
 
-        for (Candidate candidate : response.getCandidatesList()) {
-                List<Part> parts = candidate.getContent().getPartsList();
-                String textElements = "";
-                if(parts.size() == 0) {
-                    continue;
-                }
-                for(Part p : parts) {
-                    if(p.getText()!=null && p.getText().length() > 0) {
-                        jsonResponse = p.getText();
-                        try {
-                            jsonMap = JsonUtility.parseJsonToMap(jsonResponse);
-                        } catch (Exception e) {
-                           logger.warn(e.toString());
-                        }
-                    }
-                    textElements += p.getText() + " ";
-                }
-                prompt += textElements + " ";
-                logger.info("Text: " + textElements);
-                // if(textElements.matches("^[a-zA-Z0-9]+$"))
-                prompt += textElements;
-        }
+        logger.info(String.format("Result: Author %s, Title %s", title, author));
 
-        bookTitle = (String) jsonMap.get("bookName");
-        mainColor = (String) jsonMap.get("mainColor");
-        author = (String) jsonMap.get("author");
-        labels = (List<String>)jsonMap.get("labels");
+        // String modelResponse = null;
+        // if (!prompt.isEmpty()) {
+        //     modelResponse = vertexAIClient.promptModel(prompt, VertexModels.CHAT_BISON);
+        //     logger.info("Result Chat Model: " + modelResponse);
+        // }
 
-        logger.info("Result bookTitle: " + bookTitle +" mainColor: "+mainColor+" labels: "+labels);
-        String modelResponse = null;
-        if (!prompt.isEmpty()) {
-            modelResponse = vertexAIClient.promptModel(prompt, VertexModels.CHAT_BISON);
-            logger.info("Result Chat Model: " + modelResponse);
-        }
+        // retrieve the book summary from the database
+        String summary = booksService.getBookSummary(title);
+        logger.info("The summary of the book:"+ title+ " is: " + summary);
 
-        String summary = booksService.getBookSummary(bookTitle);
-        logger.info("The summary of the book "+bookTitle+ " is: " + summary);
+        // WIP - finalize after Function Calling is wired in
         // Saving result to Firestore
-        if (modelResponse != null) {
-            ApiFuture<WriteResult> writeResult = eventService.storeImage(fileName, labels, mainColor, modelResponse);
-            logger.info("Picture metadata saved in Firestore at " + writeResult.get().getUpdateTime());
-        }
+        // if (modelResponse != null) {
+        // ApiFuture<WriteResult> writeResult = eventService.storeImage(fileName, labels, mainColor, modelResponse);
+        // logger.info("Picture metadata saved in Firestore at " + writeResult.get().getUpdateTime());
+        // }
 
         return new ResponseEntity<String>(msg, HttpStatus.OK);
     }

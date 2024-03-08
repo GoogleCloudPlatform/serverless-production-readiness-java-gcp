@@ -18,7 +18,7 @@ management:
     health:
       show-details: ALWAYS
   health:
-    diskspace:  
+    diskspace:
       enabled: false
   endpoints:
     enabled-by-default: true
@@ -36,17 +36,17 @@ spring:
       modelImageProName: ${MODEL_IMAGE_PRO_NAME:gemini-pro-vision}
   ai:
     vertex:
-      ai: 
+      ai:
         gemini:
           project-id: ${VERTEX_AI_GEMINI_PROJECT_ID}
           location: ${VERTEX_AI_GEMINI_LOCATION}
-          chat: 
+          chat:
             options:
               model: gemini-pro
   threads:
-    virtual: 
-      enabled: true      
+    virtual:
+      enabled: true
 
 prompts:
   bookanalysis: ${PROMPT_BOOK_ANALYSIS:Extract the main ideas from the book The Jungle Book by Rudyard Kipling}
-  promptImage: ${PROMPT_IMAGE:Extract the book name labels main color and author strictly in JSON format. The json output strictly have property names bookName mainColor author and labels.}
+  promptImage: ${PROMPT_IMAGE:Extract the book title, labels, main color and author strictly in JSON format}

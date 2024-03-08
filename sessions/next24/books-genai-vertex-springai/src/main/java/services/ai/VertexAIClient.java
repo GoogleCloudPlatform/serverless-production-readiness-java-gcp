@@ -15,30 +15,17 @@
  */
 package services.ai;
 
-import com.google.cloud.vertexai.VertexAI;
-import com.google.cloud.vertexai.api.Content;
-import com.google.cloud.vertexai.generativeai.GenerativeModel;
-import com.google.cloud.vertexai.api.GenerateContentResponse;
-import com.google.cloud.vertexai.api.GenerationConfig;
-import com.google.cloud.vertexai.api.SafetySetting;
-import com.google.cloud.vertexai.api.HarmCategory;
-import com.google.cloud.vertexai.api.Part;
-import com.google.cloud.vertexai.api.Blob;
-import com.google.protobuf.ByteString;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.ChatResponse;
+import org.springframework.ai.chat.messages.MediaData;
+import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.vertexai.gemini.MimeTypeDetector;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatClient;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatOptions;
 import org.springframework.stereotype.Service;
-import services.config.CloudConfig;
-import services.utility.CloudUtility;
-
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -51,69 +38,50 @@ public class VertexAIClient {
         this.chatClient = chatClient;
     }
 
-    public GenerateContentResponse promptOnImage(byte[] image) throws IOException {
-        return promptOnImage(image, "");
-    }
-
-    public GenerateContentResponse promptOnImage(byte[] image, String prompt) throws IOException {
+    public String promptOnImage(String prompt,
+        String bucketName,
+        String fileName) throws IOException {
         long start = System.currentTimeMillis();
 
-        GenerateContentResponse response = null;
-        if(prompt== null ||prompt.isBlank())
-            prompt = "Extract the book name, labels, main color and author strictly in JSON format.";
-        String location = CloudUtility.extractRegion(CloudConfig.zone);
-        try (VertexAI vertexAI = new VertexAI(CloudConfig.projectID, location)) {
-            GenerationConfig generationConfig =
-                    GenerationConfig.newBuilder()
-                            .setMaxOutputTokens(2048)
-                            .setTemperature(0.4F)
-                            .setTopK(32)
-                            .setTopP(1F)
-                            .build();
-            GenerativeModel model = new GenerativeModel(VertexModels.GEMINI_PRO_VISION_VERSION, generationConfig, vertexAI);
-            List<SafetySetting> safetySettings = Arrays.asList(
-                    SafetySetting.newBuilder()
-                            .setCategory(HarmCategory.HARM_CATEGORY_HATE_SPEECH)
-                            .setThreshold(SafetySetting.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE)
-                            .build(),
-                    SafetySetting.newBuilder()
-                            .setCategory(HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT)
-                            .setThreshold(SafetySetting.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE)
-                            .build(),
-                    SafetySetting.newBuilder()
-                            .setCategory(HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT)
-                            .setThreshold(SafetySetting.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE)
-                            .build(),
-                    SafetySetting.newBuilder()
-                            .setCategory(HarmCategory.HARM_CATEGORY_HARASSMENT)
-                            .setThreshold(SafetySetting.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE)
-                            .build()
-            );
-            List<Content> contents = new ArrayList<>();
-            contents.add(Content.newBuilder().setRole("user").addParts(Part.newBuilder().setInlineData(Blob.newBuilder().setMimeType("image/png")
-                            .setData(ByteString.copyFrom(image))))
-                    .addParts(Part.newBuilder().setText(prompt))
-                    .build());
-            response = model.generateContent(contents, safetySettings);
-            logger.info(response.toString());
-        }
-        logger.info("Elapsed time (chat model): " + (System.currentTimeMillis() - start) + "ms");        
+        // bucket where image has been uploaded
+        String imageURL = String.format("gs://%s/%s",bucketName, fileName);
+
+        // create User Message for AI framework
+        var multiModalUserMessage = new UserMessage(prompt,
+            List.of(new MediaData(MimeTypeDetector.getMimeType(imageURL), imageURL)));
+
+        // call the model of choice
+        ChatResponse multiModalResponse = chatClient.call(new Prompt(List.of(multiModalUserMessage),
+            VertexAiGeminiChatOptions.builder()
+                .withModel(VertexModels.GEMINI_PRO_VISION).build()));
+        String response = multiModalResponse.getResult().getOutput().getContent();
+        logger.info("Multi-modal response: " + response);
+
+        // response from Vertex is in Markdown, remove annotations
+        response = response.replaceAll("```json", "").replaceAll("```", "").replace("'", "\"");
+
+        logger.info("Elapsed time (chat model): " + (System.currentTimeMillis() - start) + "ms");
+
+        // return the response in String format, extract values in caller
         return response;
     }
 
     public String promptModel(String prompt, String modelName) {
         long start = System.currentTimeMillis();
+
+        // prompt Chat model
         ChatResponse chatResponse = chatClient.call(new Prompt(prompt,
-                                                    VertexAiGeminiChatOptions.builder()
-                                                        .withTemperature(0.4f)
-                                                        .withModel(VertexModels.GEMINI_PRO)
-                                                        .build())
-                );
+            VertexAiGeminiChatOptions.builder()
+                .withTemperature(0.4f)
+                .withModel(VertexModels.GEMINI_PRO)
+                .build())
+        );
         logger.info("Elapsed time (chat model, with SpringAI): " + (System.currentTimeMillis() - start) + "ms");
 
         String output = chatResponse.getResult().getOutput().getContent();
-        logger.info(output);
+        logger.info("Chat Model output: ", output);
+
+        // return model response in String format
         return output;
     }
-
 }
