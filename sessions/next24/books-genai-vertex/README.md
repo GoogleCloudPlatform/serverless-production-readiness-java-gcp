@@ -1,4 +1,4 @@
-# Books GenAI - Cloud Run Service using VertexAI, Gemini and Langchain4J
+# Books GenAI - Cloud Run Service using Langchain4J, VertexAI, Gemini
 
 This lab can be executed directly in a Cloud Workstation, Cloudshell or your environment of choice. 
 
