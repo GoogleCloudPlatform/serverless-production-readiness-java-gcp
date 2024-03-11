@@ -108,7 +108,7 @@ from
 --delete from pages where book_id=11;
 --delete from books where author_id= 12;
 --update books set title='The Complete Works of William Shakespeare' where book_id=8;
-update authors set name='William Shakespeare' where author_id=1;
+--update authors set name='William Shakespeare' where author_id=1;
 
 
 
