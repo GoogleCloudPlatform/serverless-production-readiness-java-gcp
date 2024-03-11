@@ -1,0 +1,7 @@
+steps:
+- name: 'hashicorp/jsii-terraform'
+  entrypoint: sh
+  args: ["-c","chmod +x *.sh && ./cdktf.sh"]
+  env:
+  - 'CDKTF_TYPE=$_CDKTF_TYPE'
+  - 'PROJECT_ID=$PROJECT_ID'
