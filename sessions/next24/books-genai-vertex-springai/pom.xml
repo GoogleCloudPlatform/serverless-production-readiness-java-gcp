@@ -9,7 +9,7 @@
     <version>3.2.3</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
-  <artifactId>book-images</artifactId>
+  <artifactId>books-genai</artifactId>
   <version>1.0.0</version>
   <name>books-genai</name>
   <description>Spring App for Image Analysis</description>
@@ -18,7 +18,7 @@
     <spring-cloud.version>2023.0.0</spring-cloud.version>
     <testcontainers.version>1.19.7</testcontainers.version>
     <!-- <langchain4j.version>0.27.1</langchain4j.version> -->
-    <spring-ai.version>0.8.1-SNAPSHOT</spring-ai.version>
+    <spring-ai.version>0.8.1</spring-ai.version>
   </properties>
   <dependencies>
     <dependency>

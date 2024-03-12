@@ -10,6 +10,8 @@ EOF
 gcloud resource-manager org-policies set-policy policy.yaml --organization=419713829424
 export SERVICE_ACCOUNT=48099017975-compute@developer.gserviceaccount.com
 gcloud eventarc triggers list --location=us-central1
+
+# configure triggers for public and private books, images - accessing the JIT service image
 gcloud eventarc triggers create books-genai-jit-trigger-public \
      --destination-run-service=books-genai-jit \
      --destination-run-region=us-central1 \
@@ -30,6 +32,34 @@ gcloud eventarc triggers create books-genai-jit-trigger-private \
 
 gcloud eventarc triggers create books-genai-jit-trigger-image \
      --destination-run-service=books-genai-jit \
+     --destination-run-region=us-central1 \
+     --destination-run-path=/images \
+     --location=us-central1 \
+     --event-filters="type=google.cloud.storage.object.v1.finalized" \
+     --event-filters="bucket=library_next24_images" \
+     --service-account=48099017975-compute@developer.gserviceaccount.com
+
+# configure triggers for public and private books, images - accessing the Native Java service image
+gcloud eventarc triggers create books-genai-native-trigger-public \
+     --destination-run-service=books-genai-native \
+     --destination-run-region=us-central1 \
+     --destination-run-path=/document/embeddings \
+     --location=us-central1 \
+     --event-filters="type=google.cloud.storage.object.v1.finalized" \
+     --event-filters="bucket=library_next24_public" \
+     --service-account=48099017975-compute@developer.gserviceaccount.com
+
+gcloud eventarc triggers create books-genai-native-trigger-private \
+     --destination-run-service=books-genai-native \
+     --destination-run-region=us-central1 \
+     --destination-run-path=/document/embeddings \
+     --location=us-central1 \
+     --event-filters="type=google.cloud.storage.object.v1.finalized" \
+     --event-filters="bucket=library_next24_private" \
+     --service-account=48099017975-compute@developer.gserviceaccount.com
+
+gcloud eventarc triggers create books-genai-native-trigger-image \
+     --destination-run-service=books-genai-native \
      --destination-run-region=us-central1 \
      --destination-run-path=/images \
      --location=us-central1 \

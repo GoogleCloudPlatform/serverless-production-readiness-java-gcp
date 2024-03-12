@@ -25,7 +25,7 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.ChatResponse;
-import org.springframework.ai.chat.messages.MediaData;
+import org.springframework.ai.chat.messages.Media;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.Prompt;
@@ -116,7 +116,7 @@ public class BookAnalysisGeminiController {
 
     String imageURL = "gs://library_next24_images/TheJungleBook.jpg";
     var multiModalUserMessage = new UserMessage("Extract the author and title from the book cover. Return the response as a Map, remove the markdown annotations",
-        List.of(new MediaData(MimeTypeDetector.getMimeType(imageURL), imageURL)));
+        List.of(new Media(MimeTypeDetector.getMimeType(imageURL), imageURL)));
 
     ChatResponse multiModalResponse = chatSpringClient.call(new Prompt(List.of(multiModalUserMessage),
             VertexAiGeminiChatOptions.builder().withModel(VertexModels.GEMINI_PRO_VISION).build()));

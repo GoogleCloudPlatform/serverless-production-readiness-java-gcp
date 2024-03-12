@@ -23,7 +23,7 @@
             "name": "BookImagesApplication",
             "request": "launch",
             "mainClass": "services.BookImagesApplication",
-            "projectName": "book-images",
+            "projectName": "books-genai",
             "env": {
                 "MY_USER": "postgres",
                 "MY_PASSWORD": "next24-12345!",
