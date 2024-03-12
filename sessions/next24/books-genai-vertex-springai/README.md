@@ -14,7 +14,7 @@ sdk install java 21.0.2-graal
 ## Clone the code:
 ```shell
 git clone https://github.com/GoogleCloudPlatform/serverless-production-readiness-java-gcp.git
-cd genai/image-vision-vertex-langchain/
+cd serverless-production-readiness-java-gcp/sessions/next24/books-genai-vertex-springai 
 ```
 
 ## Install the maven wrapper
@@ -28,43 +28,40 @@ mvn wrapper:wrapper
 ## Build the service code and publish images to the container registry
 Build the JIT app image:
 ```shell
-With tests:
+#wWith tests:
 ./mvnw package
 
-Without tests:
-./mvnw install -DskipTests
+# without tests:
+./mvnw package -DskipTests
 
-Start the app locally require ability to reach alloydb from your machine:
+Start the app locally requires the ability to reach alloydb from your machine:
 
 export DB_URL=jdbc:postgresql://alloy-ipaddress:port/library
 export MY_USER=user
 export MY_PASSWORD=pword 
 
 java -jar target/books-genai-1.0.0.jar 
-Or
+  or
 ./mvnw spring-boot:run
 ```
 
 Build the Native Java executable:
 ```shell
+# with tests
 ./mvnw native:compile -Pnative
+
+# without tests
+./mvnw native:compile -Pnative -DskipTests
 
 Test the executable locally:
 ./target/books-genai
 ```
 
-Build Native Java Tests:
-```shell
-./mvnw clean package -Pnative,nativeTest
-
-Run the native tests locally:
-./mvnw native-tests
-```
 ### Build a JIT and Native Java container Image
 ```shell
-./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=books-genai-jit
+./mvnw spring-boot:build-image -Dskiptests -Dspring-boot.build-image.imageName=books-genai-jit
 
-./mvnw spring-boot:build-image  -DskipTests -Pnative -Dspring-boot.build-image.imageName=books-genai-native
+./mvnw spring-boot:build-image -Pnative -DskipTests -Dspring-boot.build-image.imageName=books-genai-native
 ```
 
 Check the Docker image sizes:
@@ -86,13 +83,21 @@ export PROJECT_ID=$(gcloud config get-value project)
 echo $PROJECT_ID
 ```
 
-Tag and push the images to GCR:
+Tag and push the images to GCR or Artifact Registry:
 ```shell
+# Container Registry
 docker tag books-genai-jit gcr.io/${PROJECT_ID}/books-genai-jit
 docker tag books-genai-native gcr.io/${PROJECT_ID}/books-genai-native
 
 docker push gcr.io/${PROJECT_ID}/books-genai-jit
 docker push gcr.io/${PROJECT_ID}/books-genai-native
+
+# Artifact Registry
+docker tag books-genai-jit:latest us-docker.pkg.dev/${PROJECT_ID}/books-genai-jit/books-genai:latest
+docker tag books-genai-native:latest us-docker.pkg.dev/${PROJECT_ID}/books-genai-native/books-genai:latest
+
+docker push us-docker.pkg.dev/${PROJECT_ID}/books-genai-jit/books-genai:latest 
+docker push us-docker.pkg.dev/${PROJECT_ID}/books-genai-native/books-genai:latest 
 ```
 
 ## Deploy and run workshop code
@@ -124,23 +129,28 @@ Create a vpc called default VPC with subnet in us-central1  [here](https://cloud
 
 ## Create the GCS bucket
 ```shell
-export BUCKET_PICTURES=vision-${PROJECT_ID}
+export BUCKET_PICTURES=library_next24_images
 gsutil mb -l us-central1 gs://${BUCKET_PICTURES}
 gsutil uniformbucketlevelaccess set on gs://${BUCKET_PICTURES}
 gsutil iam ch allUsers:objectViewer gs://${BUCKET_PICTURES}
 
-export BUCKET_BOOKS=books-${PROJECT_ID}
-gsutil mb -l us-central1 gs://${BUCKET_BOOKS}
-gsutil uniformbucketlevelaccess set on gs://${BUCKET_BOOKS}
-gsutil iam ch allUsers:objectViewer gs://${BUCKET_BOOKS}
+export BUCKET_BOOKS_PUBLIC=libarary_next24_public
+gsutil mb -l us-central1 gs://${BUCKET_BOOKS_PUBLIC}
+gsutil uniformbucketlevelaccess set on gs://${BUCKET_BOOKS_PUBLIC}
+gsutil iam ch allUsers:objectViewer gs://${BUCKET_BOOKS_PUBLIC}
+
+export BUCKET_BOOKS_PRIVATE=libarary_next24_private
+gsutil mb -l us-central1 gs://${BUCKET_BOOKS_PRIVATE}
+gsutil uniformbucketlevelaccess set on gs://${BUCKET_BOOKS_PRIVATE}
+gsutil iam ch allUsers:objectViewer gs://${BUCKET_BOOKS_PRIVATE}
 ```
 
 ## Create the database
 Instructions for configuring cloud Firestore available [here](https://codelabs.developers.google.com/codelabs/cloud-picadaily-lab1?hl=en&continue=https%3A%2F%2Fcodelabs.developers.google.com%2Fserverless-workshop%2F#8)
 
 ## Create the alloydb database
-Instructions for configuring cloud alloydb available [here](https://codelabs.developers.google.com/codelabs/alloydb-ai-embedding)
-Once the alloydb instance is up and Vertex AI is enabled. Skip creating quickstart_db and import data.
+Instructions for configuring cloud AlloyDB available [here](https://codelabs.developers.google.com/codelabs/alloydb-ai-embedding)
+Once the AlloyDB instance is up and Vertex AI is enabled. Skip creating quickstart_db and import data.
 
 Create a new database called library instead:
 ```shell
@@ -200,25 +210,26 @@ Deploy to Cloud Run
 ```shell
 # deploy JIT image to Cloud Run
 gcloud run deploy books-genai-jit \
-     ----set-env-vars='MY_PASSWORD=pword,MY_USER=user,DB_URL=jdbc:postgresql://alloy-internal-ip:port/library,MODEL_ANALYSIS_NAME=text-bison-32k,MODEL_IMAGE_PRO_NAME=text-bison-32k,VERTEX_AI_GEMINI_PROJECT_ID=project-id,VERTEX_AI_GEMINI_LOCATION=us-central1' \
-     --image gcr.io/${PROJECT_ID}/books-genai-jit \
-     --region us-central1 \
-     --memory 2Gi --allow-unauthenticated \
-     --vpc-connector alloy-connector
-# deploy native Java image to Cloud Run
+  --set-env-vars='MY_PASSWORD=<password>,MY_USER=<user>,DB_URL=<DB_URL>,VERTEX_AI_GEMINI_PROJECT_ID=${$PROJECT_ID},VERTEX_AI_GEMINI_LOCATION=us-central1' \
+  --image us-docker.pkg.dev/${$PROJECT_ID}/books-genai-jit/books-genai:latest  --region us-central1 \
+  --memory 4Gi --cpu 4 --cpu-boost --execution-environment=gen2  \
+  --set-env-vars=JAVA_TOOL_OPTIONS='-XX:+UseZGC -XX:+ZGenerational -XX:MaxRAMPercentage=75 -XX:ActiveProcessorCount=4 -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -Xss256k' \
+  --allow-unauthenticated 
 
+# deploy native Java image to Cloud Run
 gcloud run deploy books-genai-native \
-     --set-env-vars='MY_PASSWORD=pword,MY_USER=user,DB_URL=jdbc:postgresql://alloy-internal-ip:port/library,MODEL_ANALYSIS_NAME=text-bison-32k,MODEL_IMAGE_PRO_NAME=text-bison-32k,VERTEX_AI_GEMINI_PROJECT_ID=project-id,VERTEX_AI_GEMINI_LOCATION=us-central1' \
-     --image gcr.io/${PROJECT_ID}/books-genai-native \
-     --region us-central1 \
-     --memory 2Gi --allow-unauthenticated \
-     --vpc-connector alloy-connector
+  --set-env-vars='MY_PASSWORD=<password>,MY_USER=<user>,DB_URL=<DB_URL>,VERTEX_AI_GEMINI_PROJECT_ID=${$PROJECT_ID},VERTEX_AI_GEMINI_LOCATION=us-central1' \
+  --image us-docker.pkg.dev/${$PROJECT_ID}/books-genai-native/books-genai:latest  --region us-central1 \
+  --memory 4Gi --cpu 4 --cpu-boost --execution-environment=gen2  \
+  --set-env-vars=JAVA_TOOL_OPTIONS='-XX:+UseG1GC -XX:MaxRAMPercentage=75 -XX:ActiveProcessorCount=4 -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -Xss256k' \
+  --allow-unauthenticated 
 ```
 
 Set up Eventarc triggers
 ```shell
 gcloud eventarc triggers list --location=us-central1
 
+# configure triggers for public and private books, images - accessing the Native Java service image
 gcloud eventarc triggers create books-genai-jit-trigger-image \
      --destination-run-service=books-genai-jit \
      --destination-run-region=us-central1 \
@@ -246,20 +257,37 @@ gcloud eventarc triggers create books-genai-jit-trigger-embeddings \
      --event-filters="bucket=books-${PROJECT_ID}" \
      --service-account=48099017975-compute@developer.gserviceaccount.com
 
-gcloud eventarc triggers create books-genai-native-trigger-embeddings \
+# configure triggers for public and private books, images - accessing the Native Java service image
+gcloud eventarc triggers create books-genai-native-trigger-public \
      --destination-run-service=books-genai-native \
      --destination-run-region=us-central1 \
      --destination-run-path=/document/embeddings \
      --location=us-central1 \
      --event-filters="type=google.cloud.storage.object.v1.finalized" \
-     --event-filters="bucket=books-${PROJECT_ID}" \
+     --event-filters="bucket=library_next24_public" \
+     --service-account=48099017975-compute@developer.gserviceaccount.com
+
+gcloud eventarc triggers create books-genai-native-trigger-private \
+     --destination-run-service=books-genai-native \
+     --destination-run-region=us-central1 \
+     --destination-run-path=/document/embeddings \
+     --location=us-central1 \
+     --event-filters="type=google.cloud.storage.object.v1.finalized" \
+     --event-filters="bucket=library_next24_private" \
+     --service-account=48099017975-compute@developer.gserviceaccount.com
+
+gcloud eventarc triggers create books-genai-native-trigger-image \
+     --destination-run-service=books-genai-native \
+     --destination-run-region=us-central1 \
+     --destination-run-path=/images \
+     --location=us-central1 \
+     --event-filters="type=google.cloud.storage.object.v1.finalized" \
+     --event-filters="bucket=library_next24_images" \
      --service-account=48099017975-compute@developer.gserviceaccount.com
 ```
 
 Test the trigger
 ```shell
-gsutil cp images/GeekHour.jpeg gs://vision-${PROJECT_ID}
-gsutil cp images/CloudRun.png gs://vision-${PROJECT_ID}
 gsutil cp books/The_Jungle_Book-Rudyard_Kipling-1894-public.txt gs://books-${PROJECT_ID}
 gsutil cp books/Meditations-Marcus_Aurelius-0161-public.txt gs://books-${PROJECT_ID}
 
@@ -272,5 +300,4 @@ Log capture:
  gcloud logging read "resource.labels.service_name=books-genai-jit AND textPayload:CloudRun" --format=json
  gcloud logging read "resource.labels.service_name=books-genai-native AND textPayload:CloudRun" --format=json
 ```
-
 

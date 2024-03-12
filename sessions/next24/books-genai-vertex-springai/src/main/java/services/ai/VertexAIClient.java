@@ -18,7 +18,7 @@ package services.ai;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.ChatResponse;
-import org.springframework.ai.chat.messages.MediaData;
+import org.springframework.ai.chat.messages.Media;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.Prompt;
@@ -49,7 +49,7 @@ public class VertexAIClient {
 
         // create User Message for AI framework
         var multiModalUserMessage = new UserMessage(prompt,
-            List.of(new MediaData(MimeTypeDetector.getMimeType(imageURL), imageURL)));
+            List.of(new Media(MimeTypeDetector.getMimeType(imageURL), imageURL)));
 
         // call the model of choice
         ChatResponse multiModalResponse = chatClient.call(new Prompt(List.of(multiModalUserMessage),
