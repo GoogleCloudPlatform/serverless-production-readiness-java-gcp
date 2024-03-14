@@ -1,4 +1,4 @@
-# Books GenAI - Cloud Run Service using SpringAI, VertexAI, Gemini
+# Books GenAI - Cloud Run Service using Langchain4J, VertexAI, Gemini
 
 This lab can be executed directly in a Cloud Workstation, Cloudshell or your environment of choice.
 
@@ -14,7 +14,7 @@ sdk install java 21.0.2-graal
 ## Clone the code:
 ```shell
 git clone https://github.com/GoogleCloudPlatform/serverless-production-readiness-java-gcp.git
-cd serverless-production-readiness-java-gcp/sessions/next24/books-genai-vertex-springai 
+cd serverless-production-readiness-java-gcp/sessions/next24/books-genai-vertex-langchain4j 
 ```
 
 ## Install the maven wrapper
