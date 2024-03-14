@@ -61,8 +61,6 @@ public class PromptUtility {
 
         System.out.println(params);
 
-        // String book = (String) bookPages.get(0).get("title");
-        // String author = (String) bookPages.get(0).get("author");
         String context = "";
         for(Map<String, Object> page: bookPages) {
             context += page.get("page")+" ";

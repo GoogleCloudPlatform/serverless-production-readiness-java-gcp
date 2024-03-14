@@ -65,11 +65,11 @@ public class BookAnalysisController {
     List<Map<String, Object>> responseBook = booksService.prompt(bookRequest, contentCharactersLimit);
 
     // build prompt to query LLM with the augmented context
-    String promptWithContext = PromptUtility.formatPromptBookAnalysis(responseBook, bookRequest.keyWords());
+    String promptWithContext = PromptUtility.formatPromptBookAnalysis(bookRequest, responseBook, bookRequest.keyWords());
 
     System.out.println("Model: " + model);
     // submit prompt to the LLM via framework
-    String response = vertexAIClient.promptModel(promptWithContext, model);
+    String response = vertexAIClient.promptModel(promptWithContext);
 
     // return the response to the caller
     return new ResponseEntity<String>(response, HttpStatus.OK);

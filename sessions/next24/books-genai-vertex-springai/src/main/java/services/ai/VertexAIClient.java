@@ -67,7 +67,7 @@ public class VertexAIClient {
         return response;
     }
 
-    public String promptModel(String prompt, String modelName) {
+    public String promptModel(String prompt) {
         long start = System.currentTimeMillis();
 
         // prompt Chat model
@@ -88,8 +88,7 @@ public class VertexAIClient {
 
     public String promptModelwithFunctionCalls(SystemMessage systemMessage,
                                                UserMessage userMessage,
-                                               String functionName,
-                                               String modelName) {
+                                               String functionName) {
         long start = System.currentTimeMillis();
 
         ChatResponse chatResponse = chatClient.call(new Prompt(List.of(systemMessage, userMessage),
