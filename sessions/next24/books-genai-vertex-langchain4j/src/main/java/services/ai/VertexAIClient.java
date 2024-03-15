@@ -15,10 +15,6 @@
  */
 package services.ai;
 
-import static java.util.Collections.singletonList;
-
-import dev.langchain4j.agent.tool.ToolSpecification;
-import dev.langchain4j.agent.tool.ToolSpecifications;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ImageContent;
 import dev.langchain4j.data.message.SystemMessage;
@@ -31,28 +27,20 @@ import dev.langchain4j.model.output.Response;
 import dev.langchain4j.model.vertexai.VertexAiGeminiChatModel;
 import dev.langchain4j.service.AiServices;
 import java.io.IOException;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import services.config.CloudConfig;
 
 @Service
 public class VertexAIClient {
     private static final Logger logger = LoggerFactory.getLogger(VertexAIClient.class);
 
-    ChatLanguageModel model = VertexAiGeminiChatModel.builder()
-        .project(CloudConfig.projectID)
-        .location(CloudConfig.zone)
-        .modelName(VertexModels.GEMINI_PRO)
-        .build();
+    @Value("${spring.ai.vertex.ai.gemini.project-id}")
+    private String project;
 
-    ChatLanguageModel visionModel = VertexAiGeminiChatModel.builder()
-        .project(CloudConfig.projectID)
-        .location(CloudConfig.zone)
-        .modelName(VertexModels.GEMINI_PRO_VISION)
-        .build();
-
+    @Value("${spring.ai.vertex.ai.gemini.location}")
+    private String location;
 
     public String promptOnImage(String prompt,
                                 String bucketName,
@@ -68,6 +56,12 @@ public class VertexAIClient {
             TextContent.from(prompt)
         );
 
+        ChatLanguageModel visionModel = VertexAiGeminiChatModel.builder()
+            .project(project)
+            .location(location)
+            .modelName(VertexModels.GEMINI_PRO_VISION)
+            .build();
+
         Response<AiMessage> multiModalResponse = visionModel.generate(userMessage);
         String response = multiModalResponse.content().text();
         logger.info("Multi-modal response: " + response);
@@ -81,11 +75,19 @@ public class VertexAIClient {
         return response;
     }
 
-    public String promptModel(String prompt, String modelName) {
+    public String promptModel(String prompt) {
         long start = System.currentTimeMillis();
+        logger.info("Chat model: " + prompt);
 
+        ChatLanguageModel model = VertexAiGeminiChatModel.builder()
+            .project(project)
+            .location(location)
+            .modelName(VertexModels.GEMINI_PRO)
+            .build();
+            
         // prompt Chat model
         String output = model.generate(prompt);
+
         logger.info("Elapsed time (chat model, with SpringAI): " + (System.currentTimeMillis() - start) + "ms");
         logger.info("Chat Model output: " + output);
 
@@ -98,12 +100,17 @@ public class VertexAIClient {
     }
     public String promptModelwithFunctionCalls(SystemMessage systemMessage,
                                                UserMessage userMessage,
-                                               Object function,
-                                               String modelName) {
+                                               Object function) {
         long start = System.currentTimeMillis();
 
         ChatMemory chatMemory = MessageWindowChatMemory.withMaxMessages(10);
-        chatMemory.add(systemMessage);
+        // chatMemory.add(systemMessage);
+
+        ChatLanguageModel model = VertexAiGeminiChatModel.builder()
+            .project(project)
+            .location(location)
+            .modelName(VertexModels.GEMINI_PRO)
+            .build();
 
         Assistant assistant = AiServices.builder(Assistant.class)
             .chatLanguageModel(model)

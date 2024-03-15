@@ -57,3 +57,6 @@ sessions/next24/books-genai-vertex/.vscode/settings.json
 
 # ignore build files
 build.sh
+build-native.sh
+
+.vscode/

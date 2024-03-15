@@ -23,18 +23,10 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Function;
-
 import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.aot.hint.MemberCategory;
-import org.springframework.aot.hint.RuntimeHints;
-import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Description;
-import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,17 +36,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.annotation.JsonClassDescription;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.WriteResult;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyDescription;
-
 import services.actuator.StartupCheck;
 import services.ai.VertexAIClient;
-import services.ai.VertexModels;
 import services.config.CloudConfig;
 import services.domain.BooksService;
 import services.domain.CloudStorageService;
@@ -147,7 +132,7 @@ public class ImageProcessingController {
         String title = (String) jsonMap.get("title");
         String author = (String) jsonMap.get("author");
 
-        logger.info(String.format("Result: Author %s, Title %s", title, author));
+        logger.info(String.format("Result: Author %s, Title %s", author, title));
 
         // retrieve the book summary from the database
         String summary = booksService.getBookSummary(title);
@@ -169,8 +154,7 @@ public class ImageProcessingController {
 
         String bookStoreResponse = vertexAIClient.promptModelwithFunctionCalls(systemMessage, 
                                                                                userMessage,
-                                                                               new BookStoreService(),
-                                                                               VertexModels.GEMINI_PRO);
+                                                                               new BookStoreService());
 
         // Saving result to Firestore
         if (bookStoreResponse != null) {

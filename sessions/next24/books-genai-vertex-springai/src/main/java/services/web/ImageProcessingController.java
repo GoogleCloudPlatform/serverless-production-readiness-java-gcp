@@ -174,8 +174,7 @@ public class ImageProcessingController {
 
         String bookStoreResponse = vertexAIClient.promptModelwithFunctionCalls(systemMessage, 
                                                                                userMessage, 
-                                                                               "bookStoreAvailability", 
-                                                                               VertexModels.GEMINI_PRO);
+                                                                               "bookStoreAvailability");
 
         // Saving result to Firestore
         if (bookStoreResponse != null) {
