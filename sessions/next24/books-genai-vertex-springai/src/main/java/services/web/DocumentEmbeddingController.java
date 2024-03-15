@@ -16,18 +16,21 @@
 package services.web;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import services.actuator.StartupCheck;
 import services.config.CloudConfig;
 import services.domain.BooksService;
@@ -38,12 +41,13 @@ import services.domain.CloudStorageService;
 public class DocumentEmbeddingController {
   private static final Logger logger = LoggerFactory.getLogger(DocumentEmbeddingController.class);
 
-  @Autowired
   BooksService booksService;
-
-  @Autowired
   CloudStorageService cloudStorageService;
 
+  public DocumentEmbeddingController(BooksService booksService, CloudStorageService cloudStorageService){
+    this.booksService = booksService;
+    this.cloudStorageService = cloudStorageService;
+  }
   @PostConstruct
   public void init() {
     logger.info("BookImagesApplication: DocumentEmbeddingController Post Construct Initializer " + new SimpleDateFormat("HH:mm:ss.SSS").format(new java.util.Date(System.currentTimeMillis())));
@@ -61,7 +65,7 @@ public class DocumentEmbeddingController {
   // used for testing
   @RequestMapping(value = "/category/books", method = RequestMethod.GET)
   public ResponseEntity<List<Map<String, Object>>> getTable(@RequestParam(name = "prompt") String prompt, @RequestParam(name = "contentCharactersLimit", defaultValue = "2000") String contentCharactersLimit) {
-    return new ResponseEntity<List<Map<String, Object>>>(booksService.prompt(prompt, Integer.parseInt(contentCharactersLimit)), HttpStatus.OK);
+    return new ResponseEntity<>(booksService.prompt(prompt, Integer.parseInt(contentCharactersLimit)), HttpStatus.OK);
   }
 
   // used for testing
@@ -74,13 +78,13 @@ public class DocumentEmbeddingController {
 
   @RequestMapping(value = "/embeddings", method = RequestMethod.POST)
   public ResponseEntity<String> receiveMessage(
-      @RequestBody Map<String, Object> body, @RequestHeader Map<String, String> headers) throws IOException, InterruptedException, ExecutionException {
+      @RequestBody Map<String, Object> body, @RequestHeader Map<String, String> headers) {
     System.out.println("Header elements");
     for (String field : CloudConfig.requiredFields) {
       if (headers.get(field) == null) {
         String msg = String.format("Missing expected header: %s.", field);
         System.out.println(msg);
-        return new ResponseEntity<String>(msg, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(msg, HttpStatus.BAD_REQUEST);
       } else {
         System.out.println(field + " : " + headers.get(field));
       }
@@ -94,7 +98,7 @@ public class DocumentEmbeddingController {
     if (headers.get("ce-subject") == null) {
       String msg = "Missing expected header: ce-subject.";
       System.out.println(msg);
-      return new ResponseEntity<String>(msg, HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(msg, HttpStatus.BAD_REQUEST);
     }
 
     String ceSubject = headers.get("ce-subject");
@@ -109,7 +113,7 @@ public class DocumentEmbeddingController {
     if(fileName == null){
       msg = "Missing expected body element: file name";
       System.out.println(msg);
-      return new ResponseEntity<String>(msg, HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<>(msg, HttpStatus.BAD_REQUEST);
     }
 
     // add embedding functionality here
@@ -118,6 +122,6 @@ public class DocumentEmbeddingController {
     booksService.insertPagesBook(br, bookId);
 
     // success
-    return new ResponseEntity<String>(msg, HttpStatus.OK);
+    return new ResponseEntity<>(msg, HttpStatus.OK);
   }
 }

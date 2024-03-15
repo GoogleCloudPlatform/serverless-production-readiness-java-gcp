@@ -40,8 +40,8 @@ import services.web.data.BookRequest;
 public class BookAnalysisController {
   private static final Logger logger = LoggerFactory.getLogger(BookAnalysisController.class);
 
-  private BooksService booksService;
-  private VertexAIClient vertexAIClient;
+  private final BooksService booksService;
+  private final VertexAIClient vertexAIClient;
   public BookAnalysisController(BooksService booksService, VertexAIClient vertexAIClient) {
     this.booksService = booksService;
     this.vertexAIClient = vertexAIClient;
@@ -72,6 +72,6 @@ public class BookAnalysisController {
     String response = vertexAIClient.promptModel(promptWithContext);
 
     // return the response to the caller
-    return new ResponseEntity<String>(response, HttpStatus.OK);
+    return new ResponseEntity<>(response, HttpStatus.OK);
   }
 }
