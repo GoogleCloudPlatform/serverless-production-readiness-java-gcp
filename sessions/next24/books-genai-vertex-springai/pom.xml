@@ -9,7 +9,7 @@
     <version>3.2.3</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
-  <artifactId>books-genai</artifactId>
+  <artifactId>books-genai-springai</artifactId>
   <version>1.0.0</version>
   <name>books-genai</name>
   <description>Spring App for Image Analysis</description>

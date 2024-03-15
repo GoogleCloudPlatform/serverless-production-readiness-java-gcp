@@ -17,6 +17,7 @@ package services.web;
 
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
+import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -138,7 +139,7 @@ public class ImageProcessingController {
         logger.info("The summary of the book:"+ title+ " is: " + summary);
 
         // Function calling BookStoreService
-        UserMessage systemMessage = new UserMessage("""
+        SystemMessage systemMessage = new SystemMessage("""
                 Use Multi-turn function calling.
                 Answer with precision.
                 If the information was not fetched call the function again. Repeat at most 3 times.

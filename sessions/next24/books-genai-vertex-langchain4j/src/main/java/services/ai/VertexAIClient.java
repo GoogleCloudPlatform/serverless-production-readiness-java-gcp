@@ -17,6 +17,7 @@ package services.ai;
 
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ImageContent;
+import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.TextContent;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.memory.ChatMemory;
@@ -56,8 +57,8 @@ public class VertexAIClient {
         );
 
         ChatLanguageModel visionModel = VertexAiGeminiChatModel.builder()
-            .project("next24-genai-app")
-            .location("us-central1")
+            .project(project)
+            .location(location)
             .modelName(VertexModels.GEMINI_PRO_VISION)
             .build();
 
@@ -97,7 +98,7 @@ public class VertexAIClient {
     interface Assistant {
         String chat(UserMessage userMessage);
     }
-    public String promptModelwithFunctionCalls(UserMessage systemMessage,
+    public String promptModelwithFunctionCalls(SystemMessage systemMessage,
                                                UserMessage userMessage,
                                                Object function) {
         long start = System.currentTimeMillis();
