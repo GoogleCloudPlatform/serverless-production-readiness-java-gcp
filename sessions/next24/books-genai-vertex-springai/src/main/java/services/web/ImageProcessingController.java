@@ -15,12 +15,18 @@
  */
 package services.web;
 
+import com.fasterxml.jackson.annotation.JsonClassDescription;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+import com.google.api.core.ApiFuture;
+import com.google.cloud.firestore.WriteResult;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
-
 import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,21 +47,10 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.fasterxml.jackson.annotation.JsonClassDescription;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.google.api.core.ApiFuture;
-import com.google.cloud.firestore.WriteResult;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyDescription;
-
 import services.actuator.StartupCheck;
 import services.ai.VertexAIClient;
-import services.ai.VertexModels;
 import services.config.CloudConfig;
 import services.domain.BooksService;
-import services.domain.CloudStorageService;
 import services.domain.FirestoreService;
 import services.utility.JsonUtility;
 
@@ -67,18 +62,15 @@ public class ImageProcessingController {
 
     private final FirestoreService eventService;
 
-    private BooksService booksService;
-
-    private CloudStorageService cloudStorageService;
+    private final BooksService booksService;
 
     @Value("${prompts.promptImage}")
     private String promptImage;
 
-    public ImageProcessingController(FirestoreService eventService, BooksService booksService, VertexAIClient vertexAIClient, CloudStorageService cloudStorageService) {
+    public ImageProcessingController(FirestoreService eventService, BooksService booksService, VertexAIClient vertexAIClient) {
         this.eventService = eventService;
         this.booksService = booksService;
         this.vertexAIClient = vertexAIClient;
-        this.cloudStorageService = cloudStorageService;
     }
 
     VertexAIClient vertexAIClient;
@@ -105,7 +97,7 @@ public class ImageProcessingController {
             if (headers.get(field) == null) {
                 String msg = String.format("Missing expected header: %s.", field);
                 System.out.println(msg);
-                return new ResponseEntity<String>(msg, HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(msg, HttpStatus.BAD_REQUEST);
             } else {
                 System.out.println(field + " : " + headers.get(field));
             }
@@ -119,7 +111,7 @@ public class ImageProcessingController {
         if (headers.get("ce-subject") == null) {
             String msg = "Missing expected header: ce-subject.";
             System.out.println(msg);
-            return new ResponseEntity<String>(msg, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(msg, HttpStatus.BAD_REQUEST);
         }
 
         String ceSubject = headers.get("ce-subject");
@@ -134,7 +126,7 @@ public class ImageProcessingController {
         if(fileName == null){
             msg = "Missing expected body element: file name";
             System.out.println(msg);
-            return new ResponseEntity<String>(msg, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(msg, HttpStatus.BAD_REQUEST);
         }
 
         // multi-modal call to retrieve text from the uploaded image
@@ -165,9 +157,6 @@ public class ImageProcessingController {
                 If the information was not fetched call the function again. Repeat at most 3 times.
                 """);
 
-        // UserMessage userMessage = new UserMessage(
-        //     String.format("Please find out if the book with the title %s by author %s is available in the University bookstore.",
-        //                     title, author));
         UserMessage userMessage = new UserMessage(
             String.format("Write a nice note including book author, book title and availability. Find out if the book with the title %s by author %s is available in the University bookstore.Please add also this book summary to the response, with the text available after the column, prefix it with My Book Summary:  %s",
             title, author, summary));
@@ -182,7 +171,7 @@ public class ImageProcessingController {
             logger.info("Picture metadata saved in Firestore at " + writeResult.get().getUpdateTime());
         }
 
-        return new ResponseEntity<String>(msg, HttpStatus.OK);
+        return new ResponseEntity<>(msg, HttpStatus.OK);
     }
 
     @Bean
