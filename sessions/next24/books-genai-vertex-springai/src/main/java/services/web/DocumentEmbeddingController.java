@@ -39,33 +39,45 @@ import services.domain.CloudStorageService;
 @RestController
 @RequestMapping("/document")
 public class DocumentEmbeddingController {
+
   private static final Logger logger = LoggerFactory.getLogger(DocumentEmbeddingController.class);
 
   BooksService booksService;
   CloudStorageService cloudStorageService;
 
-  public DocumentEmbeddingController(BooksService booksService, CloudStorageService cloudStorageService){
+  public DocumentEmbeddingController(BooksService booksService,
+      CloudStorageService cloudStorageService) {
     this.booksService = booksService;
     this.cloudStorageService = cloudStorageService;
   }
+
   @PostConstruct
   public void init() {
-    logger.info("BookImagesApplication: DocumentEmbeddingController Post Construct Initializer " + new SimpleDateFormat("HH:mm:ss.SSS").format(new java.util.Date(System.currentTimeMillis())));
-    logger.info("BookImagesApplication: DocumentEmbeddingController Post Construct - StartupCheck can be enabled");
+    logger.info("BookImagesApplication: DocumentEmbeddingController Post Construct Initializer "
+        + new SimpleDateFormat("HH:mm:ss.SSS").format(
+        new java.util.Date(System.currentTimeMillis())));
+    logger.info(
+        "BookImagesApplication: DocumentEmbeddingController Post Construct - StartupCheck can be enabled");
 
     StartupCheck.up();
   }
 
   @GetMapping("start")
-  String start(){
-    logger.info("BookImagesApplication: DocumentEmbeddingController - Executed start endpoint request " + new SimpleDateFormat("HH:mm:ss.SSS").format(new java.util.Date(System.currentTimeMillis())));
+  String start() {
+    logger.info(
+        "BookImagesApplication: DocumentEmbeddingController - Executed start endpoint request "
+            + new SimpleDateFormat("HH:mm:ss.SSS").format(
+            new java.util.Date(System.currentTimeMillis())));
     return "DocumentEmbeddingController started";
   }
 
   // used for testing
   @RequestMapping(value = "/category/books", method = RequestMethod.GET)
-  public ResponseEntity<List<Map<String, Object>>> getTable(@RequestParam(name = "prompt") String prompt, @RequestParam(name = "contentCharactersLimit", defaultValue = "2000") String contentCharactersLimit) {
-    return new ResponseEntity<>(booksService.prompt(prompt, Integer.parseInt(contentCharactersLimit)), HttpStatus.OK);
+  public ResponseEntity<List<Map<String, Object>>> getTable(
+      @RequestParam(name = "prompt") String prompt,
+      @RequestParam(name = "contentCharactersLimit", defaultValue = "2000") String contentCharactersLimit) {
+    return new ResponseEntity<>(
+        booksService.prompt(prompt, Integer.parseInt(contentCharactersLimit)), HttpStatus.OK);
   }
 
   // used for testing
@@ -79,47 +91,53 @@ public class DocumentEmbeddingController {
   @RequestMapping(value = "/embeddings", method = RequestMethod.POST)
   public ResponseEntity<String> receiveMessage(
       @RequestBody Map<String, Object> body, @RequestHeader Map<String, String> headers) {
-    System.out.println("Header elements");
+    logger.info("Header elements");
     for (String field : CloudConfig.requiredFields) {
       if (headers.get(field) == null) {
         String msg = String.format("Missing expected header: %s.", field);
-        System.out.println(msg);
+        logger.error(msg);
         return new ResponseEntity<>(msg, HttpStatus.BAD_REQUEST);
       } else {
-        System.out.println(field + " : " + headers.get(field));
+        logger.info(field + " : " + headers.get(field));
       }
     }
 
-    System.out.println("Body elements");
+    logger.info("Body elements");
     for (String bodyField : body.keySet()) {
-      System.out.println(bodyField + " : " + body.get(bodyField));
+      logger.info(bodyField + " : " + body.get(bodyField));
     }
 
     if (headers.get("ce-subject") == null) {
       String msg = "Missing expected header: ce-subject.";
-      System.out.println(msg);
+      logger.error(msg);
       return new ResponseEntity<>(msg, HttpStatus.BAD_REQUEST);
     }
 
     String ceSubject = headers.get("ce-subject");
     String msg = "Detected change in Cloud Storage bucket: (ce-subject) : " + ceSubject;
-    System.out.println(msg);
+    logger.info(msg);
 
-    String fileName = (String)body.get("name");
-    String bucketName = (String)body.get("bucket");
+    // get docuemnt name and bucket
+    String fileName = (String) body.get("name");
+    String bucketName = (String) body.get("bucket");
 
     logger.info("New book uploaded for embedding:" + fileName);
 
-    if(fileName == null){
+    if (fileName == null) {
       msg = "Missing expected body element: file name";
-      System.out.println(msg);
+      logger.error(msg);
       return new ResponseEntity<>(msg, HttpStatus.BAD_REQUEST);
     }
 
     // add embedding functionality here
+    long start = System.currentTimeMillis();
     BufferedReader br = cloudStorageService.readFile(bucketName, fileName);
+    logger.info("Embedding flow - read book: " + (System.currentTimeMillis() - start) + "ms");
+
+    start = System.currentTimeMillis();
     Integer bookId = booksService.insertBook(fileName);
     booksService.insertPagesBook(br, bookId);
+    logger.info("Embedding flow - insert book and pages: " + (System.currentTimeMillis() - start) + "ms");
 
     // success
     return new ResponseEntity<>(msg, HttpStatus.OK);

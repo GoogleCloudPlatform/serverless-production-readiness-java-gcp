@@ -61,15 +61,20 @@ public class BookAnalysisController {
   @PostMapping("")
   public ResponseEntity<String> processUserRequest(@RequestBody BookRequest bookRequest, @RequestParam(name = "contentCharactersLimit", defaultValue = "6000") Integer contentCharactersLimit){
 
+    long start = System.currentTimeMillis();
+    logger.info("Book analysis flow : start");
     // Prompt AlloyDB for the embeddings for the book in the request
     List<Map<String, Object>> responseBook = booksService.prompt(bookRequest, contentCharactersLimit);
+    logger.info("Book analysis flow: retrieve embeddings from AlloyDB AI: " + (System.currentTimeMillis() - start) + "ms");
 
     // build prompt to query LLM with the augmented context
     String promptWithContext = PromptUtility.formatPromptBookAnalysis(bookRequest, responseBook, bookRequest.keyWords());
 
-    System.out.println("Model: " + model);
+    logger.info("Book analysis flow - Model: " + model);
+    start = System.currentTimeMillis();
     // submit prompt to the LLM via framework
     String response = vertexAIClient.promptModel(promptWithContext);
+    logger.info("Book analysis flow: prompt LLM: " + (System.currentTimeMillis() - start) + "ms");
 
     // return the response to the caller
     return new ResponseEntity<>(response, HttpStatus.OK);

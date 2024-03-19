@@ -52,19 +52,15 @@ public class ImageProcessingController {
     private static final Logger logger = LoggerFactory.getLogger(ImageProcessingController.class);
 
     private final FirestoreService eventService;
-
     private BooksService booksService;
-
-    private CloudStorageService cloudStorageService;
 
     @Value("${prompts.promptImage}")
     private String promptImage;
 
-    public ImageProcessingController(FirestoreService eventService, BooksService booksService, VertexAIClient vertexAIClient, CloudStorageService cloudStorageService) {
+    public ImageProcessingController(FirestoreService eventService, BooksService booksService, VertexAIClient vertexAIClient) {
         this.eventService = eventService;
         this.booksService = booksService;
         this.vertexAIClient = vertexAIClient;
-        this.cloudStorageService = cloudStorageService;
     }
 
     VertexAIClient vertexAIClient;
@@ -86,31 +82,31 @@ public class ImageProcessingController {
     @RequestMapping(value = "", method = RequestMethod.POST)
     public ResponseEntity<String> receiveMessage(
         @RequestBody Map<String, Object> body, @RequestHeader Map<String, String> headers) throws IOException, InterruptedException, ExecutionException {
-        System.out.println("Header elements");
+        logger.info("Header elements");
         for (String field : CloudConfig.requiredFields) {
             if (headers.get(field) == null) {
                 String msg = String.format("Missing expected header: %s.", field);
-                System.out.println(msg);
+                logger.error(msg);
                 return new ResponseEntity<String>(msg, HttpStatus.BAD_REQUEST);
             } else {
-                System.out.println(field + " : " + headers.get(field));
+                logger.info(field + " : " + headers.get(field));
             }
         }
 
-        System.out.println("Body elements");
+        logger.info("Body elements");
         for (String bodyField : body.keySet()) {
-            System.out.println(bodyField + " : " + body.get(bodyField));
+            logger.info(bodyField + " : " + body.get(bodyField));
         }
 
         if (headers.get("ce-subject") == null) {
             String msg = "Missing expected header: ce-subject.";
-            System.out.println(msg);
+            logger.error(msg);
             return new ResponseEntity<String>(msg, HttpStatus.BAD_REQUEST);
         }
 
         String ceSubject = headers.get("ce-subject");
         String msg = "Detected change in Cloud Storage bucket: (ce-subject) : " + ceSubject;
-        System.out.println(msg);
+        logger.info(msg);
 
         String fileName = (String)body.get("name");
         String bucketName = (String)body.get("bucket");
@@ -119,7 +115,7 @@ public class ImageProcessingController {
 
         if(fileName == null){
             msg = "Missing expected body element: file name";
-            System.out.println(msg);
+            logger.error(msg);
             return new ResponseEntity<String>(msg, HttpStatus.BAD_REQUEST);
         }
 
@@ -129,9 +125,9 @@ public class ImageProcessingController {
         // parse the response and extract the data
         Map<String, Object> jsonMap = JsonUtility.parseJsonToMap(response);
 
+        // get book details
         String title = (String) jsonMap.get("title");
         String author = (String) jsonMap.get("author");
-
         logger.info(String.format("Result: Author %s, Title %s", author, title));
 
         // retrieve the book summary from the database
@@ -145,9 +141,6 @@ public class ImageProcessingController {
                 If the information was not fetched call the function again. Repeat at most 3 times.
                 """);
 
-        // UserMessage userMessage = new UserMessage(
-        //     String.format("Please find out if the book with the title %s by author %s is available in the University bookstore.",
-        //                     title, author));
         UserMessage userMessage = new UserMessage(
             String.format("Write a nice note including book author, book title and availability. Find out if the book with the title %s by author %s is available in the University bookstore.Please add also this book summary to the response, with the text available after the column, prefix it with My Book Summary:  %s",
             title, author, summary));
@@ -178,40 +171,4 @@ public class ImageProcessingController {
         }
         public record BookStoreResponse(String title, String author, String availability) {}
     }
-
-    // @Bean
-    // @Description("Get availability of book in the book store")
-    // public Function<BookStoreService.Request, BookStoreService.Response> bookStoreAvailability() {
-    //     return new BookStoreService();
-    // }
-    // public static class BookStoreService
-    //     implements Function<BookStoreService.Request, BookStoreService.Response> {
-    //
-    //     @JsonInclude(Include.NON_NULL)
-    //     @JsonClassDescription("BookStore API Request")
-    //     public record Request(
-    //         @JsonProperty(required = true, value = "title") @JsonPropertyDescription("The title of the book") String title,
-    //         @JsonProperty(required = true, value = "author") @JsonPropertyDescription("The author of the book") String author) {
-    //     }
-    //     @JsonInclude(Include.NON_NULL)
-    //     public record Response(String title, String author, String availability) {
-    //     }
-    //
-    //     @Override
-    //     public Response apply(Request request) {
-    //         System.out.println("BookStore availability request: " + request);
-    //         return new Response(request.title(), request.author(), "The book is available for purchase in the book store in paperback format.");
-    //     }
-    // }
-    //
-    // public static class BookStoreServiceRuntimeHints implements RuntimeHintsRegistrar {
-    //     @Override
-    //     public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
-    //         // Register method for reflection
-    //         var mcs = MemberCategory.values();
-    //         hints.reflection().registerType(BookStoreService.Request.class, mcs);
-    //         hints.reflection().registerType(BookStoreService.Response.class, mcs);
-    //     }
-    //
-    // }
 }
