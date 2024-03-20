@@ -58,6 +58,7 @@ public class BookAnalysisController {
     StartupCheck.up();
   }
 
+  @CrossOrigin
   @PostMapping("")
   public ResponseEntity<String> processUserRequest(@RequestBody BookRequest bookRequest, @RequestParam(name = "contentCharactersLimit", defaultValue = "6000") Integer contentCharactersLimit){
 
