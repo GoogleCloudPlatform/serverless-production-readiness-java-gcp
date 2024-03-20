@@ -61,7 +61,6 @@ public class ImageProcessingController {
     private static final Logger logger = LoggerFactory.getLogger(ImageProcessingController.class);
 
     private final FirestoreService eventService;
-
     private final BooksService booksService;
 
     @Value("${prompts.promptImage}")
@@ -99,24 +98,24 @@ public class ImageProcessingController {
                 System.out.println(msg);
                 return new ResponseEntity<>(msg, HttpStatus.BAD_REQUEST);
             } else {
-                System.out.println(field + " : " + headers.get(field));
+                logger.info(field + " : " + headers.get(field));
             }
         }
 
-        System.out.println("Body elements");
+        logger.info("Body elements");
         for (String bodyField : body.keySet()) {
-            System.out.println(bodyField + " : " + body.get(bodyField));
+            logger.info(bodyField + " : " + body.get(bodyField));
         }
 
         if (headers.get("ce-subject") == null) {
             String msg = "Missing expected header: ce-subject.";
-            System.out.println(msg);
+            logger.error(msg);
             return new ResponseEntity<>(msg, HttpStatus.BAD_REQUEST);
         }
 
         String ceSubject = headers.get("ce-subject");
         String msg = "Detected change in Cloud Storage bucket: (ce-subject) : " + ceSubject;
-        System.out.println(msg);
+        logger.info(msg);
 
         String fileName = (String)body.get("name");
         String bucketName = (String)body.get("bucket");
@@ -125,7 +124,7 @@ public class ImageProcessingController {
 
         if(fileName == null){
             msg = "Missing expected body element: file name";
-            System.out.println(msg);
+            logger.error(msg);
             return new ResponseEntity<>(msg, HttpStatus.BAD_REQUEST);
         }
 
@@ -135,16 +134,10 @@ public class ImageProcessingController {
         // parse the response and extract the data
         Map<String, Object> jsonMap = JsonUtility.parseJsonToMap(response);
 
+        // get book details
         String title = (String) jsonMap.get("title");
         String author = (String) jsonMap.get("author");
-
         logger.info(String.format("Result: Author %s, Title %s", title, author));
-
-        // String modelResponse = null;
-        // if (!prompt.isEmpty()) {
-        //     modelResponse = vertexAIClient.promptModel(prompt, VertexModels.CHAT_BISON);
-        //     logger.info("Result Chat Model: " + modelResponse);
-        // }
 
         // retrieve the book summary from the database
         String summary = booksService.getBookSummary(title);
@@ -194,7 +187,7 @@ public class ImageProcessingController {
 
         @Override
         public Response apply(Request request) {
-            System.out.println("BookStore availability request: " + request);
+            logger.info("BookStore availability request: " + request);
             return new Response(request.title(), request.author(), "The book is available for purchase in the book store in paperback format.");
         }
     }
