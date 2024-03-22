@@ -301,4 +301,3 @@ Log capture:
  gcloud logging read "resource.labels.service_name=books-genai-native AND textPayload:CloudRun" --format=json
 ```
 
-
