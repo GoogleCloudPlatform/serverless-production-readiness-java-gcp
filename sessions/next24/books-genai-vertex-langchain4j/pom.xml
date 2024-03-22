@@ -91,6 +91,11 @@
         <artifactId>langchain4j-vertex-ai-gemini</artifactId>
         <version>${langchain4j.version}</version>
     </dependency>
+    <dependency>
+      <groupId>dev.langchain4j</groupId>
+      <artifactId>langchain4j-ollama</artifactId>
+      <version>0.28.0</version>
+    </dependency>
 
     <dependency>
       <groupId>com.zaxxer</groupId>
@@ -108,6 +113,19 @@
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>ollama</artifactId>
+        <version>1.19.7</version>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.rest-assured</groupId>
+      <artifactId>rest-assured</artifactId>
+      <version>5.4.0</version>
+      <scope>test</scope>
+    </dependency>
+
 
     <dependency>
       <groupId>org.testcontainers</groupId>
