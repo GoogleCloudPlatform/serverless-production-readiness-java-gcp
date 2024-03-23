@@ -1,5 +1,7 @@
 -- setup alloy db follow these steps on codelabs https://codelabs.developers.google.com/codelabs/alloydb-ai-embedding#4
 
+CREATE TYPE scope_type AS ENUM ('public', 'private');
+
 -- 1. Authors Table
 create TABLE authors (
     author_id SERIAL PRIMARY KEY,
@@ -14,12 +16,11 @@ create TABLE books (
     title VARCHAR(255) NOT NULL,
     author_id INT NOT NULL,
     publication_year date,
+    scope scope_type NOT NULL DEFAULT 'public',
     CONSTRAINT fk_author
         FOREIGN KEY(author_id)
         REFERENCES Authors(author_id)
 );
-CREATE TYPE scope_type AS ENUM ('public', 'private');
-ALTER TABLE books ADD COLUMN scope scope_type NOT NULL DEFAULT 'public';
 
 -- 4. Pages Table
 create TABLE public.pages (
