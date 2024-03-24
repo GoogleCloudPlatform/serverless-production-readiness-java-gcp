@@ -32,6 +32,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+/*
+    VertexAIClient is a service class that interacts with the Vertex AI Chat Client.
+
+    This implementation leverages Langchain4J's Vertex AI Chat Client to interact with the Vertex AI Chat API.
+    Support for function calling is also demonstrated in this class.
+ */
 @Service
 public class VertexAIClient {
     private static final Logger logger = LoggerFactory.getLogger(VertexAIClient.class);
