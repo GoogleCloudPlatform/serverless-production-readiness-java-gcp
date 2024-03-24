@@ -35,6 +35,13 @@ import services.domain.BooksService;
 import services.utility.PromptUtility;
 import services.web.data.BookRequest;
 
+/**
+ * Controller for the Book Analysis service.
+ * This controller is responsible for processing the user request for book analysis.
+ * The controller will prompt AlloyDB for the embeddings for the book in the request.
+ * The controller will build a prompt to query LLM with the augmented context.
+ * Returns the book anaylsis response to the caller.
+ */
 @RestController
 @RequestMapping("/analysis")
 public class BookAnalysisController {
@@ -64,6 +71,7 @@ public class BookAnalysisController {
 
     long start = System.currentTimeMillis();
     logger.info("Book analysis flow : start");
+
     // Prompt AlloyDB for the embeddings for the book in the request
     List<Map<String, Object>> responseBook = booksService.prompt(bookRequest, contentCharactersLimit);
     logger.info("Book analysis flow: retrieve embeddings from AlloyDB AI: " + (System.currentTimeMillis() - start) + "ms");
@@ -73,7 +81,8 @@ public class BookAnalysisController {
 
     logger.info("Book analysis flow - Model: " + model);
     start = System.currentTimeMillis();
-    // submit prompt to the LLM via framework
+
+    // submit prompt to the LLM via LLM orchestration framework
     String response = vertexAIClient.promptModel(promptWithContext);
     logger.info("Book analysis flow: prompt LLM: " + (System.currentTimeMillis() - start) + "ms");
 

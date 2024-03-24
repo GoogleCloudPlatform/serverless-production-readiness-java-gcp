@@ -36,6 +36,10 @@ import services.config.CloudConfig;
 import services.domain.BooksService;
 import services.domain.CloudStorageService;
 
+/**
+ * Controller for handling document embedding requests, generating document summaries
+ * and persistence to Vector and SQL databases.
+ */
 @RestController
 @RequestMapping("/document")
 public class DocumentEmbeddingController {
@@ -117,7 +121,7 @@ public class DocumentEmbeddingController {
     String msg = "Detected change in Cloud Storage bucket: (ce-subject) : " + ceSubject;
     logger.info(msg);
 
-    // get docuemnt name and bucket
+    // get document name and bucket
     String fileName = (String) body.get("name");
     String bucketName = (String) body.get("bucket");
 
@@ -129,11 +133,13 @@ public class DocumentEmbeddingController {
       return new ResponseEntity<>(msg, HttpStatus.BAD_REQUEST);
     }
 
-    // add embedding functionality here
+    // read file from Cloud Storage
     long start = System.currentTimeMillis();
     BufferedReader br = cloudStorageService.readFile(bucketName, fileName);
     logger.info("Embedding flow - read book: " + (System.currentTimeMillis() - start) + "ms");
 
+    // add embedding functionality here
+    // persist book and pages to AlloyDB
     start = System.currentTimeMillis();
     Integer bookId = booksService.insertBook(fileName);
     booksService.insertPagesBook(br, bookId);
