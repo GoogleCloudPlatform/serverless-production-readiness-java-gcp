@@ -15,10 +15,11 @@
  */
 package services.domain;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
-
 import services.domain.dao.DataAccess;
 import services.domain.util.ScopeType;
 import services.utility.FileUtility;
@@ -35,6 +36,8 @@ import java.util.Map;
 public class BooksService {
     @Autowired
     DataAccess dao;
+
+    private static final Logger logger = LoggerFactory.getLogger(BooksService.class);
 
     @Autowired
     CloudStorageService cloudStorageService;
@@ -67,7 +70,7 @@ public class BooksService {
         } else {
             if(authorId==null)
                 authorId = dao.insertAuthor("famous author", author);
-            System.out.println("publicPrivate:"+publicPrivate);
+            logger.info("publicPrivate:"+publicPrivate);
             bookId = dao.insertBook( (Integer) authorId, title, year, ScopeType.fromValue(publicPrivate));
         }
 
@@ -99,7 +102,7 @@ public class BooksService {
 
         BufferedReader reader = null;
         Integer bookId = (Integer) book.get("book_id");
-        System.out.println(filePath+" "+bookTitle+" bookId:"+bookId);
+        logger.info(filePath+" "+bookTitle+" bookId:"+bookId);
         try {
             //replace with cloud storage eventually
             ClassPathResource classPathResource = new ClassPathResource(filePath);
@@ -124,7 +127,7 @@ public class BooksService {
                 return success;
             }
             char[] cbuf = new char[6000];
-            // Read 3000 characters at a time
+
             int charsRead;
             while ((charsRead = reader.read(cbuf)) != -1) {
                 content = new String(cbuf, 0, charsRead);
@@ -150,7 +153,7 @@ public class BooksService {
             return success;
         }
         Integer bookId = (Integer) book.get("book_id");
-        System.out.println("bookId:"+bookId);
+        logger.info("bookId:"+bookId);
         success = insertPagesBook(reader, bookId);
         return success;
 
