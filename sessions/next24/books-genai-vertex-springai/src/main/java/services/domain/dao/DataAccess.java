@@ -21,32 +21,33 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import services.domain.util.ScopeType;
-
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
-//@ComponentScan("com.journaldev.spring")
 public class DataAccess {
 
     JdbcTemplate jdbcTemplate;
 
-    // Inject HikariDataSource as a bean dependency
-    // AlloyDB reference: https://codelabs.developers.google.com/codelabs/alloydb-ai-embedding#7
+    private static final Logger logger = LoggerFactory.getLogger(DataAccess.class);
+
     @Autowired
     public DataAccess(DataSource hikariDataSource) {
         jdbcTemplate = new JdbcTemplate(hikariDataSource);
     }
 
     public Map<String, Object> findBook(String title) {
-        // Query the database
-        // prompt = Give me the poems about love?
         String sql = "select\n" +
                 "*\n" +
                 "from\n" +
@@ -54,16 +55,13 @@ public class DataAccess {
         Object[] parameters = new Object[]{title};
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, parameters);
 
-        // Iterate over the results
         for (Map<String, Object> row : rows) {
-            System.out.println(row.get("title"));
+            logger.info(row.get("title")+"");
         }
         return rows.size()==0 ? new HashMap<>() : rows.get(0);
     }
 
     public Map<String, Object> findAuthor(String authorName) {
-        // Query the database
-        // prompt = Give me the poems about love?
         String sql = "select\n" +
                 "*\n" +
                 "from\n" +
@@ -71,16 +69,13 @@ public class DataAccess {
         Object[] parameters = new Object[]{authorName};
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, parameters);
 
-        // Iterate over the results
         for (Map<String, Object> row : rows) {
-            System.out.println(row.get("name"));
+            logger.info(row.get("name")+"");
         }
         return rows.size()==0 ? new HashMap<>() : rows.get(0);
     }
 
     public Map<String, Object> findSummaries(Integer bookId) {
-        // Query the database
-        // prompt = Give me the poems about love?
         String sql = "select\n" +
                 "*\n" +
                 "from\n" +
@@ -88,16 +83,12 @@ public class DataAccess {
         Object[] parameters = new Object[]{bookId};
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, parameters);
 
-        // Iterate over the results
-//        for (Map<String, Object> row : rows) {
-        System.out.println("number of rows: " + rows.size());
-//        }
+        logger.info("number of rows: " + rows.size());
+
         return rows.size()==0 ? new HashMap<>() : rows.get(0);
     }
 
     public List<Map<String, Object>> findPages(Integer bookId) {
-        // Query the database
-        // prompt = Give me the poems about love?
         String sql = "select\n" +
                 "*\n" +
                 "from\n" +
@@ -105,10 +96,7 @@ public class DataAccess {
         Object[] parameters = new Object[]{bookId};
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, parameters);
 
-        // Iterate over the results
-//        for (Map<String, Object> row : rows) {
-            System.out.println("number of rows: " + rows.size());
-//        }
+        logger.info("number of rows: " + rows.size());
         return rows;
     }
 
@@ -116,11 +104,7 @@ public class DataAccess {
         return promptForBooks(prompt, null, null, characterLimit);
     }
 
-
-    // Perform database operations using the JdbcTemplate
     public List<Map<String, Object>> promptForBooks(String prompt, String book, String author, Integer characterLimit) {
-        // Query the database
-        // prompt = Give me the poems about love?
         if (characterLimit == null || characterLimit == 0) {
             characterLimit = 2000;
         }
@@ -138,43 +122,34 @@ public class DataAccess {
                 "       a.author_id=b.author_id\n";
         Object[] parameters = new Object[]{characterLimit, prompt, book, author};
         List<Object> params = Arrays.stream(parameters)
-                .filter(Objects::nonNull)  // Filters out null values
-                .filter(p -> p instanceof String ? !((String) p).isEmpty() : true) // Conditional filtering
+                .filter(Objects::nonNull)
+                .filter(p -> p instanceof String ? !((String) p).isEmpty() : true)
                 .collect(Collectors.toList());
-        System.out.println(params.toString());
+        logger.info(params.toString());
         if ( params.size()>2 ) {
             sql += createWhereClause(book, author);
         }
         sql += " ORDER BY\n" +
                 "distance ASC\n" +
                 "LIMIT 10;";
-//        String prompt ="yanni tests";
-//        String prompt ="What kind of fruit trees grow well here?";
-        System.out.println(sql);
+        logger.info(sql);
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, params.toArray());
 
-        // Iterate over the results
-//        for (Map<String, Object> row : rows) {
-//            System.out.println(row.get("page"));
-//        }
         return rows;
-        // Insert data into the database
-//        sql = "INSERT INTO table_name (column1, column2, column3) VALUES (?, ?, ?)";
-//        jdbcTemplate.update(sql, "value1", "value2", "value3");
     }
 
     private String createWhereClause(String book, String author) {
         StringBuilder whereClause = new StringBuilder();
         whereClause.append("WHERE ");
         if (book != null) {
-            whereClause.append("b.title = ?"); // Use a parameter placeholder
+            whereClause.append("b.title = ?");
         }
 
         if (author != null) {
             if (whereClause.length() > 0) {
                 whereClause.append(" AND ");
             }
-            whereClause.append("a.name = ?");  // Use a parameter placeholder
+            whereClause.append("a.name = ?");
         }
 
         return whereClause.toString();
@@ -192,25 +167,18 @@ public class DataAccess {
     }
 
     public Integer insertAuthor(String bio, String author) {
-//        String sql = "insert into authors (\n" +
-//                "    \"bio\",\n" +
-//                "    \"name\")\n" +
-//                "values (?, ?)";
-//        Object[] parameters = new Object[]{bio, author};
         final Map<String, Object> parameters = new HashMap<>();
         parameters.put("bio", bio);
         parameters.put("name", author);
         SimpleJdbcInsert insertIntoAuthors = new SimpleJdbcInsert(jdbcTemplate).withTableName("authors")
                 .usingColumns("bio", "name")
                 .usingGeneratedKeyColumns("author_id");
-//        int success =jdbcTemplate.update(sql, parameters);
         Number authorId = insertIntoAuthors.executeAndReturnKey(parameters);
 
         return Integer.valueOf(authorId.intValue());
     }
 
     public Integer insertBook(Integer authorId, String title, String year, ScopeType publicPrivate) {
-//        String sql = "INSERT INTO " + tableName + " (scope) VALUES (CAST(? AS scope_type))";
         LocalDate publicationYear = LocalDate.parse(year);
         String sql = "insert into books (\n" +
                 "    author_id,\n" +
@@ -221,11 +189,6 @@ public class DataAccess {
                 "    ?,\n" +
                 "    ?, CAST(? AS scope_type))\n";
         Object[] parameters = new Object[]{authorId, publicationYear, title, publicPrivate.getValue()};
-//        final Map<String, Object> parameters = new HashMap<>();
-//        parameters.put("author_id", authorId);
-//        parameters.put("publication_year", year);
-//        parameters.put("title", title);
-//        parameters.put("scope", ScopeType.fromValue(publicPriavate));
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
@@ -238,9 +201,6 @@ public class DataAccess {
 
             return ps;
         }, keyHolder);
-//        SimpleJdbcInsert insertIntoAuthors = new SimpleJdbcInsert(jdbcTemplate).withTableName("books").usingGeneratedKeyColumns("book_id");
-//        int success =jdbcTemplate.update(sql, parameters);
-//        Number bookId = insertIntoAuthors.executeAndReturnKey(parameters);
         return Integer.valueOf(keyHolder.getKeys().get("book_id")+"");
     }
 }
