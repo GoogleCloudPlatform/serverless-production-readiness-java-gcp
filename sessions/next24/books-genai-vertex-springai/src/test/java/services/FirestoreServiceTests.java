@@ -52,11 +52,13 @@ public class FirestoreServiceTests {
   // @Autowired
   private FirestoreService eventService;
 
-  // @Disabled("Until Spring Boot 3.1 is released")
   @Test
-  void testEventRepositoryStoreImage() throws ExecutionException, InterruptedException {
-    ApiFuture<WriteResult> writeResult = eventService.storeImage("testImage",
-        Collections.singletonList("label"), "#FFFFFF", "Test Model Response");
+  void testEventRepositoryStoreBook() throws ExecutionException, InterruptedException {
+    ApiFuture<WriteResult> writeResult = eventService.storeBookInfo("The_Jungle_Book-Rudyard_Kipling-1894-public.txt",
+      "The Jungle Book",
+      "Rudyard Kipling",
+      "The Jungle Book is a collection of stories by the English author Rudyard Kipling. Most of the characters are animals such as Shere Khan the tiger and Baloo the bear, though a principal character",
+      "modelResponse");
     assertNotNull(writeResult.get().getUpdateTime());
   }
 }

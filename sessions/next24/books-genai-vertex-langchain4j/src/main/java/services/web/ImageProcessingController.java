@@ -46,6 +46,22 @@ import services.domain.CloudStorageService;
 import services.domain.FirestoreService;
 import services.utility.JsonUtility;
 
+/**
+ * ImageProcessingController is a Spring Boot REST controller that listens for Cloud Storage events
+ * and processes the uploaded images.
+ *
+ * Controller is responsible for:
+ * 1. Receiving the Cloud Storage event
+ * 2. Extracting the image metadata
+ * 3. Extracting the text from the image
+ * 4. Extracting the book details from the text
+ * 5. Extracting the book summary from the database
+ * 6. Calling the LLM to generate a report for the book including a book summary
+ * and the up-to-date availability in the Bookstore
+ * 7. Uses the BookStoreService to check the availability of the book, invoked by the LLM
+ * using the function calling feature
+ * 8. Saving the image metadata in Firestore
+ */
 @RestController
 @RequestMapping("/images")
 public class ImageProcessingController {
@@ -157,6 +173,11 @@ public class ImageProcessingController {
 
         return new ResponseEntity<String>(msg, HttpStatus.OK);
     }
+
+    /**
+     * BookStoreService is a function that checks the availability of a book in the bookstore.
+     * Invoked by the LLM using the function calling feature.
+     */
     static class BookStoreService {
         @Tool("Find book availability in bookstore based on the book title and book author")
         BookStoreResponse getBookAvailability(@P("The title of the book") String title,
