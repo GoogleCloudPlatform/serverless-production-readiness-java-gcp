@@ -36,12 +36,6 @@ public class CloudStorageService {
         ReadableByteChannel channel = blob.reader();
         InputStreamReader isr = new InputStreamReader(Channels.newInputStream(channel));
         BufferedReader br = new BufferedReader(isr);
-        // Create a byte array input stream.
-//        byte[] bytes = blob.getContent();
-//        InputStream input = new ByteArrayInputStream(bytes);
-//        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(input));
-        // Do something with the byte array.
-        // System.out.println(new String(bytes));
         return br;
     }
 
