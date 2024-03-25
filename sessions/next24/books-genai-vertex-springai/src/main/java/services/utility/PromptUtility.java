@@ -19,9 +19,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import services.web.data.BookRequest;
 
+
 public class PromptUtility {
+
+    private static final Logger logger = LoggerFactory.getLogger(PromptUtility.class);
     public static String formatPromptBookKeywords(List<String> keywords) {
         // Check for an empty topics list
         List<String> params = keywords.stream()
@@ -58,7 +64,7 @@ public class PromptUtility {
             return ""; // Or other default message
         }
 
-        System.out.println(params);
+        logger.info(params+"");
 
         String context = "";
         for(Map<String, Object> page: bookPages) {

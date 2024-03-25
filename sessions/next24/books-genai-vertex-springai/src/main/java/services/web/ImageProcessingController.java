@@ -107,11 +107,11 @@ public class ImageProcessingController {
     @RequestMapping(value = "", method = RequestMethod.POST)
     public ResponseEntity<String> receiveMessage(
         @RequestBody Map<String, Object> body, @RequestHeader Map<String, String> headers) throws IOException, InterruptedException, ExecutionException {
-        System.out.println("Header elements");
+        logger.info("Header elements");
         for (String field : CloudConfig.requiredFields) {
             if (headers.get(field) == null) {
                 String msg = String.format("Missing expected header: %s.", field);
-                System.out.println(msg);
+                logger.info(msg);
                 return new ResponseEntity<>(msg, HttpStatus.BAD_REQUEST);
             } else {
                 logger.info(field + " : " + headers.get(field));
