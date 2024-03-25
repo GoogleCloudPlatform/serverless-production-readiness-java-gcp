@@ -179,10 +179,11 @@ public class ImageProcessingController {
      * Invoked by the LLM using the function calling feature.
      */
     static class BookStoreService {
+        private static final Logger logger = LoggerFactory.getLogger(BookStoreService.class);
         @Tool("Find book availability in bookstore based on the book title and book author")
         BookStoreResponse getBookAvailability(@P("The title of the book") String title,
             @P("The author of the book") String author) {
-            System.out.printf("Called getBookAvailability(%s, %s)%n", title, author);
+            logger.info("Called getBookAvailability(%s, %s)%n", title, author);
             return new BookStoreResponse(title, author, "The book is available for purchase in the book store in paperback format.");
         }
 
