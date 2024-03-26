@@ -76,7 +76,6 @@ public class VertexAIClient {
     public String promptModel(String prompt) {
         long start = System.currentTimeMillis();
 
-        // prompt Chat model
         ChatResponse chatResponse = chatClient.call(new Prompt(prompt,
             VertexAiGeminiChatOptions.builder()
                 .withTemperature(0.4f)
@@ -84,8 +83,10 @@ public class VertexAIClient {
                 .build())
         );
         logger.info("Elapsed time (chat model, with SpringAI): " + (System.currentTimeMillis() - start) + "ms");
-
-        String output = chatResponse.getResult().getOutput().getContent();
+        String output = "Failed to fetch.. Please try again!";
+        if(chatResponse.getResult()!=null) {
+            output = chatResponse.getResult().getOutput().getContent();
+        }
         logger.info("Chat Model output: " + output);
 
         // return model response in String format
