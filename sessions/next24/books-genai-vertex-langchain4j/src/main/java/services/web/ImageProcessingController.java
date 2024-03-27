@@ -17,7 +17,6 @@ package services.web;
 
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
-import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -42,7 +41,6 @@ import services.actuator.StartupCheck;
 import services.ai.VertexAIClient;
 import services.config.CloudConfig;
 import services.domain.BooksService;
-import services.domain.CloudStorageService;
 import services.domain.FirestoreService;
 import services.utility.JsonUtility;
 
@@ -151,18 +149,11 @@ public class ImageProcessingController {
         logger.info("The summary of the book:"+ title+ " is: " + summary);
 
         // Function calling BookStoreService
-        SystemMessage systemMessage = new SystemMessage("""
-                Use Multi-turn function calling.
-                Answer with precision.
-                If the information was not fetched call the function again. Repeat at most 3 times.
-                """);
-
         UserMessage userMessage = new UserMessage(
             String.format("Write a nice note including book author, book title and availability. Find out if the book with the title %s by author %s is available in the University bookstore.Please add also this book summary to the response, with the text available after the column, prefix it with My Book Summary:  %s",
             title, author, summary));
 
-        String bookStoreResponse = vertexAIClient.promptModelwithFunctionCalls(systemMessage, 
-                                                                               userMessage,
+        String bookStoreResponse = vertexAIClient.promptModelwithFunctionCalls(userMessage,
                                                                                new BookStoreService());
 
         // Saving result to Firestore
@@ -183,7 +174,7 @@ public class ImageProcessingController {
         @Tool("Find book availability in bookstore based on the book title and book author")
         BookStoreResponse getBookAvailability(@P("The title of the book") String title,
             @P("The author of the book") String author) {
-            logger.info("Called getBookAvailability(%s, %s)%n", title, author);
+            logger.info(String.format("Called getBookAvailability(%s, %s)", title, author));
             return new BookStoreResponse(title, author, "The book is available for purchase in the book store in paperback format.");
         }
 

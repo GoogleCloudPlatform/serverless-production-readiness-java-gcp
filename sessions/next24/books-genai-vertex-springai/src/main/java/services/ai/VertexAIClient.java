@@ -60,14 +60,15 @@ public class VertexAIClient {
         // call the model of choice
         ChatResponse multiModalResponse = chatClient.call(new Prompt(List.of(multiModalUserMessage),
             VertexAiGeminiChatOptions.builder()
-                .withModel(VertexModels.GEMINI_PRO_VISION).build()));
+                .withModel(VertexModels.GEMINI_PRO_VISION)
+                .build()));
         String response = multiModalResponse.getResult().getOutput().getContent();
         logger.info("Multi-modal response: " + response);
 
         // response from Vertex is in Markdown, remove annotations
         response = response.replaceAll("```json", "").replaceAll("```", "").replace("'", "\"");
 
-        logger.info("Elapsed time (chat model): " + (System.currentTimeMillis() - start) + "ms");
+        logger.info("Elapsed time (gemini-pro-vision, with SpringAI): " + (System.currentTimeMillis() - start) + "ms");
 
         // return the response in String format, extract values in caller
         return response;
@@ -75,6 +76,7 @@ public class VertexAIClient {
 
     public String promptModel(String prompt) {
         long start = System.currentTimeMillis();
+        logger.info("Chat model prompt: {} ...", prompt.substring(0, 500));
 
         ChatResponse chatResponse = chatClient.call(new Prompt(prompt,
             VertexAiGeminiChatOptions.builder()
@@ -82,12 +84,13 @@ public class VertexAIClient {
                 .withModel(VertexModels.GEMINI_PRO)
                 .build())
         );
-        logger.info("Elapsed time (chat model, with SpringAI): " + (System.currentTimeMillis() - start) + "ms");
-        String output = "Failed to fetch.. Please try again!";
+        logger.info("Elapsed time (gemini-pro, with SpringAI): " + (System.currentTimeMillis() - start) + "ms");
+        
+        String output = "Model response contains no data. Please try again!";
         if(chatResponse.getResult()!=null) {
             output = chatResponse.getResult().getOutput().getContent();
         }
-        logger.info("Chat Model output: " + output);
+        logger.info("Chat model output: {} ...", output.substring(0, 1000));
 
         // return model response in String format
         return output;
@@ -101,9 +104,10 @@ public class VertexAIClient {
         ChatResponse chatResponse = chatClient.call(new Prompt(List.of(systemMessage, userMessage),
                                                     VertexAiGeminiChatOptions.builder()
                                                         .withModel("gemini-pro")
-                                                        .withFunction(functionName).build()));
+                                                        .withFunction(functionName)
+                                                        .build()));
         
-        logger.info("Elapsed time (chat model, with SpringAI): " + (System.currentTimeMillis() - start) + "ms");
+        logger.info("Elapsed time (gemini-pro, with SpringAI): " + (System.currentTimeMillis() - start) + "ms");
 
         String output = chatResponse.getResult().getOutput().getContent();
         logger.info("Chat Model output with Function Call: " + output);
