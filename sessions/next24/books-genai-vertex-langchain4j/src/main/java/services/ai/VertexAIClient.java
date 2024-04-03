@@ -17,7 +17,6 @@ package services.ai;
 
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ImageContent;
-import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.TextContent;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.memory.ChatMemory;
@@ -26,6 +25,8 @@ import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.output.Response;
 import dev.langchain4j.model.vertexai.VertexAiGeminiChatModel;
 import dev.langchain4j.service.AiServices;
+import dev.langchain4j.service.SystemMessage;
+
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +58,6 @@ public class VertexAIClient {
         String imageURL = String.format("gs://%s/%s",bucketName, fileName);
 
         UserMessage userMessage = UserMessage.from(
-            // ImageContent.from(Base64.getEncoder().encodeToString(readBytes("https://storage.googleapis.com/vision-optimize-serverless-apps/TheJungleBook.jpg")), "image/jpeg"),
             ImageContent.from(imageURL),
             TextContent.from(prompt)
         );
@@ -75,7 +75,7 @@ public class VertexAIClient {
         // response from Vertex is in Markdown, remove annotations
         response = response.replaceAll("```json", "").replaceAll("```", "").replace("'", "\"");
 
-        logger.info("Elapsed time (chat model): " + (System.currentTimeMillis() - start) + "ms");
+        logger.info("Elapsed time (gemini-pro-vision, with Langchain4J): " + (System.currentTimeMillis() - start) + "ms");
 
         // return the response in String format, extract values in caller
         return response;
@@ -83,7 +83,7 @@ public class VertexAIClient {
 
     public String promptModel(String prompt) {
         long start = System.currentTimeMillis();
-        logger.info("Chat model: " + prompt);
+        logger.info("Chat model prompt: {} ...", prompt.substring(0, 500));
 
         ChatLanguageModel model = VertexAiGeminiChatModel.builder()
             .project(project)
@@ -94,23 +94,26 @@ public class VertexAIClient {
         // prompt Chat model
         String output = model.generate(prompt);
 
-        logger.info("Elapsed time (chat model, with SpringAI): " + (System.currentTimeMillis() - start) + "ms");
-        logger.info("Chat Model output: " + output);
+        logger.info("Elapsed time (gemini-pro, with Langchain4J): " + (System.currentTimeMillis() - start) + "ms");
+        logger.info("Chat model output: {} ...", output.substring(0, 1000));
 
         // return model response in String format
         return output;
     }
 
     interface Assistant {
+        @SystemMessage("""
+            Use Multi-turn function calling.
+            Answer with precision.
+            If the information was not fetched call the function again. Repeat at most 3 times.
+            """)
         String chat(UserMessage userMessage);
     }
-    public String promptModelwithFunctionCalls(SystemMessage systemMessage,
-                                               UserMessage userMessage,
+    public String promptModelwithFunctionCalls(UserMessage userMessage,
                                                Object function) {
         long start = System.currentTimeMillis();
 
         ChatMemory chatMemory = MessageWindowChatMemory.withMaxMessages(10);
-        // chatMemory.add(systemMessage);
 
         ChatLanguageModel model = VertexAiGeminiChatModel.builder()
             .project(project)
@@ -126,7 +129,7 @@ public class VertexAIClient {
 
         String output = assistant.chat(userMessage);
 
-        logger.info("Elapsed time (chat model, with Langchain4J): " + (System.currentTimeMillis() - start) + "ms");
+        logger.info("Elapsed time (gemini-pro, with Langchain4J): " + (System.currentTimeMillis() - start) + "ms");
         logger.info("Chat Model output with Function Call: " + output);
 
         // return model response in String format

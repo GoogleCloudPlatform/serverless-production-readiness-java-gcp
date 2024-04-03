@@ -49,7 +49,6 @@ public class FirestoreServiceTests {
     registry.add("spring.cloud.gcp.firestore.host-port", firestoreEmulator::getEmulatorEndpoint);
   }
 
-  // @Autowired
   private FirestoreService eventService;
 
   @Test

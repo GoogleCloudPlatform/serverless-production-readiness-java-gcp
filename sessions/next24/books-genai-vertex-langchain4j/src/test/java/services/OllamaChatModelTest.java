@@ -59,7 +59,12 @@ public class OllamaChatModelTest {
 
         System.out.println(("Build model and start container in " + (System.currentTimeMillis()-start) + " ms"));
         start = System.currentTimeMillis();
-        String answer = model.generate(String.format("Summarize in no more than 2000 words the content of the book listed after the : %s", document.text()));
+        String prompt = """
+                Summarize in no more than 3000 words the content 
+                of the book listed after the : %s                
+                """;
+        System.out.println(prompt);
+        String answer = model.generate(String.format(prompt, document.text()));
         System.out.println(("Summarize book in " + (System.currentTimeMillis()-start) + " ms"));
 
         System.out.println(answer);
@@ -76,7 +81,7 @@ public class OllamaChatModelTest {
 
         System.out.println(("Build model and start container in " + (System.currentTimeMillis()-start) + " ms"));
         start = System.currentTimeMillis();
-        String answer = model.generate(String.format("Summarize in no more than 2000 words the content of the book The Jungle Book by Rudyard Kipling"));
+        String answer = model.generate(String.format("Give me a summary of The Jungle Book - Rudyard Kipling in less than 10 paragraphs with no special characters, line breaks, and headings."));
         System.out.println(("Summarize book in " + (System.currentTimeMillis()-start) + " ms"));
 
         System.out.println(answer);
