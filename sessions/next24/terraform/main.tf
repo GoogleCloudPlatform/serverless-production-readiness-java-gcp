@@ -58,6 +58,7 @@ resource "null_resource" "create_firestore_index" {
   depends_on = [module.project_services]
   provisioner "local-exec" {
     command = <<-EOT
+      gcloud firestore databases create --project=${var.project_id} --region=${var.region}
       gcloud firestore indexes composite create \
         --project=${var.project_id} \
         --collection-group=pictures \
