@@ -58,9 +58,7 @@ resource "google_compute_firewall" "allow_access_ingress" {
   depends_on = [google_compute_network.auto_vpc]
   allow {
     protocol = "tcp"
-    ports    = ["22"]
-    ports    = ["80"]
-    ports    = ["5432"]
+    ports    = ["22","80","5432"]
   }
 
   direction    = "INGRESS"
