@@ -28,8 +28,8 @@ module "project_services" {
     "logging.googleapis.com",
     "storage-component.googleapis.com",
     "aiplatform.googleapis.com",
-    "run.googleapis.com",           # Cloud Run API
-    "alloydb.googleapis.com",        # Assuming this is the AlloyDB API name; please verify
+    "run.googleapis.com",
+    "alloydb.googleapis.com",
     "artifactregistry.googleapis.com"
   ]
 }
@@ -75,7 +75,7 @@ resource "google_vpc_access_connector" "alloy_connector" {
   region        = var.region
   network       = "default"
   ip_cidr_range = "10.100.0.0/28"
-  depends_on = [module.auto_vpc]
+  depends_on = [google_compute_network.auto_vpc]
 }
 
 resource "null_resource" "alloydb_cluster" {
@@ -83,7 +83,7 @@ resource "null_resource" "alloydb_cluster" {
     always_run = "${timestamp()}"
   }
 
-  depends_on = [module.alloy_connector]
+  depends_on = [google_vpc_access_connector.alloy_connector]
 
   provisioner "local-exec" {
     command = <<EOF
@@ -107,7 +107,7 @@ locals {
 # Example Cloud Run deployment
 resource "google_cloud_run_service" "cloud_run" {
   for_each = local.cloud_run_services
-  depends_on = [module.alloydb_cluster]
+  depends_on = [null_resource.alloydb_cluster]
   name     = each.key
   location = var.region
 
