@@ -132,6 +132,7 @@ resource "google_cloud_run_service" "cloud_run" {
       annotations = {
         "run.googleapis.com/cpu"    = "4"
         "run.googleapis.com/memory" = "4Gi"
+        "run.googleapis.com/vpc-access-connector"  = google_vpc_access_connector.alloy_connector.id
       }
     }
     spec {
@@ -168,9 +169,7 @@ resource "google_cloud_run_service" "cloud_run" {
           name  = "JAVA_TOOL_OPTIONS"
           value = "-XX:+UseG1GC -XX:MaxRAMPercentage=75 -XX:ActiveProcessorCount=4 -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -Xss256k"
         }
-        // Add more environment variables as necessary
       }
-      vpc_connector = google_vpc_access_connector.alloy_connector.id
     }
   }
 
@@ -180,7 +179,7 @@ resource "google_cloud_run_service" "cloud_run" {
   }
 
   autogenerate_revision_name = true
-#   allow_unauthenticated      = true
+  # allow_unauthenticated      = true
 }
 
 # Eventarc trigger example (adjust according to your actual setup)
