@@ -46,16 +46,6 @@ resource "google_storage_bucket" "dynamic_buckets" {
   uniform_bucket_level_access = each.value.uniform_bucket_level_access
 }
 
-resource "google_storage_bucket_iam_binding" "dynamic_buckets_public" {
-  for_each = var.buckets
-  depends_on = [google_storage_bucket.dynamic_buckets]
-  bucket = "${each.key}_${var.project_id}"
-  role   = "roles/storage.objectViewer"
-  members = [
-    "allUsers",
-  ]
-}
-
 resource "google_compute_network" "auto_vpc" {
   name                    = "default"
   depends_on = [module.project_services]
@@ -132,7 +122,7 @@ resource "google_artifact_registry_repository" "books_genai_repo" {
 # Example Cloud Run deployment
 resource "google_cloud_run_service" "cloud_run" {
   for_each = local.cloud_run_services
-  depends_on = [google_artifact_registry_repository.books_genai_repo, google_service_networking_connection.private_vpc_connection, google_storage_bucket.dynamic_buckets, google_storage_bucket_iam_binding.dynamic_buckets_public]
+  depends_on = [google_artifact_registry_repository.books_genai_repo, google_service_networking_connection.private_vpc_connection, google_storage_bucket.dynamic_buckets]
   name     = each.key
   location = var.region
 
@@ -153,6 +143,7 @@ resource "google_cloud_run_service" "cloud_run" {
             cpu    = "4000m"
             memory = "4Gi"
           }
+
         }
         env {
           name  = "MY_PASSWORD"
