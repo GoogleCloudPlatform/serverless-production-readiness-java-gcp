@@ -104,8 +104,7 @@ resource "null_resource" "alloydb_cluster" {
 
 data "external" "alloydb_ip" {
   depends_on = [null_resource.alloydb_cluster]
-
-  program = ["bash", "-c", "cat ${path.module}/alloydb_ip.txt"]
+  program = ["bash", "-c", "echo '{\"ip_address\": \"'$(cat ${path.module}/alloydb_ip.txt)'\"}'"]
 }
 
 locals {
@@ -119,7 +118,7 @@ locals {
       env = "native"
     }
   }
-  alloydb_ip = data.external.alloydb_ip.result[0]
+  alloydb_ip = data.external.alloydb_ip.result["ip_address"]
 }
 
 resource "google_artifact_registry_repository" "books_genai_repo" {
