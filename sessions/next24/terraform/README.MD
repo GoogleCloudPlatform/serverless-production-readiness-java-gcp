@@ -67,4 +67,4 @@ docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/books-genai-native/books-gena
 ## Once the images are there then the cloud run instances will be ready to deploy on the second terraform apply.. (First run will fail here)
 
 ## Issues & TODOs
-## CI to build the images and push to artifact registry..GCE instance need external ip to install psql.
+## CI to build the images and push to artifact registry..GCE instance need external ip to install psql & download sql with ddl
