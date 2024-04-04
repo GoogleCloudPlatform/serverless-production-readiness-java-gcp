@@ -46,8 +46,8 @@ public class VertexAIClient {
     }
 
     public String promptOnImage(String prompt,
-        String bucketName,
-        String fileName) throws IOException {
+                                String bucketName,
+                                String fileName) throws IOException {
         long start = System.currentTimeMillis();
 
         // bucket where image has been uploaded
@@ -55,13 +55,13 @@ public class VertexAIClient {
 
         // create User Message for AI framework
         var multiModalUserMessage = new UserMessage(prompt,
-            List.of(new Media(MimeTypeDetector.getMimeType(imageURL), imageURL)));
+                List.of(new Media(MimeTypeDetector.getMimeType(imageURL), imageURL)));
 
         // call the model of choice
         ChatResponse multiModalResponse = chatClient.call(new Prompt(List.of(multiModalUserMessage),
-            VertexAiGeminiChatOptions.builder()
-                .withModel(VertexModels.GEMINI_PRO_VISION)
-                .build()));
+                VertexAiGeminiChatOptions.builder()
+                        .withModel(VertexModels.GEMINI_PRO_VISION)
+                        .build()));
         String response = multiModalResponse.getResult().getOutput().getContent();
         logger.info("Multi-modal response: " + response);
 
@@ -79,13 +79,13 @@ public class VertexAIClient {
         logger.info("Chat model prompt: {} ...", prompt.substring(0, 500));
 
         ChatResponse chatResponse = chatClient.call(new Prompt(prompt,
-            VertexAiGeminiChatOptions.builder()
-                .withTemperature(0.4f)
-                .withModel(VertexModels.GEMINI_PRO)
-                .build())
+                VertexAiGeminiChatOptions.builder()
+                        .withTemperature(0.4f)
+                        .withModel(VertexModels.GEMINI_PRO)
+                        .build())
         );
         logger.info("Elapsed time (gemini-pro, with SpringAI): " + (System.currentTimeMillis() - start) + "ms");
-        
+
         String output = "Model response contains no data. Please try again!";
         if(chatResponse.getResult()!=null) {
             output = chatResponse.getResult().getOutput().getContent();
@@ -102,11 +102,11 @@ public class VertexAIClient {
         long start = System.currentTimeMillis();
 
         ChatResponse chatResponse = chatClient.call(new Prompt(List.of(systemMessage, userMessage),
-                                                    VertexAiGeminiChatOptions.builder()
-                                                        .withModel("gemini-pro")
-                                                        .withFunction(functionName)
-                                                        .build()));
-        
+                VertexAiGeminiChatOptions.builder()
+                        .withModel("gemini-pro")
+                        .withFunction(functionName)
+                        .build()));
+
         logger.info("Elapsed time (gemini-pro, with SpringAI): " + (System.currentTimeMillis() - start) + "ms");
 
         String output = chatResponse.getResult().getOutput().getContent();

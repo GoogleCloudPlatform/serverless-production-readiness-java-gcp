@@ -95,7 +95,7 @@ public class ImageProcessingController {
 
     @RequestMapping(value = "", method = RequestMethod.POST)
     public ResponseEntity<String> receiveMessage(
-        @RequestBody Map<String, Object> body, @RequestHeader Map<String, String> headers) throws IOException, InterruptedException, ExecutionException {
+            @RequestBody Map<String, Object> body, @RequestHeader Map<String, String> headers) throws IOException, InterruptedException, ExecutionException {
         logger.info("Header elements");
         for (String field : CloudConfig.requiredFields) {
             if (headers.get(field) == null) {
@@ -150,11 +150,11 @@ public class ImageProcessingController {
 
         // Function calling BookStoreService
         UserMessage userMessage = new UserMessage(
-            String.format("Write a nice note including book author, book title and availability. Find out if the book with the title %s by author %s is available in the University bookstore.Please add also this book summary to the response, with the text available after the column, prefix it with My Book Summary:  %s",
-            title, author, summary));
+                String.format("Write a nice note including book author, book title and availability. Find out if the book with the title %s by author %s is available in the University bookstore.Please add also this book summary to the response, with the text available after the column, prefix it with My Book Summary:  %s",
+                        title, author, summary));
 
         String bookStoreResponse = vertexAIClient.promptModelwithFunctionCalls(userMessage,
-                                                                               new BookStoreService());
+                new BookStoreService());
 
         // Saving result to Firestore
         if (bookStoreResponse != null) {
@@ -173,14 +173,14 @@ public class ImageProcessingController {
         private static final Logger logger = LoggerFactory.getLogger(BookStoreService.class);
         @Tool("Find book availability in bookstore based on the book title and book author")
         BookStoreResponse getBookAvailability(@P("The title of the book") String title,
-            @P("The author of the book") String author) {
+                                              @P("The author of the book") String author) {
             logger.info(String.format("Called getBookAvailability(%s, %s)", title, author));
             return new BookStoreResponse(title, author, "The book is available for purchase in the book store in paperback format.");
         }
 
         public record BookStoreRequest(
-            @P("The title of the book") String title,
-            @P("The author of the book") String author) {
+                @P("The title of the book") String title,
+                @P("The author of the book") String author) {
         }
         public record BookStoreResponse(String title, String author, String availability) {}
     }
