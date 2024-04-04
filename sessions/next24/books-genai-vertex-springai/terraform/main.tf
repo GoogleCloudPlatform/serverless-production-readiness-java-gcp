@@ -163,7 +163,7 @@ resource "google_cloud_run_service" "cloud_run" {
   }
 
   autogenerate_revision_name = true
-  allow_unauthenticated      = true
+#   allow_unauthenticated      = true
 }
 
 # Eventarc trigger example (adjust according to your actual setup)
@@ -173,20 +173,28 @@ resource "google_eventarc_trigger" "books_genai_jit_trigger_image" {
   service_account = "${var.project_id}-compute@developer.gserviceaccount.com"
 
   destination {
-    cloud_run {
-      service = google_cloud_run_service.books_genai_jit.name
+    cloud_run_service {
+      service = google_cloud_run_service.cloud_run.name
       path    = "/images"
+      region  = var.region
     }
-  }
-
-  matching_criteria {
-    attribute = "type"
-    value     = "google.cloud.storage.object.v1.finalized"
   }
 
   transport {
     pubsub {
-      topic = "projects/${var.project_id}/topics/your-topic"
+      topic = "projects/${var.project_id}/topics/your-topic-name"
     }
   }
+  event_filter {
+    attribute = "type"
+    value     = "google.cloud.storage.object.v1.finalized"
+  }
+  event_filter {
+    attribute = "bucket"
+    value     = "your-bucket-name"
+  }
+#   matching_criteria {
+#     attribute = "type"
+#     value     = "google.cloud.storage.object.v1.finalized"
+#   }
 }
