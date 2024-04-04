@@ -1,7 +1,7 @@
 steps:
   # Step 1: Clone the GitHub repository
   - name: 'gcr.io/cloud-builders/git'
-    args: ['clone', 'git@github.com:GoogleCloudPlatform/serverless-production-readiness-java-gcp.git']
+    args: ['clone', 'https://github.com/ypenn21/serverless-production-readiness-java-gcp.git']
 
   # Step 2: Build the Docker image with the Java artifact
   - name: 'gcr.io/cloud-builders/docker'
@@ -15,5 +15,6 @@ steps:
   # Step 4: Push the Docker image to Google Cloud's Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'gcr.io/$PROJECT_ID/books-genai-jit']
-
-  # gcloud builds submit --config=custom_build.yaml --substitutions=PROJECT_ID="PROJECT_ID"
+  #gcloud services enable cloudbuild.googleapis.com
+  #gcloud services enable artifactregistry.googleapis.com
+  # gcloud builds submit --config=cloudbuild.yaml --substitutions=$PROJECT_ID="books-genai-tf-test"

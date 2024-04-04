@@ -214,7 +214,8 @@ gcloud run deploy books-genai-jit \
   --image us-docker.pkg.dev/${$PROJECT_ID}/books-genai-jit/books-genai:latest  --region us-central1 \
   --memory 4Gi --cpu 4 --cpu-boost --execution-environment=gen2  \
   --set-env-vars=JAVA_TOOL_OPTIONS='-XX:+UseZGC -XX:+ZGenerational -XX:MaxRAMPercentage=75 -XX:ActiveProcessorCount=4 -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -Xss256k' \
-  --allow-unauthenticated 
+  --allow-unauthenticated \
+  --vpc-connector alloy-connector
 
 # deploy native Java image to Cloud Run
 gcloud run deploy books-genai-native \
@@ -222,7 +223,8 @@ gcloud run deploy books-genai-native \
   --image us-docker.pkg.dev/${$PROJECT_ID}/books-genai-native/books-genai:latest  --region us-central1 \
   --memory 4Gi --cpu 4 --cpu-boost --execution-environment=gen2  \
   --set-env-vars=JAVA_TOOL_OPTIONS='-XX:+UseG1GC -XX:MaxRAMPercentage=75 -XX:ActiveProcessorCount=4 -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -Xss256k' \
-  --allow-unauthenticated 
+  --allow-unauthenticated \
+  --vpc-connector alloy-connector
 ```
 
 Set up Eventarc triggers
