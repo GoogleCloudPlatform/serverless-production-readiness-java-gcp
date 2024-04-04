@@ -52,18 +52,20 @@ resource "google_compute_network" "auto_vpc" {
   auto_create_subnetworks = true # This creates subnets in each region, similar to a default VPC
 }
 
-resource "google_compute_firewall" "allow_ssh" {
-  name    = "allow-ssh"
+resource "google_compute_firewall" "allow_access_ingress" {
+  name    = "allow-ingress-22-80-5432"
   network = "projects/${var.project_id}/global/networks/default"
   depends_on = [google_compute_network.auto_vpc]
   allow {
     protocol = "tcp"
     ports    = ["22"]
+    ports    = ["80"]
+    ports    = ["5432"]
   }
 
   direction    = "INGRESS"
   source_ranges = ["0.0.0.0/0"]
-  target_tags   = ["ssh-access"]
+  target_tags   = ["all-access"]
 }
 
 # Reserve IP range for VPC peering
@@ -212,10 +214,10 @@ resource "google_cloud_run_service" "cloud_run" {
 }
 
 # Eventarc trigger example (adjust according to your actual setup)
-resource "google_eventarc_trigger" "books_genai_trigger_image" {
+resource "google_eventarc_trigger" "books_genai_trigger_embeddings" {
   for_each = local.cloud_run_services
   depends_on = [google_cloud_run_service.cloud_run]
-  name     = "${each.key}-trigger-image-${var.region}"
+  name     = "${each.key}-trigger-embeddings-${var.region}"
   location = var.region
 
   # Ensure you have the correct service account email format
@@ -224,17 +226,17 @@ resource "google_eventarc_trigger" "books_genai_trigger_image" {
   destination {
     cloud_run_service {
       service = each.key #Assuming `service_name` is defined in your `local.cloud_run_services`
-      path    = "/images"
+      path    = "/document/embeddings"
       region  = var.region
     }
   }
 
-  transport {
-    pubsub {
-      # Replace 'your-topic-name' with your actual topic name
-      topic = "projects/${var.project_id}/topics/your-topic-name"
-    }
-  }
+#   transport {
+#     pubsub {
+#       # Replace 'your-topic-name' with your actual topic name
+#       topic = "projects/${var.project_id}/topics/your-topic-name"
+#     }
+#   }
 
   matching_criteria {
     attribute = "type"
