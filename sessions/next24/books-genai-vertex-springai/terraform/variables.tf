@@ -23,6 +23,11 @@ variable "alloydb_password" {
   description = "The password for the AlloyDB instance."
   sensitive   = true
 }
+variable "alloydb_cluster_name" {
+  type        = string
+  description = "The cluster name for the AlloyDB instance."
+  sensitive   = true
+}
 
 variable "my_password" {
   description = "The password for MY application"
