@@ -41,7 +41,7 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
 gcloud projects add-iam-policy-binding $PROJECT_ID \
     --member="serviceAccount:service-${PROJECT_NUMBER}@gs-project-accounts.iam.gserviceaccount.com" \
     --role='roles/pubsub.publisher' 
-
+#These two org policies are needed for VM that provisions the DDL & Cloud Run to allow unauthenticated
 export ORG_ID=$(gcloud organizations list --format="value(name)")
 cat <<EOF > policy.yaml
 constraint: constraints/compute.vmExternalIpAccess
@@ -73,4 +73,5 @@ docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/books-genai-native/books-gena
 ## Once the images are there then the cloud run instances will be ready to deploy on the second terraform apply.. (First run will fail here)
 
 ## Issues & TODOs
-## CI to build the images and push to artifact registry..GCE instance need external ip to install psql & download sql with ddl & Cloud run need to allow unauthenticated
+## CI to build the images and push to artifact registry..GCE instance need external ip to install psql & download sql with ddl. 
+## Cloud run need to allow unauthenticated
