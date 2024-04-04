@@ -114,10 +114,6 @@ locals {
     }
   }
   alloydb_ip = try(file("${path.module}/alloydb_ip.txt"), "")
-
-  project_id   = data.google_project.current.project_id
-  project_number = data.google_project.current.number
-
 }
 
 resource "google_artifact_registry_repository" "books_genai_repo" {
@@ -204,7 +200,7 @@ resource "google_eventarc_trigger" "books_genai_trigger_image" {
   location = var.region
 
   # Ensure you have the correct service account email format
-  service_account = "${local.project_number}-compute@developer.gserviceaccount.com"
+  service_account = "${var.project_number}-compute@developer.gserviceaccount.com"
 
   destination {
     cloud_run_service {

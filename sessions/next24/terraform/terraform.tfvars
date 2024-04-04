@@ -1,4 +1,5 @@
 project_id = "your-gcp-project-id"
+project_number = "your-gcp-project-number"
 my_user = "postgres"
 alloydb_cluster_name = "alloydb-aip-01"
 buckets = {
