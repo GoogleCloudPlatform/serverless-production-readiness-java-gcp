@@ -170,6 +170,7 @@ resource "google_cloud_run_service" "cloud_run" {
         }
         // Add more environment variables as necessary
       }
+      vpc_connector = google_vpc_access_connector.alloy_connector.id
     }
   }
 
