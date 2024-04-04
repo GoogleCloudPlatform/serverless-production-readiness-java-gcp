@@ -90,6 +90,13 @@ resource "null_resource" "alloydb_cluster" {
         gcloud alloydb clusters create ${var.alloydb_cluster_name} \
           --region=${var.region} --password=${var.alloydb_password}
       fi
+      if ! gcloud alloydb instances list --filter="name=${var.alloydb_cluster_name}-pr AND cluster=${var.alloydb_cluster_name}" --format="value(name)" --region="${var.region}"; then
+        gcloud alloydb instances create ${var.alloydb_cluster_name}-pr \
+          --instance-type=PRIMARY \
+          --cpu-count=2 \
+          --region=${var.region} \
+          --cluster=${var.alloydb_cluster_name}
+      fi
     EOT
   }
 }
