@@ -77,6 +77,20 @@ resource "google_vpc_access_connector" "alloy_connector" {
   depends_on = [module.auto_vpc]
 }
 
+resource "null_resource" "alloydb_cluster" {
+  triggers = {
+    always_run = "${timestamp()}"
+  }
+
+  depends_on = [module.alloy_connector]
+
+  provisioner "local-exec" {
+    command = <<EOF
+    gcloud alloydb clusters create ${var.alloydb_cluster_name} --region=${var.region} --password=${var.alloydb_password} --format="get(ipAddresses[0].ipAddress)" > alloydb_ip.txt
+    EOF
+  }
+}
+
 locals {
   cloud_run_services = {
     "books-genai-jit" = {
@@ -86,12 +100,13 @@ locals {
       image = "us-docker.pkg.dev/${var.project_id}/books-genai-native/books-genai:latest"
     }
   }
+  alloydb_ip = try(file("${path.module}/alloydb_ip.txt"), "")
 }
 
 # Example Cloud Run deployment
 resource "google_cloud_run_service" "cloud_run" {
   for_each = local.cloud_run_services
-
+  depends_on = [module.alloydb_cluster]
   name     = each.key
   location = var.region
 
@@ -112,7 +127,6 @@ resource "google_cloud_run_service" "cloud_run" {
             memory = "4Gi"
           }
         }
-
         env {
           name  = "MY_PASSWORD"
           value = var.my_password
@@ -123,7 +137,7 @@ resource "google_cloud_run_service" "cloud_run" {
         }
         env {
           name  = "DB_URL"
-          value = var.db_url
+          value =  "jdbc:postgresql://${local.alloydb_ip}:5432/library"
         }
         env {
           name  = "VERTEX_AI_GEMINI_PROJECT_ID"
@@ -155,7 +169,7 @@ resource "google_cloud_run_service" "cloud_run" {
 resource "google_eventarc_trigger" "books_genai_jit_trigger_image" {
   name        = "books-genai-jit-trigger-image"
   location    = var.region
-  service_account = "your-service-account@your-project.iam.gserviceaccount.com"
+  service_account = "${var.project_id}-compute@developer.gserviceaccount.com"
 
   destination {
     cloud_run {
@@ -173,15 +187,5 @@ resource "google_eventarc_trigger" "books_genai_jit_trigger_image" {
     pubsub {
       topic = "projects/${var.project_id}/topics/your-topic"
     }
-  }
-}
-
-resource "null_resource" "alloydb_cluster" {
-  triggers = {
-    always_run = "${timestamp()}"
-  }
-
-  provisioner "local-exec" {
-    command = "gcloud alloydb clusters create ${var.alloydb_cluster_name} --region=${var.region} --password=${var.alloydb_password}"
   }
 }
