@@ -284,7 +284,14 @@ resource "google_cloud_run_service" "cloud_run" {
 
   autogenerate_revision_name = true
 }
-
+resource "google_cloud_run_service_iam_member" "cloud_run_unauthenticated" {
+  for_each = local.cloud_run_services
+  depends_on = [google_cloud_run_service.cloud_run]
+  location = var.region
+  service  = each.key
+  role     = "roles/run.invoker"
+  member   = "allUsers"
+}
 resource "google_eventarc_trigger" "books_genai_trigger_embeddings" {
   for_each = local.cloud_run_services
   depends_on = [google_cloud_run_service.cloud_run]
