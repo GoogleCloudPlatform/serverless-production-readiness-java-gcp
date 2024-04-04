@@ -81,7 +81,7 @@ resource "google_vpc_access_connector" "alloy_connector" {
 
 resource "google_service_networking_connection" "private_vpc_connection" {
   depends_on = [google_vpc_access_connector.alloy_connector]
-  network                 = google_compute_network.custom_vpc.id
+  network                 = google_compute_network.auto_vpc.id
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.psa_range.name]
 }

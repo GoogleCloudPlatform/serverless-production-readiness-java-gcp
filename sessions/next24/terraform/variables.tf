@@ -29,18 +29,8 @@ variable "alloydb_cluster_name" {
   sensitive   = true
 }
 
-variable "my_password" {
-  description = "The password for MY application"
-  type        = string
-  sensitive   = true
-}
-
 variable "my_user" {
   description = "User for the application"
   type        = string
-}
-
-variable "db_url" {
-  description = "Database URL"
-  type        = string
+  default     = "postgres"
 }
