@@ -95,19 +95,34 @@ resource "null_resource" "alloydb_cluster" {
 locals {
   cloud_run_services = {
     "books-genai-jit" = {
-      image = "us-docker.pkg.dev/${var.project_id}/books-genai-jit/books-genai:latest"
+      image = "${var.region}-docker.pkg.dev/${var.project_id}/books-genai-jit/books-genai:latest",
+      env = "jit"
     },
     "books-genai-native" = {
-      image = "us-docker.pkg.dev/${var.project_id}/books-genai-native/books-genai:latest"
+      image = "${var.region}-docker.pkg.dev/${var.project_id}/books-genai-native/books-genai:latest",
+      env = "native"
     }
   }
   alloydb_ip = try(file("${path.module}/alloydb_ip.txt"), "")
 }
 
+resource "google_artifact_registry_repository" "books_genai_repo" {
+  for_each = local.cloud_run_services
+  depends_on = [null_resource.alloydb_cluster]
+  location      = var.region
+  repository_id = each.key
+  description   = "Artifact registry for books-genai-jit images"
+  format        = "DOCKER"
+
+  labels = {
+    env = each.value.env
+  }
+}
+
 # Example Cloud Run deployment
 resource "google_cloud_run_service" "cloud_run" {
   for_each = local.cloud_run_services
-  depends_on = [null_resource.alloydb_cluster]
+  depends_on = [google_artifact_registry_repository.books_genai_repo]
   name     = each.key
   location = var.region
 
