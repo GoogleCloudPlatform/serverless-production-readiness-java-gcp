@@ -104,6 +104,9 @@ resource "google_compute_instance" "alloydb_client" {
   // Network interface with external access
   network_interface {
     network = "default"
+#     access_config {
+#           // Consider organization policies if you plan to assign an external IP
+#     }
   }
     metadata_startup_script = <<EOF
   #!/bin/bash
@@ -287,6 +290,6 @@ resource "google_eventarc_trigger" "books_genai_trigger_embeddings" {
 
   matching_criteria {
     attribute = "bucket"
-    value     = "library_next24_public"
+    value     = "library_next24_public_${var.project_id}"
   }
 }
