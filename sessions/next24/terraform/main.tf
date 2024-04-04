@@ -85,6 +85,48 @@ resource "google_vpc_access_connector" "alloy_connector" {
   depends_on = [google_compute_network.auto_vpc]
 }
 
+resource "google_compute_instance" "alloydb_lient" {
+  name         = "alloydb-client"
+  zone         = var.zone
+  depends_on = [null_resource.alloydb_cluster]
+  boot_disk {
+    initialize_params {
+      // The latest Debian 12 image (excluding arm64)
+      image = data.google_compute_image.debian_12.self_link
+    }
+  }
+
+  // Network interface with external access
+  network_interface {
+    network = "default"
+    access_config {
+      // Empty block to assign an external IP
+    }
+  }
+    metadata_startup_script = <<EOF
+  #!/bin/bash
+  sudo apt-get update
+  sudo apt-get install --yes postgresql-client
+  export REGION=${var.region}
+  export ADBCLUSTER=${var.alloydb_cluster_name}
+  export PGPASSWORD=${var.alloydb_password}
+  psql "host=${local.alloydb_ip} user=postgres" -c "CREATE DATABASE quickstart_db"
+  EOF
+  // Assigning the 'ssh-access' tag for firewall rules
+  tags = ["all-access"]
+
+  // Scopes
+  service_account {
+    scopes = ["https://www.googleapis.com/auth/cloud-platform"]
+  }
+}
+
+// Data source to fetch the latest Debian 12 image (excluding arm64)
+data "google_compute_image" "debian_12" {
+  family  = "debian-12"
+  project = "debian-cloud"
+}
+
 resource "google_service_networking_connection" "private_vpc_connection" {
   depends_on = [google_vpc_access_connector.alloy_connector]
   network                 = google_compute_network.auto_vpc.id

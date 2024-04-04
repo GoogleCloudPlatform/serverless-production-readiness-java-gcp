@@ -14,6 +14,12 @@ variable "region" {
   description = "The GCP region where resources will be created."
 }
 
+variable "zone" {
+  type        = string
+  default     = "us-central1-a"
+  description = "The GCP zone where resources will be created."
+}
+
 variable "buckets" {
   type = map(object({
     location                 = string
