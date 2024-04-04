@@ -84,11 +84,13 @@ resource "null_resource" "alloydb_cluster" {
   }
 
   depends_on = [google_service_networking_connection.private_vpc_connection]
-
   provisioner "local-exec" {
-    command = <<EOF
-    gcloud alloydb clusters create ${var.alloydb_cluster_name} --region=${var.region} --password=${var.alloydb_password} --format="get(ipAddresses[0].ipAddress)" > alloydb_ip.txt
-    EOF
+    command = <<-EOT
+      if ! gcloud alloydb clusters list --filter="name=${var.alloydb_cluster_name}" --format="value(name)" --region="${var.region}"; then
+        gcloud alloydb clusters create ${var.alloydb_cluster_name} \
+          --region=${var.region} --password=${var.alloydb_password}
+      fi
+    EOT
   }
 }
 
