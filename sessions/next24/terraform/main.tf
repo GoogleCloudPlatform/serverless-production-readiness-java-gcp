@@ -11,7 +11,6 @@ provider "google" {
   region  = var.region
 }
 
-# Enable required Google Cloud services
 module "project_services" {
   source  = "terraform-google-modules/project-factory/google//modules/project_services"
   version = "~> 11.1"
@@ -38,7 +37,6 @@ module "project_services" {
   ]
 }
 
-# Dynamic creation of Google Cloud Storage buckets
 resource "google_storage_bucket" "dynamic_buckets" {
   for_each = var.buckets
   depends_on = [module.project_services]
@@ -98,7 +96,6 @@ resource "google_compute_firewall" "allow_access_ingress" {
   target_tags   = ["all-access"]
 }
 
-# Reserve IP range for VPC peering
 resource "google_compute_global_address" "psa_range" {
   name          = "psa-range"
   purpose       = "VPC_PEERING"
@@ -108,7 +105,6 @@ resource "google_compute_global_address" "psa_range" {
   depends_on = [google_compute_network.auto_vpc]
 }
 
-# VPC Connector
 resource "google_vpc_access_connector" "alloy_connector" {
   name          = "alloy-connector"
   region        = var.region
@@ -152,16 +148,14 @@ resource "google_compute_instance" "alloydb_client" {
   curl -o /tmp/init-db.sql https://raw.githubusercontent.com/GoogleCloudPlatform/serverless-production-readiness-java-gcp/main/sessions/next24/books-genai-vertex-springai/sql/books-ddl.sql
   psql "host=${local.alloydb_ip} user=postgres dbname=library" -f /tmp/init-db.sql
   EOF
-  // Assigning the 'ssh-access' tag for firewall rules
+  
   tags = ["all-access"]
 
-  // Scopes
   service_account {
     scopes = ["https://www.googleapis.com/auth/cloud-platform"]
   }
 }
 
-// Data source to fetch the latest Debian 12 image (excluding arm64)
 data "google_compute_image" "debian_12" {
   family  = "debian-12"
   project = "debian-cloud"
@@ -230,7 +224,6 @@ resource "google_artifact_registry_repository" "books_genai_repo" {
   }
 }
 
-# Example Cloud Run deployment
 resource "google_cloud_run_service" "cloud_run" {
   for_each = local.cloud_run_services
   depends_on = [google_compute_instance.alloydb_client, google_artifact_registry_repository.books_genai_repo, google_service_networking_connection.private_vpc_connection, google_storage_bucket.dynamic_buckets]
@@ -290,10 +283,8 @@ resource "google_cloud_run_service" "cloud_run" {
   }
 
   autogenerate_revision_name = true
-  # allow_unauthenticated      = true
 }
 
-# Eventarc trigger example (adjust according to your actual setup)
 resource "google_eventarc_trigger" "books_genai_trigger_embeddings" {
   for_each = local.cloud_run_services
   depends_on = [google_cloud_run_service.cloud_run]
@@ -311,13 +302,6 @@ resource "google_eventarc_trigger" "books_genai_trigger_embeddings" {
     }
   }
 
-#   transport {
-#     pubsub {
-#       # Replace 'your-topic-name' with your actual topic name
-#       topic = "projects/${var.project_id}/topics/your-topic-name"
-#     }
-#   }
-
   matching_criteria {
     attribute = "type"
     value     = "google.cloud.storage.object.v1.finalized"
@@ -329,14 +313,12 @@ resource "google_eventarc_trigger" "books_genai_trigger_embeddings" {
   }
 }
 
-# Eventarc trigger example (adjust according to your actual setup)
 resource "google_eventarc_trigger" "books_genai_trigger_image" {
   for_each = local.cloud_run_services
   depends_on = [google_cloud_run_service.cloud_run]
   name     = "${each.key}-trigger-image-${var.region}"
   location = var.region
 
-  # Ensure you have the correct service account email format
   service_account = "${var.project_number}-compute@developer.gserviceaccount.com"
 
   destination {
@@ -346,13 +328,6 @@ resource "google_eventarc_trigger" "books_genai_trigger_image" {
       region  = var.region
     }
   }
-
-#   transport {
-#     pubsub {
-#       # Replace 'your-topic-name' with your actual topic name
-#       topic = "projects/${var.project_id}/topics/your-topic-name"
-#     }
-#   }
 
   matching_criteria {
     attribute = "type"
