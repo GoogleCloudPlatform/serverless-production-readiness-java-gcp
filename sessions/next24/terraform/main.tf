@@ -52,6 +52,20 @@ resource "google_compute_network" "auto_vpc" {
   auto_create_subnetworks = true # This creates subnets in each region, similar to a default VPC
 }
 
+resource "google_compute_firewall" "allow_ssh" {
+  name    = "allow-ssh"
+  network = "projects/your-project-id/global/networks/default"
+  depends_on = [google_compute_network.auto_vpc]
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+
+  direction    = "INGRESS"
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["ssh-access"]
+}
+
 # Reserve IP range for VPC peering
 resource "google_compute_global_address" "psa_range" {
   name          = "psa-range"
