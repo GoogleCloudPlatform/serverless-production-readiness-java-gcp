@@ -178,7 +178,7 @@ resource "google_eventarc_trigger" "books_genai_jit_trigger_image" {
 
   destination {
     cloud_run_service {
-      service = each.value.service_name # Assuming `service_name` is defined in your `local.cloud_run_services`
+      service = each.key #Assuming `service_name` is defined in your `local.cloud_run_services`
       path    = "/images"
       region  = var.region
     }
