@@ -97,9 +97,15 @@ resource "null_resource" "alloydb_cluster" {
           --region=${var.region} \
           --cluster=${var.alloydb_cluster_name}
       fi
-      gcloud alloydb instances describe alloydb-aip-01-pr         --region=us-central1         --cluster=alloydb-aip-01         --format='get(ipAddress)' > alloydb_ip.txt
+      gcloud alloydb instances describe alloydb-aip-01-pr --region=us-central1 --cluster=alloydb-aip-01 --format='get(ipAddress)' > alloydb_ip.txt
     EOT
   }
+}
+
+data "external" "alloydb_ip" {
+  depends_on = [null_resource.alloydb_cluster]
+
+  program = ["bash", "-c", "cat ${path.module}/alloydb_ip.txt"]
 }
 
 locals {
@@ -113,7 +119,7 @@ locals {
       env = "native"
     }
   }
-  alloydb_ip = try(file("${path.module}/alloydb_ip.txt"), "")
+  alloydb_ip = data.external.alloydb_ip.result[0]
 }
 
 resource "google_artifact_registry_repository" "books_genai_repo" {
