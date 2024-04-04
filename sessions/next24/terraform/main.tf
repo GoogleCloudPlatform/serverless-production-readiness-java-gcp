@@ -79,12 +79,19 @@ resource "google_vpc_access_connector" "alloy_connector" {
   depends_on = [google_compute_network.auto_vpc]
 }
 
+resource "google_service_networking_connection" "private_vpc_connection" {
+  depends_on = [google_vpc_access_connector.alloy_connector]
+  network                 = google_compute_network.custom_vpc.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.psa_range.name]
+}
+
 resource "null_resource" "alloydb_cluster" {
   triggers = {
     always_run = "${timestamp()}"
   }
 
-  depends_on = [google_vpc_access_connector.alloy_connector]
+  depends_on = [google_service_networking_connection.private_vpc_connection]
 
   provisioner "local-exec" {
     command = <<EOF
@@ -123,7 +130,7 @@ resource "google_artifact_registry_repository" "books_genai_repo" {
 # Example Cloud Run deployment
 resource "google_cloud_run_service" "cloud_run" {
   for_each = local.cloud_run_services
-  depends_on = [google_artifact_registry_repository.books_genai_repo, google_storage_bucket.dynamic_buckets, google_storage_bucket_iam_binding.dynamic_buckets_public]
+  depends_on = [google_artifact_registry_repository.books_genai_repo, google_service_networking_connection.private_vpc_connection, google_storage_bucket.dynamic_buckets, google_storage_bucket_iam_binding.dynamic_buckets_public]
   name     = each.key
   location = var.region
 
@@ -147,7 +154,7 @@ resource "google_cloud_run_service" "cloud_run" {
         }
         env {
           name  = "MY_PASSWORD"
-          value = var.my_password
+          value = var.alloydb_password
         }
         env {
           name  = "MY_USER"

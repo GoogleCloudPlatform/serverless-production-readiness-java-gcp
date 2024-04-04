@@ -1,6 +1,5 @@
 project_id = "your-gcp-project-id"
 my_user = "postgres"
-my_password = ""
 alloydb_cluster_name = "alloydb-aip-01"
 buckets = {
   "library_next24_images" = {
