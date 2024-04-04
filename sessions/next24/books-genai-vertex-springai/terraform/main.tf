@@ -168,13 +168,17 @@ resource "google_cloud_run_service" "cloud_run" {
 
 # Eventarc trigger example (adjust according to your actual setup)
 resource "google_eventarc_trigger" "books_genai_jit_trigger_image" {
-  name        = "books-genai-jit-trigger-image"
-  location    = var.region
+  for_each = local.cloud_run_services
+
+  name     = "${each.key}-trigger-image-${var.region}"
+  location = var.region
+
+  # Ensure you have the correct service account email format
   service_account = "${var.project_id}-compute@developer.gserviceaccount.com"
 
   destination {
     cloud_run_service {
-      service = google_cloud_run_service.cloud_run.name
+      service = each.value.service_name # Assuming `service_name` is defined in your `local.cloud_run_services`
       path    = "/images"
       region  = var.region
     }
@@ -182,19 +186,18 @@ resource "google_eventarc_trigger" "books_genai_jit_trigger_image" {
 
   transport {
     pubsub {
+      # Replace 'your-topic-name' with your actual topic name
       topic = "projects/${var.project_id}/topics/your-topic-name"
     }
   }
-  event_filter {
+
+  matching_criteria {
     attribute = "type"
     value     = "google.cloud.storage.object.v1.finalized"
   }
-  event_filter {
+
+  matching_criteria {
     attribute = "bucket"
-    value     = "your-bucket-name"
+    value     = "library_next24_public"
   }
-#   matching_criteria {
-#     attribute = "type"
-#     value     = "google.cloud.storage.object.v1.finalized"
-#   }
 }
