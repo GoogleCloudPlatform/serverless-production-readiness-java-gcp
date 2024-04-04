@@ -54,7 +54,7 @@ resource "google_compute_network" "auto_vpc" {
 
 resource "google_compute_firewall" "allow_ssh" {
   name    = "allow-ssh"
-  network = "projects/your-project-id/global/networks/default"
+  network = "projects/${var.project_id}/global/networks/default"
   depends_on = [google_compute_network.auto_vpc]
   allow {
     protocol = "tcp"
