@@ -116,6 +116,8 @@ resource "google_compute_instance" "alloydb_client" {
   export ADBCLUSTER=${var.alloydb_cluster_name}
   export PGPASSWORD=${var.alloydb_password}
   psql "host=${local.alloydb_ip} user=postgres" -c "CREATE DATABASE library"
+  psql "host=${local.alloydb_ip}  user=postgres dbname=library" -c "CREATE EXTENSION IF NOT EXISTS google_ml_integration CASCADE"
+  psql "host=${local.alloydb_ip}  user=postgres dbname=library" -c "CREATE EXTENSION IF NOT EXISTS vector"
   EOF
   // Assigning the 'ssh-access' tag for firewall rules
   tags = ["all-access"]
