@@ -32,7 +32,8 @@ module "project_services" {
     "alloydb.googleapis.com",
     "artifactregistry.googleapis.com",
     "vpcaccess.googleapis.com",
-    "servicenetworking.googleapis.com"
+    "servicenetworking.googleapis.com",
+    "eventarc.googleapis.com"
   ]
 }
 
@@ -85,9 +86,10 @@ resource "google_vpc_access_connector" "alloy_connector" {
   depends_on = [google_compute_network.auto_vpc]
 }
 
-resource "google_compute_instance" "alloydb_lient" {
+resource "google_compute_instance" "alloydb_client" {
   name         = "alloydb-client"
   zone         = var.zone
+  machine_type = "e2-medium"
   depends_on = [null_resource.alloydb_cluster]
   boot_disk {
     initialize_params {
@@ -96,12 +98,12 @@ resource "google_compute_instance" "alloydb_lient" {
     }
   }
 
+  shielded_instance_config {
+    enable_secure_boot = true
+  }
   // Network interface with external access
   network_interface {
     network = "default"
-    access_config {
-      // Empty block to assign an external IP
-    }
   }
     metadata_startup_script = <<EOF
   #!/bin/bash
@@ -110,7 +112,7 @@ resource "google_compute_instance" "alloydb_lient" {
   export REGION=${var.region}
   export ADBCLUSTER=${var.alloydb_cluster_name}
   export PGPASSWORD=${var.alloydb_password}
-  psql "host=${local.alloydb_ip} user=postgres" -c "CREATE DATABASE quickstart_db"
+  psql "host=${local.alloydb_ip} user=postgres" -c "CREATE DATABASE library"
   EOF
   // Assigning the 'ssh-access' tag for firewall rules
   tags = ["all-access"]
@@ -193,7 +195,7 @@ resource "google_artifact_registry_repository" "books_genai_repo" {
 # Example Cloud Run deployment
 resource "google_cloud_run_service" "cloud_run" {
   for_each = local.cloud_run_services
-  depends_on = [google_artifact_registry_repository.books_genai_repo, google_service_networking_connection.private_vpc_connection, google_storage_bucket.dynamic_buckets]
+  depends_on = [google_compute_instance.alloydb_client, google_artifact_registry_repository.books_genai_repo, google_service_networking_connection.private_vpc_connection, google_storage_bucket.dynamic_buckets]
   name     = each.key
   location = var.region
 
