@@ -33,7 +33,8 @@ module "project_services" {
     "artifactregistry.googleapis.com",
     "vpcaccess.googleapis.com",
     "servicenetworking.googleapis.com",
-    "eventarc.googleapis.com"
+    "eventarc.googleapis.com",
+    "firestore.googleapis.com"
   ]
 }
 
@@ -51,6 +52,19 @@ resource "google_compute_network" "auto_vpc" {
   name                    = "default"
   depends_on = [module.project_services]
   auto_create_subnetworks = true # This creates subnets in each region, similar to a default VPC
+}
+
+resource "null_resource" "create_firestore_index" {
+  depends_on = [module.project_services]
+  provisioner "local-exec" {
+    command = <<-EOT
+      gcloud firestore indexes composite create \
+        --project=${var.project_id} \
+        --collection-group=pictures \
+        --field-config field-path=thumbnail,order=descending \
+        --field-config field-path=created,order=descending
+    EOT
+  }
 }
 
 resource "google_compute_firewall" "allow_access_ingress" {
