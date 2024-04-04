@@ -56,8 +56,6 @@ gcloud resource-manager org-policies set-policy policy.yaml --organization=${ORG
 terraform init 
 terraform plan
 terraform apply
-#import state if needed e.g. vpc that already exists:
-terraform import google_compute_network.auto_vpc projects/books-genai-tf-test/global/networks/default
 ```
 
 ## Terraform must be run twice. The first run creates the infrastructure such as artifact registry, VPC, firewall, VPC peering, GCE psql client, firestore, & alloydb.
