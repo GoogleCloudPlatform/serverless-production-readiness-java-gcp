@@ -127,12 +127,14 @@ resource "google_compute_instance" "alloydb_client" {
   #!/bin/bash
   sudo apt-get update
   sudo apt-get install --yes postgresql-client
+  curl -o /tmp/init-db.sql https://raw.githubusercontent.com/GoogleCloudPlatform/serverless-production-readiness-java-gcp/main/sessions/next24/books-genai-vertex-springai/sql/books-ddl.sql
   export REGION=${var.region}
   export ADBCLUSTER=${var.alloydb_cluster_name}
   export PGPASSWORD=${var.alloydb_password}
   psql "host=${local.alloydb_ip} user=postgres" -c "CREATE DATABASE library"
   psql "host=${local.alloydb_ip}  user=postgres dbname=library" -c "CREATE EXTENSION IF NOT EXISTS google_ml_integration CASCADE"
   psql "host=${local.alloydb_ip}  user=postgres dbname=library" -c "CREATE EXTENSION IF NOT EXISTS vector"
+  psql "host=${local.alloydb_ip} user=postgres dbname=library" -f /tmp/init-db.sql
   EOF
   // Assigning the 'ssh-access' tag for firewall rules
   tags = ["all-access"]
