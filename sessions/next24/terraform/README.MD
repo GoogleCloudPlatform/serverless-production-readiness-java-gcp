@@ -34,4 +34,12 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
 gcloud projects add-iam-policy-binding $PROJECT_ID \
     --member="serviceAccount:service-${PROJECT_NUMBER}@gs-project-accounts.iam.gserviceaccount.com" \
     --role='roles/pubsub.publisher' 
+
+export ORG_ID=$(gcloud organizations list --format="value(name)")
+cat <<EOF > policy.yaml
+constraint: constraints/compute.vmExternalIpAccess
+listPolicy:
+  allValues: ALLOW
+EOF
+gcloud resource-manager org-policies set-policy policy.yaml --organization=${ORG_ID}
 ```
