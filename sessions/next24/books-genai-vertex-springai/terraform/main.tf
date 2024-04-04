@@ -37,7 +37,7 @@ module "project_services" {
 # Dynamic creation of Google Cloud Storage buckets
 resource "google_storage_bucket" "dynamic_buckets" {
   for_each = var.buckets
-
+  depends_on = [module.project_services]
   name          = each.key
   location      = each.value.location
   force_destroy = each.value.force_destroy
@@ -46,7 +46,7 @@ resource "google_storage_bucket" "dynamic_buckets" {
 
 resource "google_storage_bucket_iam_binding" "dynamic_buckets_public" {
   for_each = var.buckets
-
+  depends_on = [google_storage_bucket.dynamic_buckets]
   bucket = each.key
   role   = "roles/storage.objectViewer"
   members = [
@@ -67,6 +67,7 @@ resource "google_compute_global_address" "psa_range" {
   address_type  = "INTERNAL"
   prefix_length = 24
   network       = "default"
+  depends_on = [google_compute_network.auto_vpc]
 }
 
 # VPC Connector
@@ -122,7 +123,7 @@ resource "google_artifact_registry_repository" "books_genai_repo" {
 # Example Cloud Run deployment
 resource "google_cloud_run_service" "cloud_run" {
   for_each = local.cloud_run_services
-  depends_on = [google_artifact_registry_repository.books_genai_repo]
+  depends_on = [google_artifact_registry_repository.books_genai_repo, google_storage_bucket.dynamic_buckets, google_storage_bucket_iam_binding.dynamic_buckets_public]
   name     = each.key
   location = var.region
 
