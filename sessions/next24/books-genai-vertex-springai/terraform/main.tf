@@ -184,7 +184,7 @@ resource "google_cloud_run_service" "cloud_run" {
 # Eventarc trigger example (adjust according to your actual setup)
 resource "google_eventarc_trigger" "books_genai_trigger_image" {
   for_each = local.cloud_run_services
-
+  depends_on = [google_cloud_run_service.cloud_run]
   name     = "${each.key}-trigger-image-${var.region}"
   location = var.region
 
