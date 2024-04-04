@@ -104,9 +104,9 @@ resource "google_compute_instance" "alloydb_client" {
   // Network interface with external access
   network_interface {
     network = "default"
-#     access_config {
-#           // Consider organization policies if you plan to assign an external IP
-#     }
+    access_config {
+          // Consider organization policies if you plan to assign an external IP
+    }
   }
     metadata_startup_script = <<EOF
   #!/bin/bash
@@ -160,7 +160,7 @@ resource "null_resource" "alloydb_cluster" {
           --region=${var.region} \
           --cluster=${var.alloydb_cluster_name}
       fi
-      gcloud alloydb instances describe alloydb-aip-01-pr --region=us-central1 --cluster=alloydb-aip-01 --format='get(ipAddress)' > alloydb_ip.txt
+      gcloud alloydb instances describe ${var.alloydb_cluster_name}-pr --region=us-central1 --cluster=alloydb-aip-01 --format='get(ipAddress)' > alloydb_ip.txt
     EOT
   }
 }
