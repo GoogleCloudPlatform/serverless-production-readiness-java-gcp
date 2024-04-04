@@ -30,7 +30,9 @@ module "project_services" {
     "aiplatform.googleapis.com",
     "run.googleapis.com",
     "alloydb.googleapis.com",
-    "artifactregistry.googleapis.com"
+    "artifactregistry.googleapis.com",
+    "vpcaccess.googleapis.com",
+    "servicenetworking.googleapis.com"
   ]
 }
 
@@ -38,7 +40,7 @@ module "project_services" {
 resource "google_storage_bucket" "dynamic_buckets" {
   for_each = var.buckets
   depends_on = [module.project_services]
-  name          = each.key
+  name          = "${each.key}_${var.project_id}"
   location      = each.value.location
   force_destroy = each.value.force_destroy
   uniform_bucket_level_access = each.value.uniform_bucket_level_access
@@ -47,7 +49,7 @@ resource "google_storage_bucket" "dynamic_buckets" {
 resource "google_storage_bucket_iam_binding" "dynamic_buckets_public" {
   for_each = var.buckets
   depends_on = [google_storage_bucket.dynamic_buckets]
-  bucket = each.key
+  bucket = "${each.key}_${var.project_id}"
   role   = "roles/storage.objectViewer"
   members = [
     "allUsers",
