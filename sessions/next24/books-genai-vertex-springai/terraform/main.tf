@@ -29,7 +29,8 @@ module "project_services" {
     "storage-component.googleapis.com",
     "aiplatform.googleapis.com",
     "run.googleapis.com",           # Cloud Run API
-    "alloydb.googleapis.com"        # Assuming this is the AlloyDB API name; please verify
+    "alloydb.googleapis.com",        # Assuming this is the AlloyDB API name; please verify
+    "artifactregistry.googleapis.com"
   ]
 }
 
