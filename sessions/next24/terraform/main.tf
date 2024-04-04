@@ -58,12 +58,28 @@ resource "null_resource" "create_firestore_index" {
   depends_on = [module.project_services]
   provisioner "local-exec" {
     command = <<-EOT
-      gcloud firestore databases create --project=${var.project_id} --region=${var.region}
-      gcloud firestore indexes composite create \
-        --project=${var.project_id} \
-        --collection-group=pictures \
-        --field-config field-path=thumbnail,order=descending \
-        --field-config field-path=created,order=descending
+      # Check if Firestore database exists and create if it does not
+      DB_EXISTS=$(gcloud firestore databases list --project=${var.project_id} --format="value(name)")
+      if [ -z "$DB_EXISTS" ]; then
+        echo "Firestore database not found, creating..."
+        gcloud firestore databases create --project=${var.project_id} --location=${var.region}
+      else
+        echo "Firestore database already exists, skipping creation..."
+      fi
+      
+      # Check if the specific composite index exists and create if it does not
+      INDEX_EXISTS=$(gcloud firestore indexes composite list --project=${var.project_id} --format="value(name)" --filter="collectionGroup=pictures AND fields.fieldPath=thumbnail AND fields.fieldPath=created")
+      if [ -z "$INDEX_EXISTS" ]; then
+        echo "Composite index not found, creating..."
+        sleep 90
+	gcloud firestore indexes composite create \
+          --project=${var.project_id} \
+          --collection-group=pictures \
+          --field-config field-path=thumbnail,order=descending \
+          --field-config field-path=created,order=descending
+      else
+        echo "Composite index already exists, skipping creation..."
+      fi    
     EOT
   }
 }
