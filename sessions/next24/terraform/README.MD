@@ -49,6 +49,12 @@ listPolicy:
   allValues: ALLOW
 EOF
 gcloud resource-manager org-policies set-policy policy.yaml --organization=${ORG_ID}
+cat <<EOF > policy.yaml
+constraint: constraints/iam.allowedPolicyMemberDomains
+listPolicy:
+  allValues: ALLOW
+EOF
+gcloud resource-manager org-policies set-policy policy.yaml --organization=${ORG_ID}
 ```
 ## Edit terraform.tfvars file populate my_user, alloydb_cluster_name, project_number, & project_id before running TF
 
