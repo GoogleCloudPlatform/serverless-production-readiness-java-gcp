@@ -42,11 +42,6 @@ listPolicy:
   allValues: ALLOW
 EOF
 gcloud resource-manager org-policies set-policy policy.yaml --organization=${ORG_ID}
-terraform init 
-terraform plan
-terraform apply
-#import state if needed e.g. vpc that already exists:
-terraform import google_compute_network.auto_vpc projects/books-genai-tf-test/global/networks/default
 ```
 ## Edit terraform.tfvars file populate my_user, alloydb_cluster_name, project_number, & project_id before running TF
 
