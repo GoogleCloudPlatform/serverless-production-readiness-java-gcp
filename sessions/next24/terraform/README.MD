@@ -37,6 +37,7 @@ gcloud projects add-iam-policy-binding ${PROJECT_ID} \
 --member="serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com" \
 --role="roles/datastore.user" 
 
+#This resolves the error when eventarc publishes msg to cloudrun: "Error: The request was not authenticated. Either allow unauthenticated invocations or set the proper Authorization header"
 gcloud projects add-iam-policy-binding ${PROJECT_ID} \
 --member="serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com" \
 --role="roles/run.invoker"  
@@ -63,7 +64,7 @@ gcloud projects add-iam-policy-binding ${PROJECT_ID} \
     --member="serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com" \
     --role="roles/eventarc.eventReceiver"
 
-#These two org policies are needed for VM that provisions the DDL to install psql + retrieve sql file & Cloud Run to allow unauthenticated
+#These two org policies are needed for VM to get external ip & Cloud Run to allow unauthenticated
 export ORG_ID=$(gcloud organizations list --format="value(name)")
 cat <<EOF > policy.yaml
 constraint: constraints/compute.vmExternalIpAccess
