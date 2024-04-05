@@ -180,6 +180,7 @@ resource "null_resource" "alloydb_cluster" {
       if [ -z "$DB_CLUSTER_EXISTS" ]; then
         gcloud alloydb clusters create ${var.alloydb_cluster_name} \
           --region=${var.region} --password=${var.alloydb_password}
+        sleep 10
       fi
       DB_EXISTS=$(gcloud alloydb instances list --cluster=${var.alloydb_cluster_name} --filter="name=${var.alloydb_cluster_name}-pr AND cluster=${var.alloydb_cluster_name}" --format="value(name)" --region="${var.region}")
       if [ -z "$DB_EXISTS" ]; then
@@ -188,6 +189,7 @@ resource "null_resource" "alloydb_cluster" {
           --cpu-count=2 \
           --region=${var.region} \
           --cluster=${var.alloydb_cluster_name}
+          sleep 10
       fi
       gcloud alloydb instances describe ${var.alloydb_cluster_name}-pr --region=${var.region} --cluster=${var.alloydb_cluster_name} --format='get(ipAddress)' > alloydb_ip.txt
     EOT
