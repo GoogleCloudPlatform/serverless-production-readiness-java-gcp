@@ -70,7 +70,7 @@ resource "null_resource" "create_firestore_index" {
       if [ -z "$INDEX_EXISTS" ]; then
         echo "Composite index not found, creating..."
         sleep 90
-	gcloud firestore indexes composite create \
+	    gcloud firestore indexes composite create \
           --project=${var.project_id} \
           --collection-group=pictures \
           --field-config field-path=thumbnail,order=descending \
