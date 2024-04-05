@@ -90,7 +90,7 @@ public class VertexAIClient {
         if(chatResponse.getResult()!=null) {
             output = chatResponse.getResult().getOutput().getContent();
         }
-        logger.info("Chat model output: {} ...", output.substring(0, Math.min(1000, prompt.length())));
+        logger.info("Chat model output: {} ...", output.substring(0, Math.min(1000, output.length())));
 
         // return model response in String format
         return output;
