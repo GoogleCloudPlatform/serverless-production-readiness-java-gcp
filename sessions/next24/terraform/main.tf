@@ -53,6 +53,7 @@ resource "google_compute_network" "auto_vpc" {
 }
 
 resource "google_compute_router" "router" {
+  depends_on = [google_compute_network.auto_vpc]
   project = var.project_id
   name    = "nat-router"
   network = google_compute_network.auto_vpc.name
@@ -61,7 +62,7 @@ resource "google_compute_router" "router" {
 
 module "cloud-nat" {
   source  = "terraform-google-modules/cloud-nat/google"
-
+  depends_on = [google_compute_router.router]
   project_id                         = var.project_id
   region                             = var.region
   router                             = google_compute_router.router.name
