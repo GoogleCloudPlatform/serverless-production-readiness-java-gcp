@@ -30,6 +30,24 @@ gcloud projects add-iam-policy-binding ${PROJECT_ID} \
     --role='roles/pubsub.publisher'
 
 gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+--member="serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com" \
+--role="roles/aiplatform.user"
+
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+--member="serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com" \
+--role="roles/datastore.user" 
+
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member="serviceAccount:service-${PROJECT_NUMBER}@gs-project-accounts.iam.gserviceaccount.com" \
+    --role='roles/pubsub.publisher' 
+
+#Apply after the first time you run the terraform.. Or else you will get an error
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+--member="serviceAccount:service-${PROJECT_NUMBER}@gcp-sa-alloydb.iam.gserviceaccount.com" \
+--role="roles/aiplatform.user"
+
+#Apply eventarc permissions when you see in tf Error 400: Invalid resource state for "": Permission denied while using the Eventarc Service Agent. 
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
     --member="serviceAccount:service-${PROJECT_NUMBER}@gcp-sa-eventarc.iam.gserviceaccount.com" \
     --role="roles/eventarc.serviceAgent"
 
@@ -41,21 +59,6 @@ gcloud projects add-iam-policy-binding ${PROJECT_ID} \
     --member="serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com" \
     --role="roles/eventarc.eventReceiver"
 
-gcloud projects add-iam-policy-binding ${PROJECT_ID} \
---member="serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com" \
---role="roles/aiplatform.user"
-
-gcloud projects add-iam-policy-binding ${PROJECT_ID} \
---member="serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com" \
---role="roles/datastore.user" 
-
-gcloud projects add-iam-policy-binding $PROJECT_ID \
---member="serviceAccount:service-${PROJECT_NUMBER}@gcp-sa-alloydb.iam.gserviceaccount.com" \
---role="roles/aiplatform.user"
-
-gcloud projects add-iam-policy-binding $PROJECT_ID \
-    --member="serviceAccount:service-${PROJECT_NUMBER}@gs-project-accounts.iam.gserviceaccount.com" \
-    --role='roles/pubsub.publisher' 
 #These two org policies are needed for VM that provisions the DDL to install psql + retrieve sql file & Cloud Run to allow unauthenticated
 export ORG_ID=$(gcloud organizations list --format="value(name)")
 cat <<EOF > policy.yaml
