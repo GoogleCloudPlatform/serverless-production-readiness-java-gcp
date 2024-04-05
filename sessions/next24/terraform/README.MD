@@ -61,6 +61,7 @@ gcloud resource-manager org-policies set-policy policy.yaml --organization=${ORG
 ```shell
 terraform init 
 terraform plan
+#Password will be prompted. This is a password that you setup on the first run.
 terraform apply
 ```
 
