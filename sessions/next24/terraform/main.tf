@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     google = {
-      version = ">3.5.0"
+      version = ">4.50.0"
     }
   }
 }
@@ -11,7 +11,6 @@ provider "google" {
   region  = var.region
 }
 
-# Enable required Google Cloud services
 module "project_services" {
   source  = "terraform-google-modules/project-factory/google//modules/project_services"
   version = "~> 11.1"
@@ -33,11 +32,11 @@ module "project_services" {
     "artifactregistry.googleapis.com",
     "vpcaccess.googleapis.com",
     "servicenetworking.googleapis.com",
-    "eventarc.googleapis.com"
+    "eventarc.googleapis.com",
+    "firestore.googleapis.com"
   ]
 }
 
-# Dynamic creation of Google Cloud Storage buckets
 resource "google_storage_bucket" "dynamic_buckets" {
   for_each = var.buckets
   depends_on = [module.project_services]
@@ -51,6 +50,36 @@ resource "google_compute_network" "auto_vpc" {
   name                    = "default"
   depends_on = [module.project_services]
   auto_create_subnetworks = true # This creates subnets in each region, similar to a default VPC
+}
+
+resource "null_resource" "create_firestore_index" {
+  depends_on = [module.project_services]
+  provisioner "local-exec" {
+    command = <<-EOT
+      # Check if Firestore database exists and create if it does not
+      DB_EXISTS=$(gcloud firestore databases list --project=${var.project_id} --format="value(name)")
+      if [ -z "$DB_EXISTS" ]; then
+        echo "Firestore database not found, creating..."
+        gcloud firestore databases create --project=${var.project_id} --location=${var.region}
+        sleep 90
+      else
+        echo "Firestore database already exists, skipping creation..."
+      fi
+      
+      # Check if the specific composite index exists and create if it does not
+      INDEX_EXISTS=$(gcloud firestore indexes composite list --project=${var.project_id} --format="value(COLLECTION_GROUP)" --filter="pictures")
+      if [ -z "$INDEX_EXISTS" ]; then
+        echo "Composite index not found, creating..."
+	    gcloud firestore indexes composite create \
+          --project=${var.project_id} \
+          --collection-group=pictures \
+          --field-config field-path=thumbnail,order=descending \
+          --field-config field-path=created,order=descending
+      else
+        echo "Composite index already exists, skipping creation..."
+      fi    
+    EOT
+  }
 }
 
 resource "google_compute_firewall" "allow_access_ingress" {
@@ -67,7 +96,6 @@ resource "google_compute_firewall" "allow_access_ingress" {
   target_tags   = ["all-access"]
 }
 
-# Reserve IP range for VPC peering
 resource "google_compute_global_address" "psa_range" {
   name          = "psa-range"
   purpose       = "VPC_PEERING"
@@ -77,7 +105,6 @@ resource "google_compute_global_address" "psa_range" {
   depends_on = [google_compute_network.auto_vpc]
 }
 
-# VPC Connector
 resource "google_vpc_access_connector" "alloy_connector" {
   name          = "alloy-connector"
   region        = var.region
@@ -104,9 +131,9 @@ resource "google_compute_instance" "alloydb_client" {
   // Network interface with external access
   network_interface {
     network = "default"
-#     access_config {
-#           // Consider organization policies if you plan to assign an external IP
-#     }
+    access_config {
+          // Consider organization policies if you plan to assign an external IP
+    }
   }
     metadata_startup_script = <<EOF
   #!/bin/bash
@@ -118,17 +145,17 @@ resource "google_compute_instance" "alloydb_client" {
   psql "host=${local.alloydb_ip} user=postgres" -c "CREATE DATABASE library"
   psql "host=${local.alloydb_ip}  user=postgres dbname=library" -c "CREATE EXTENSION IF NOT EXISTS google_ml_integration CASCADE"
   psql "host=${local.alloydb_ip}  user=postgres dbname=library" -c "CREATE EXTENSION IF NOT EXISTS vector"
+  curl -o /tmp/init-db.sql https://raw.githubusercontent.com/GoogleCloudPlatform/serverless-production-readiness-java-gcp/main/sessions/next24/sql/books-ddl.sql
+  psql "host=${local.alloydb_ip} user=postgres dbname=library" -f /tmp/init-db.sql
   EOF
-  // Assigning the 'ssh-access' tag for firewall rules
+  
   tags = ["all-access"]
 
-  // Scopes
   service_account {
     scopes = ["https://www.googleapis.com/auth/cloud-platform"]
   }
 }
 
-// Data source to fetch the latest Debian 12 image (excluding arm64)
 data "google_compute_image" "debian_12" {
   family  = "debian-12"
   project = "debian-cloud"
@@ -149,18 +176,22 @@ resource "null_resource" "alloydb_cluster" {
   depends_on = [google_service_networking_connection.private_vpc_connection]
   provisioner "local-exec" {
     command = <<-EOT
-      if ! gcloud alloydb clusters list --filter="name=${var.alloydb_cluster_name}" --format="value(name)" --region="${var.region}"; then
+      DB_CLUSTER_EXISTS=$(gcloud alloydb clusters list --filter="name=${var.alloydb_cluster_name}" --format="value(name)" --region="${var.region}")
+      if [ -z "$DB_CLUSTER_EXISTS" ]; then
         gcloud alloydb clusters create ${var.alloydb_cluster_name} \
           --region=${var.region} --password=${var.alloydb_password}
+        sleep 30
       fi
-      if ! gcloud alloydb instances list --filter="name=${var.alloydb_cluster_name}-pr AND cluster=${var.alloydb_cluster_name}" --format="value(name)" --region="${var.region}"; then
+      DB_EXISTS=$(gcloud alloydb instances list --cluster=${var.alloydb_cluster_name} --filter="name=${var.alloydb_cluster_name}-pr AND cluster=${var.alloydb_cluster_name}" --format="value(name)" --region="${var.region}")
+      if [ -z "$DB_EXISTS" ]; then
         gcloud alloydb instances create ${var.alloydb_cluster_name}-pr \
           --instance-type=PRIMARY \
           --cpu-count=2 \
           --region=${var.region} \
           --cluster=${var.alloydb_cluster_name}
+          sleep 10
       fi
-      gcloud alloydb instances describe alloydb-aip-01-pr --region=us-central1 --cluster=alloydb-aip-01 --format='get(ipAddress)' > alloydb_ip.txt
+      gcloud alloydb instances describe ${var.alloydb_cluster_name}-pr --region=${var.region} --cluster=${var.alloydb_cluster_name} --format='get(ipAddress)' > alloydb_ip.txt
     EOT
   }
 }
@@ -197,7 +228,6 @@ resource "google_artifact_registry_repository" "books_genai_repo" {
   }
 }
 
-# Example Cloud Run deployment
 resource "google_cloud_run_service" "cloud_run" {
   for_each = local.cloud_run_services
   depends_on = [google_compute_instance.alloydb_client, google_artifact_registry_repository.books_genai_repo, google_service_networking_connection.private_vpc_connection, google_storage_bucket.dynamic_buckets]
@@ -257,10 +287,15 @@ resource "google_cloud_run_service" "cloud_run" {
   }
 
   autogenerate_revision_name = true
-  # allow_unauthenticated      = true
 }
-
-# Eventarc trigger example (adjust according to your actual setup)
+resource "google_cloud_run_service_iam_member" "cloud_run_unauthenticated" {
+  for_each = local.cloud_run_services
+  depends_on = [google_cloud_run_service.cloud_run]
+  location = var.region
+  service  = each.key
+  role     = "roles/run.invoker"
+  member   = "allUsers"
+}
 resource "google_eventarc_trigger" "books_genai_trigger_embeddings" {
   for_each = local.cloud_run_services
   depends_on = [google_cloud_run_service.cloud_run]
@@ -278,13 +313,6 @@ resource "google_eventarc_trigger" "books_genai_trigger_embeddings" {
     }
   }
 
-#   transport {
-#     pubsub {
-#       # Replace 'your-topic-name' with your actual topic name
-#       topic = "projects/${var.project_id}/topics/your-topic-name"
-#     }
-#   }
-
   matching_criteria {
     attribute = "type"
     value     = "google.cloud.storage.object.v1.finalized"
@@ -293,5 +321,32 @@ resource "google_eventarc_trigger" "books_genai_trigger_embeddings" {
   matching_criteria {
     attribute = "bucket"
     value     = "library_next24_public_${var.project_id}"
+  }
+}
+
+resource "google_eventarc_trigger" "books_genai_trigger_image" {
+  for_each = local.cloud_run_services
+  depends_on = [google_cloud_run_service.cloud_run]
+  name     = "${each.key}-trigger-image-${var.region}"
+  location = var.region
+
+  service_account = "${var.project_number}-compute@developer.gserviceaccount.com"
+
+  destination {
+    cloud_run_service {
+      service = each.key #Assuming `service_name` is defined in your `local.cloud_run_services`
+      path    = "/images"
+      region  = var.region
+    }
+  }
+
+  matching_criteria {
+    attribute = "type"
+    value     = "google.cloud.storage.object.v1.finalized"
+  }
+
+  matching_criteria {
+    attribute = "bucket"
+    value     = "library_next24_images_${var.project_id}"
   }
 }
