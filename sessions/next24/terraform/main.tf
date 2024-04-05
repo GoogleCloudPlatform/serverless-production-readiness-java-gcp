@@ -187,7 +187,7 @@ resource "null_resource" "alloydb_cluster" {
           --region=${var.region} \
           --cluster=${var.alloydb_cluster_name}
       fi
-      gcloud alloydb instances describe ${var.alloydb_cluster_name}-pr --region=us-central1 --cluster=alloydb-aip-01 --format='get(ipAddress)' > alloydb_ip.txt
+      gcloud alloydb instances describe ${var.alloydb_cluster_name}-pr --region=${var.region} --cluster=${var.alloydb_cluster_name} --format='get(ipAddress)' > alloydb_ip.txt
     EOT
   }
 }
