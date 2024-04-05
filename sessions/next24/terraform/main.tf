@@ -176,11 +176,13 @@ resource "null_resource" "alloydb_cluster" {
   depends_on = [google_service_networking_connection.private_vpc_connection]
   provisioner "local-exec" {
     command = <<-EOT
-      if ! gcloud alloydb clusters list --filter="name=${var.alloydb_cluster_name}" --format="value(name)" --region="${var.region}"; then
+      DB_CLUSTER_EXISTS=$(gcloud alloydb clusters list --filter="name=${var.alloydb_cluster_name}" --format="value(name)" --region="${var.region}")
+      if [ -z "$DB_CLUSTER_EXISTS" ]; then
         gcloud alloydb clusters create ${var.alloydb_cluster_name} \
           --region=${var.region} --password=${var.alloydb_password}
       fi
-      if ! gcloud alloydb instances list --cluster=${var.alloydb_cluster_name} --filter="name=${var.alloydb_cluster_name}-pr AND cluster=${var.alloydb_cluster_name}" --format="value(name)" --region="${var.region}"; then
+      DB_EXISTS=$(gcloud alloydb instances list --cluster=${var.alloydb_cluster_name} --filter="name=${var.alloydb_cluster_name}-pr AND cluster=${var.alloydb_cluster_name}" --format="value(name)" --region="${var.region}")
+      if [ -z "$DB_EXISTS" ]; then
         gcloud alloydb instances create ${var.alloydb_cluster_name}-pr \
           --instance-type=PRIMARY \
           --cpu-count=2 \
