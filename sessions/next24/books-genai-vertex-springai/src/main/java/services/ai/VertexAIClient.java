@@ -27,6 +27,7 @@ import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatClient;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatOptions;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 
 /*
@@ -82,6 +83,7 @@ public class VertexAIClient {
                 VertexAiGeminiChatOptions.builder()
                         .withTemperature(0.4f)
                         .withModel(VertexModels.GEMINI_PRO)
+                        // .withFunctions(new HashSet<String>())
                         .build())
         );
         logger.info("Elapsed time (gemini-pro, with SpringAI): " + (System.currentTimeMillis() - start) + "ms");
