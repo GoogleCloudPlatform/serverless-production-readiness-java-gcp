@@ -6,6 +6,21 @@ export REGION=us-central1
 export PROJECT_NUMBER=$(gcloud projects list --filter="$(gcloud config get-value project)" --format="value(PROJECT_NUMBER)")
 export SERVICE_ACCOUNT=${PROJECT_NUMBER}-compute@developer.gserviceaccount.com
 
+gcloud services enable vision.googleapis.com
+gcloud services enable cloudfunctions.googleapis.com
+gcloud services enable cloudbuild.googleapis.com
+gcloud services enable run.googleapis.com
+gcloud services enable logging.googleapis.com 
+gcloud services enable storage-component.googleapis.com 
+gcloud services enable aiplatform.googleapis.com
+gcloud services enable run.googleapis.com 
+gcloud services enable alloydb.googleapis.com 
+gcloud services enable artifactregistry.googleapis.com
+gcloud services enable vpcaccess.googleapis.com
+gcloud services enable servicenetworking.googleapis.com
+gcloud services enable eventarc.googleapis.com
+gcloud services enable firestore.googleapis.com
+
 gcloud projects add-iam-policy-binding ${PROJECT_ID}     --member="serviceAccount:${SERVICE_ACCOUNT}"     --role='roles/storage.objectViewer'
 
 export SERVICE_ACCOUNT_KMS="$(gsutil kms serviceaccount -p ${PROJECT_ID})"
@@ -68,7 +83,7 @@ terraform apply
 ## Terraform must be run twice. The first run creates the infrastructure such as artifact registry, VPC, firewall, VPC peering, GCE psql client, firestore, & alloydb.
 ## After the first time you run TF & the above infra is created. Tag and push the cloud run images to the artifact registry you just created. Example below:
 ```shell
-docker push ${REGION}docker.pkg.dev/${PROJECT_ID}/books-genai-jit/books-genai:latest
+docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/books-genai-jit/books-genai:latest
 docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/books-genai-native/books-genai:latest
 ```
 ## Once the images are there then the cloud run instances will be ready to deploy on the second terraform apply.. (First run will fail here)
