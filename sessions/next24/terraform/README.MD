@@ -41,7 +41,7 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
     --member="serviceAccount:service-${PROJECT_NUMBER}@gs-project-accounts.iam.gserviceaccount.com" \
     --role='roles/pubsub.publisher' 
 
-#Apply after the first time you run the terraform.. Or else you will get an error
+#Apply after the first time you run the terraform for alloy.. Or else you will get an error this service account doesn't exist
 gcloud projects add-iam-policy-binding $PROJECT_ID \
 --member="serviceAccount:service-${PROJECT_NUMBER}@gcp-sa-alloydb.iam.gserviceaccount.com" \
 --role="roles/aiplatform.user"
