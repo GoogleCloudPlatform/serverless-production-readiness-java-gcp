@@ -147,10 +147,7 @@ resource "google_compute_instance" "alloydb_client" {
   }
   // Network interface with external access
   network_interface {
-    network = "default"
-    access_config {
-          // Consider organization policies if you plan to assign an external IP
-    }
+    network = google_compute_network.auto_vpc.name
   }
     metadata_startup_script = <<EOF
   #!/bin/bash
