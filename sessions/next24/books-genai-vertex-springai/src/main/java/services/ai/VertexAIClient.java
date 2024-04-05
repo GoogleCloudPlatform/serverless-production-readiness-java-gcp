@@ -76,7 +76,7 @@ public class VertexAIClient {
 
     public String promptModel(String prompt) {
         long start = System.currentTimeMillis();
-        logger.info("Chat model prompt: {} ...", prompt.substring(0, 500));
+        logger.info("Chat model prompt: {} ...",  prompt.substring(0, Math.min(500, prompt.length())));
 
         ChatResponse chatResponse = chatClient.call(new Prompt(prompt,
                 VertexAiGeminiChatOptions.builder()
@@ -90,7 +90,7 @@ public class VertexAIClient {
         if(chatResponse.getResult()!=null) {
             output = chatResponse.getResult().getOutput().getContent();
         }
-        logger.info("Chat model output: {} ...", output.substring(0, 1000));
+        logger.info("Chat model output: {} ...", output.substring(0, Math.min(1000, prompt.length())));
 
         // return model response in String format
         return output;
