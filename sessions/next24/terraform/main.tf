@@ -47,9 +47,26 @@ resource "google_storage_bucket" "dynamic_buckets" {
 }
 
 resource "google_compute_network" "auto_vpc" {
-  name                    = "default"
+  name = "default"
   depends_on = [module.project_services]
   auto_create_subnetworks = true # This creates subnets in each region, similar to a default VPC
+}
+
+resource "google_compute_router" "router" {
+  project = var.project_id
+  name    = "nat-router"
+  network = google_compute_network.auto_vpc.name
+  region  = var.region
+}
+
+module "cloud-nat" {
+  source  = "terraform-google-modules/cloud-nat/google"
+
+  project_id                         = var.project_id
+  region                             = var.region
+  router                             = google_compute_router.router.name
+  name                               = "nat-config"
+  source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
 }
 
 resource "null_resource" "create_firestore_index" {

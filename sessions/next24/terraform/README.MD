@@ -37,6 +37,10 @@ gcloud projects add-iam-policy-binding ${PROJECT_ID} \
 --member="serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com" \
 --role="roles/datastore.user" 
 
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+--member="serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com" \
+--role="roles/run.invoker"  
+
 gcloud projects add-iam-policy-binding $PROJECT_ID \
     --member="serviceAccount:service-${PROJECT_NUMBER}@gs-project-accounts.iam.gserviceaccount.com" \
     --role='roles/pubsub.publisher' 
