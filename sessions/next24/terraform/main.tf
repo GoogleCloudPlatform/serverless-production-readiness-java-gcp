@@ -176,7 +176,7 @@ resource "null_resource" "alloydb_cluster" {
   depends_on = [google_service_networking_connection.private_vpc_connection]
   provisioner "local-exec" {
     command = <<-EOT
-      if ! gcloud alloydb clusters list --cluster=${var.alloydb_cluster_name} --filter="name=${var.alloydb_cluster_name}" --format="value(name)" --region="${var.region}"; then
+      if ! gcloud alloydb clusters list --filter="name=${var.alloydb_cluster_name}" --format="value(name)" --region="${var.region}"; then
         gcloud alloydb clusters create ${var.alloydb_cluster_name} \
           --region=${var.region} --password=${var.alloydb_password}
       fi
