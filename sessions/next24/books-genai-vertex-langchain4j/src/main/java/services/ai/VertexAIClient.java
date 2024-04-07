@@ -95,7 +95,7 @@ public class VertexAIClient {
         String output = model.generate(prompt);
 
         logger.info("Elapsed time (gemini-pro, with Langchain4J): " + (System.currentTimeMillis() - start) + "ms");
-        logger.info("Chat model output: {} ...", output.substring(0, Math.min(1000, prompt.length())));
+        logger.info("Chat model output: {} ...", output.substring(0, Math.min(1000, output.length())));
         // return model response in String format
         return output;
     }
