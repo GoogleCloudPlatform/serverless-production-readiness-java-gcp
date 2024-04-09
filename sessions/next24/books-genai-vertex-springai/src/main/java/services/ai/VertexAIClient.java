@@ -70,8 +70,6 @@ public class VertexAIClient {
         response = response.replaceAll("```json", "").replaceAll("```", "").replace("'", "\"");
 
         logger.info("Elapsed time (gemini-pro-vision, with SpringAI): " + (System.currentTimeMillis() - start) + "ms");
-
-        // return the response in String format, extract values in caller
         return response;
     }
 
@@ -83,7 +81,6 @@ public class VertexAIClient {
                 VertexAiGeminiChatOptions.builder()
                         .withTemperature(0.4f)
                         .withModel(VertexModels.GEMINI_PRO)
-                        // .withFunctions(new HashSet<String>())
                         .build())
         );
         logger.info("Elapsed time (gemini-pro, with SpringAI): " + (System.currentTimeMillis() - start) + "ms");
@@ -93,8 +90,6 @@ public class VertexAIClient {
             output = chatResponse.getResult().getOutput().getContent();
         }
         logger.info("Chat model output: {} ...", output.substring(0, Math.min(1000, output.length())));
-
-        // return model response in String format
         return output;
     }
 
@@ -105,7 +100,7 @@ public class VertexAIClient {
 
         ChatResponse chatResponse = chatClient.call(new Prompt(List.of(systemMessage, userMessage),
                 VertexAiGeminiChatOptions.builder()
-                        .withModel("gemini-pro")
+                        .withModel(VertexModels.GEMINI_PRO)
                         .withFunction(functionName)
                         .build()));
 
@@ -113,8 +108,6 @@ public class VertexAIClient {
 
         String output = chatResponse.getResult().getOutput().getContent();
         logger.info("Chat Model output with Function Call: " + output);
-
-        // return model response in String format
         return output;
     }
 
