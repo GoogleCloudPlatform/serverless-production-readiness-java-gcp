@@ -35,6 +35,7 @@ import services.actuator.StartupCheck;
 import services.config.CloudConfig;
 import services.domain.BooksService;
 import services.domain.CloudStorageService;
+import services.utility.RequestValidationUtility;
 
 /**
  * Controller for handling document embedding requests, generating document summaries
@@ -95,43 +96,16 @@ public class DocumentEmbeddingController {
   @RequestMapping(value = "/embeddings", method = RequestMethod.POST)
   public ResponseEntity<String> receiveMessage(
       @RequestBody Map<String, Object> body, @RequestHeader Map<String, String> headers) {
-    logger.info("Header elements");
-    for (String field : CloudConfig.requiredFields) {
-      if (headers.get(field) == null) {
-        String msg = String.format("Missing expected header: %s.", field);
-        logger.error(msg);
-        return new ResponseEntity<>(msg, HttpStatus.BAD_REQUEST);
-      } else {
-        logger.info(field + " : " + headers.get(field));
-      }
+    String errorMsg = RequestValidationUtility.validateRequest(body,headers);
+    if (!errorMsg.isBlank()) {
+      return new ResponseEntity<>(errorMsg, HttpStatus.BAD_REQUEST);
     }
-
-    logger.info("Body elements");
-    for (String bodyField : body.keySet()) {
-      logger.info(bodyField + " : " + body.get(bodyField));
-    }
-
-    if (headers.get("ce-subject") == null) {
-      String msg = "Missing expected header: ce-subject.";
-      logger.error(msg);
-      return new ResponseEntity<>(msg, HttpStatus.BAD_REQUEST);
-    }
-
-    String ceSubject = headers.get("ce-subject");
-    String msg = "Detected change in Cloud Storage bucket: (ce-subject) : " + ceSubject;
-    logger.info(msg);
 
     // get document name and bucket
     String fileName = (String) body.get("name");
     String bucketName = (String) body.get("bucket");
 
     logger.info("New book uploaded for embedding:" + fileName);
-
-    if (fileName == null) {
-      msg = "Missing expected body element: file name";
-      logger.error(msg);
-      return new ResponseEntity<>(msg, HttpStatus.BAD_REQUEST);
-    }
 
     // read file from Cloud Storage
     long start = System.currentTimeMillis();
@@ -146,6 +120,6 @@ public class DocumentEmbeddingController {
     logger.info("Embedding flow - insert book and pages: " + (System.currentTimeMillis() - start) + "ms");
 
     // success
-    return new ResponseEntity<>(msg, HttpStatus.OK);
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 }

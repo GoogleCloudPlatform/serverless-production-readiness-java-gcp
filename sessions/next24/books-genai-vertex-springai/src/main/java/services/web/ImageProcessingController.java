@@ -53,6 +53,7 @@ import services.config.CloudConfig;
 import services.domain.BooksService;
 import services.domain.FirestoreService;
 import services.utility.JsonUtility;
+import services.utility.RequestValidationUtility;
 
 /**
  * ImageProcessingController is a Spring Boot REST controller that listens for Cloud Storage events
@@ -107,42 +108,15 @@ public class ImageProcessingController {
     @RequestMapping(value = "", method = RequestMethod.POST)
     public ResponseEntity<String> receiveMessage(
         @RequestBody Map<String, Object> body, @RequestHeader Map<String, String> headers) throws IOException, InterruptedException, ExecutionException {
-        logger.info("Header elements");
-        for (String field : CloudConfig.requiredFields) {
-            if (headers.get(field) == null) {
-                String msg = String.format("Missing expected header: %s.", field);
-                logger.info(msg);
-                return new ResponseEntity<>(msg, HttpStatus.BAD_REQUEST);
-            } else {
-                logger.info(field + " : " + headers.get(field));
-            }
+        String errorMsg = RequestValidationUtility.validateRequest(body,headers);
+        if (!errorMsg.isBlank()) {
+            return new ResponseEntity<>(errorMsg, HttpStatus.BAD_REQUEST);
         }
-
-        logger.info("Body elements");
-        for (String bodyField : body.keySet()) {
-            logger.info(bodyField + " : " + body.get(bodyField));
-        }
-
-        if (headers.get("ce-subject") == null) {
-            String msg = "Missing expected header: ce-subject.";
-            logger.error(msg);
-            return new ResponseEntity<>(msg, HttpStatus.BAD_REQUEST);
-        }
-
-        String ceSubject = headers.get("ce-subject");
-        String msg = "Detected change in Cloud Storage bucket: (ce-subject) : " + ceSubject;
-        logger.info(msg);
 
         String fileName = (String)body.get("name");
         String bucketName = (String)body.get("bucket");
 
         logger.info("New picture uploaded " + fileName);
-
-        if(fileName == null){
-            msg = "Missing expected body element: file name";
-            logger.error(msg);
-            return new ResponseEntity<>(msg, HttpStatus.BAD_REQUEST);
-        }
 
         // multi-modal call to retrieve text from the uploaded image
         String response = vertexAIClient.promptOnImage(promptImage, bucketName, fileName);
@@ -180,7 +154,7 @@ public class ImageProcessingController {
             logger.info("Picture metadata saved in Firestore at " + writeResult.get().getUpdateTime());
         }
 
-        return new ResponseEntity<>(msg, HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Bean
