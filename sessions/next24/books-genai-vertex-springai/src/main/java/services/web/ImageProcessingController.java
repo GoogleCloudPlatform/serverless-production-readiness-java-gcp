@@ -119,6 +119,7 @@ public class ImageProcessingController {
         logger.info("New picture uploaded " + fileName);
 
         // multi-modal call to retrieve text from the uploaded image
+        // property file ```promptImage: ${PROMPT_IMAGE:Extract the title and author from the image, strictly in JSON format}```
         String response = vertexAIClient.promptOnImage(promptImage, bucketName, fileName);
 
         // parse the response and extract the data
