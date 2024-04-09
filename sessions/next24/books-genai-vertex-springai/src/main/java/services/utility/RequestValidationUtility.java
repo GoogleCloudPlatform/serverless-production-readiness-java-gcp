@@ -19,6 +19,7 @@ public class RequestValidationUtility {
             if (headers.get(field) == null) {
                 errorMsg = String.format("Missing expected header: %s.", field);
                 logger.info(errorMsg);
+                return errorMsg;
             } else {
                 logger.info(field + " : " + headers.get(field));
             }
@@ -32,17 +33,18 @@ public class RequestValidationUtility {
         if (headers.get("ce-subject") == null) {
             errorMsg = "Missing expected header: ce-subject.";
             logger.error(errorMsg);
+            return errorMsg;
         }
 
         String ceSubject = headers.get("ce-subject");
-        errorMsg = "Detected change in Cloud Storage bucket: (ce-subject) : " + ceSubject;
-        logger.info(errorMsg);
+        logger.info("Detected change in Cloud Storage bucket: (ce-subject) : " + ceSubject);
 
         String fileName = (String)body.get("name");
         if(fileName == null){
             errorMsg = "Missing expected body element: file name";
             logger.error(errorMsg);
+            return errorMsg;
         }
-        return errorMsg;
+        return "";
     }
 }
