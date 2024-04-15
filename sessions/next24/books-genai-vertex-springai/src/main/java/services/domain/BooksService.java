@@ -18,8 +18,10 @@ package services.domain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+import services.ai.VertexAIClient;
 import services.domain.dao.DataAccess;
 import services.domain.util.ScopeType;
 import services.utility.FileUtility;
@@ -39,6 +41,16 @@ import java.util.Map;
 public class BooksService {
     @Autowired
     DataAccess dao;
+
+    @Autowired
+    VertexAIClient vertexAIClient;
+
+    @Value("${prompts.promptSummary1}")
+    private String promptSubSummary;
+
+
+    @Value("${prompts.promptSummary}")
+    private String promptSummary;
 
     private static final Logger logger = LoggerFactory.getLogger(BooksService.class);
 
@@ -78,6 +90,42 @@ public class BooksService {
         }
 
         return bookId;
+    }
+
+    public String createBookSummary(BufferedReader reader, String bookTitle) {
+        String summary = "";
+        try {
+            summary = getBookSummary(bookTitle);
+            if (!summary.isEmpty()) {
+                return summary;
+            }
+            summary = "";
+            Map<String, Object> book = dao.findBook(bookTitle);
+            Integer bookId = (Integer) book.get("book_id");
+            String content="";
+            Integer page = 1;
+            char[] cbuf = new char[35000];
+            int charsRead;
+            String context = "";
+            logger.info("The prompt build summary: " +promptSubSummary.formatted(content, context));
+            while ((charsRead = reader.read(cbuf)) != -1) {
+                content = new String(cbuf, 0, charsRead);
+                context = vertexAIClient.promptModel(promptSubSummary.formatted(content, context));
+                summary += "\n"+context;
+                page++;
+            }
+            reader.close();
+            logger.info("The book "+bookTitle +" has pages: " +page);
+            logger.info("The summary for book "+bookTitle +" is: " +summary);
+            logger.info("The prompt summary: " +promptSummary.formatted(summary));
+            vertexAIClient.promptModel(promptSummary.formatted(summary));
+            dao.insertSummaries(bookId, summary);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return summary;
     }
 
     public String getBookSummary(String bookTitle) {
