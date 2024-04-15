@@ -45,7 +45,7 @@ public class BooksService {
     @Autowired
     VertexAIClient vertexAIClient;
 
-    @Value("${prompts.promptSummary1}")
+    @Value("${prompts.promptSubSummary}")
     private String promptSubSummary;
 
 
