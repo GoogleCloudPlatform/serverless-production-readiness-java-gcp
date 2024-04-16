@@ -110,7 +110,7 @@ public class BooksService {
             Integer bookId = (Integer) book.get("book_id");
             String content="";
             Integer page = 1;
-            char[] cbuf = new char[45000];
+            char[] cbuf = new char[55000];
             int charsRead;
             String context = "";
             logger.info("The prompt build summary: " +promptSubSummary.formatted(context, content));
