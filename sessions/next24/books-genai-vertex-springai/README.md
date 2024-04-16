@@ -286,6 +286,16 @@ gcloud eventarc triggers create books-genai-native-trigger-image \
      --event-filters="type=google.cloud.storage.object.v1.finalized" \
      --event-filters="bucket=library_next24_images" \
      --service-account=48099017975-compute@developer.gserviceaccount.com
+
+# After command finishes set navigate to pub/sub subscriptions and set the trigger-summary-sub Acknowledgement deadline to 600
+gcloud eventarc triggers create books-genai-jit-trigger-summary \
+     --destination-run-service=books-genai-jit \
+     --destination-run-region=us-central1 \
+     --destination-run-path=/summary \
+     --location=us-central1 \
+     --event-filters="type=google.cloud.storage.object.v1.finalized" \
+     --event-filters="bucket=library_next24_summary" \
+     --service-account=48099017975-compute@developer.gserviceaccount.com
 ```
 
 Test the trigger
