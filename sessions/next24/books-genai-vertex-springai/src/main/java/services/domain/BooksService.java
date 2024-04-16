@@ -122,9 +122,7 @@ public class BooksService {
                         context = vertexAIClient.promptModel(promptSubSummary.formatted(context, content));
                     }
                 } catch (io.grpc.StatusRuntimeException statusRuntimeException) {
-                    if(statusRuntimeException.getStatus().equals(FAILED_PRECONDITION)) {
-                        context = vertexAIClient.promptModel(promptSubSummary.formatted(context, content));
-                    }
+                    continue;
                 }
                 summary += "\n"+context;
                 if(page%10==0)
