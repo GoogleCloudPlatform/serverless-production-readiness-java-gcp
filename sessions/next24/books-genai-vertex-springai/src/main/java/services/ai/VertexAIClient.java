@@ -46,32 +46,6 @@ public class VertexAIClient {
         this.chatClient = chatClient;
     }
 
-    private String createConciseSummaryPrompt(String text) {
-        return String.format("""
-                Taking the following context delimited by triple backquotes into consideration:
-
-                `%s`
-
-                Write a concise summary of the following text delimited by triple backquotes.
-
-                `%s`
-
-                CONCISE SUMMARY:
-                """, "", text); // Placeholder for initial context
-    }
-
-    private String createDetailedSummaryPrompt(String text) {
-        return String.format("""
-                Please give me a summary with an introduction, three once sentence bullet points, and a conclusion from the following text delimited by triple backquotes.
-
-                `Text:%s`
-
-                SUMMARY:
-                """, text);
-    }
-
-
-
     public String promptOnImage(String prompt,
                                 String bucketName,
                                 String fileName) throws IOException {
