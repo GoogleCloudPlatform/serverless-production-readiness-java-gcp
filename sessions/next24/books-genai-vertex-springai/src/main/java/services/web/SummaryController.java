@@ -51,7 +51,7 @@ public class SummaryController {
         long start = System.currentTimeMillis();
         logger.info("Book summary flow : start");
 
-        String summmary = booksService.createBookSummary(br, FileUtility.getTitle(fileName));
+        String summmary = booksService.createBookSummary(br, fileName);
 
         logger.info("Book summary flow end " + (System.currentTimeMillis() - start) + "ms");
 

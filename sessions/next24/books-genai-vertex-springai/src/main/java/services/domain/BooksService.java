@@ -92,9 +92,11 @@ public class BooksService {
         return bookId;
     }
 
-    public String createBookSummary(BufferedReader reader, String bookTitle) {
+    public String createBookSummary(BufferedReader reader, String fileName) {
         String summary = "";
         try {
+            String bookTitle = FileUtility.getTitle(fileName);
+            bookTitle = SqlUtility.replaceUnderscoresWithSpaces(bookTitle);
             summary = getBookSummary(bookTitle);
             if (!summary.isEmpty()) {
                 return summary;
