@@ -56,6 +56,9 @@ public class BooksService {
     @Value("${prompts.promptSummary}")
     private String promptSummary;
 
+    @Value("${summary.chunk.characters}")
+    private Integer summaryChunkCharacters;
+
     private static final Logger logger = LoggerFactory.getLogger(BooksService.class);
 
     @Autowired
@@ -110,7 +113,7 @@ public class BooksService {
             Integer bookId = (Integer) book.get("book_id");
             String content="";
             Integer page = 1;
-            char[] cbuf = new char[55000];
+            char[] cbuf = new char[summaryChunkCharacters];
             int charsRead;
             String context = "";
             logger.info("The prompt build summary: " +promptSubSummary.formatted(context, content));
