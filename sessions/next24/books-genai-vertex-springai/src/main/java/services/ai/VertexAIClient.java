@@ -111,7 +111,7 @@ public class VertexAIClient {
         );
         logger.info("Elapsed time (gemini-pro, with SpringAI): " + (System.currentTimeMillis() - start) + "ms");
 
-        String output = "Model response contains no data. Please try again!";
+        String output = VertexModels.RETRY_MSG;
         if(chatResponse.getResult()!=null) {
             output = chatResponse.getResult().getOutput().getContent();
         }

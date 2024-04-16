@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import services.ai.VertexAIClient;
+import services.ai.VertexModels;
 import services.domain.dao.DataAccess;
 import services.domain.util.ScopeType;
 import services.utility.FileUtility;
@@ -113,6 +114,9 @@ public class BooksService {
             while ((charsRead = reader.read(cbuf)) != -1) {
                 content = new String(cbuf, 0, charsRead);
                 context = vertexAIClient.promptModel(promptSubSummary.formatted(context, content));
+                if(context.contains(VertexModels.RETRY_MSG)) {
+                    context = vertexAIClient.promptModel(promptSubSummary.formatted(context, content));
+                }
                 summary += "\n"+context;
                 if(page%10==0)
                     logger.info("The prompt build summary: " +summary);
