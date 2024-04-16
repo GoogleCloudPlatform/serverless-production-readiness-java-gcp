@@ -124,6 +124,9 @@ public class BooksService {
                 } catch (io.grpc.StatusRuntimeException statusRuntimeException) {
                     logger.warn("vertexAIClient.promptModel(promptSubSummary.formatted(context, content)) statusRuntimeException: " + statusRuntimeException.getMessage());
                     continue;
+                } catch (RuntimeException e) {
+                    logger.warn("Failed to interact with Vertex AI model: "+e.getMessage(), e);
+                    continue;
                 }
                 summary += "\n"+context;
                 if(page%10==0)
