@@ -169,7 +169,7 @@ public class DataAccess {
     public Integer insertSummaries(Integer bookId, String summary) {
         String sql = "insert into bookSummaries (\n" +
                 "book_id,\n" +
-                "summary,\n" +
+                "summary)\n" +
                 "values (?,?)";
         Object[] parameters = new Object[]{bookId, summary};
         int success =jdbcTemplate.update(sql, parameters);
