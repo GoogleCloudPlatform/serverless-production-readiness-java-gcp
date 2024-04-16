@@ -56,7 +56,7 @@ public class BooksService {
     @Value("${prompts.promptSummary}")
     private String promptSummary;
 
-    @Value("${summary.chunk.characters}")
+    @Value("${workflows.summary.chunk.characters}")
     private Integer summaryChunkCharacters;
 
     private static final Logger logger = LoggerFactory.getLogger(BooksService.class);

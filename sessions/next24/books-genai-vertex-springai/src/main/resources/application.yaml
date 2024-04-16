@@ -46,6 +46,7 @@ spring:
   threads:
     virtual:
       enabled: true
+workflows:
   summary:
     chunk:
       characters: ${SUMMARY_CHUNK:120000}
