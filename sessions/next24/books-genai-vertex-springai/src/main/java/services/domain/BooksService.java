@@ -116,10 +116,12 @@ public class BooksService {
             logger.info("The prompt build summary: " +promptSubSummary.formatted(context, content));
             while ((charsRead = reader.read(cbuf)) != -1) {
                 content = new String(cbuf, 0, charsRead);
+                int retry = 0;
                 try {
                     context = vertexAIClient.promptModel(promptSubSummary.formatted(context, content));
-                    if(context.contains(VertexModels.RETRY_MSG)) {
+                    while(context.contains(VertexModels.RETRY_MSG) && retry < 2) {
                         context = vertexAIClient.promptModel(promptSubSummary.formatted(context, content));
+                        retry++;
                     }
                 } catch (io.grpc.StatusRuntimeException statusRuntimeException) {
                     logger.warn("vertexAIClient.promptModel(promptSubSummary.formatted(context, content)) statusRuntimeException: " + statusRuntimeException.getMessage());
