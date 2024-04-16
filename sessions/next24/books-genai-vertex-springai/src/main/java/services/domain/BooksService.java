@@ -38,6 +38,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static io.grpc.Status.Code.FAILED_PRECONDITION;
+
 @Service
 public class BooksService {
     @Autowired
@@ -113,9 +116,15 @@ public class BooksService {
             logger.info("The prompt build summary: " +promptSubSummary.formatted(context, content));
             while ((charsRead = reader.read(cbuf)) != -1) {
                 content = new String(cbuf, 0, charsRead);
-                context = vertexAIClient.promptModel(promptSubSummary.formatted(context, content));
-                if(context.contains(VertexModels.RETRY_MSG)) {
+                try {
                     context = vertexAIClient.promptModel(promptSubSummary.formatted(context, content));
+                    if(context.contains(VertexModels.RETRY_MSG)) {
+                        context = vertexAIClient.promptModel(promptSubSummary.formatted(context, content));
+                    }
+                } catch (io.grpc.StatusRuntimeException statusRuntimeException) {
+                    if(statusRuntimeException.getStatus().equals(FAILED_PRECONDITION)) {
+                        context = vertexAIClient.promptModel(promptSubSummary.formatted(context, content));
+                    }
                 }
                 summary += "\n"+context;
                 if(page%10==0)
