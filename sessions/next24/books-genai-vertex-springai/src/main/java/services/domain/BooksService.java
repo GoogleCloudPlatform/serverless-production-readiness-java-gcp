@@ -121,7 +121,7 @@ public class BooksService {
             logger.info("The book "+bookTitle +" has pages: " +page);
             logger.info("The summary for book "+bookTitle +" is: " +summary);
             logger.info("The prompt summary: " +promptSummary.formatted(summary));
-            vertexAIClient.promptModel(promptSummary.formatted(summary));
+            summary = vertexAIClient.promptModel(promptSummary.formatted(summary));
             dao.insertSummaries(bookId, summary);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
