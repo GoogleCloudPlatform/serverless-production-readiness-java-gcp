@@ -114,7 +114,8 @@ public class BooksService {
                 content = new String(cbuf, 0, charsRead);
                 context = vertexAIClient.promptModel(promptSubSummary.formatted(context, content));
                 summary += "\n"+context;
-                logger.info("The prompt build summary: " +summary);
+                if(page%10==0)
+                    logger.info("The prompt build summary: " +summary);
                 page++;
             }
             reader.close();
