@@ -122,6 +122,7 @@ public class BooksService {
                         context = vertexAIClient.promptModel(promptSubSummary.formatted(context, content));
                     }
                 } catch (io.grpc.StatusRuntimeException statusRuntimeException) {
+                    logger.warn("vertexAIClient.promptModel(promptSubSummary.formatted(context, content)) statusRuntimeException: " + statusRuntimeException.getMessage());
                     continue;
                 }
                 summary += "\n"+context;
