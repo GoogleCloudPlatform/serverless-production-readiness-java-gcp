@@ -50,5 +50,5 @@ spring:
 prompts:
   bookanalysis: ${PROMPT_BOOK_ANALYSIS:Extract the main ideas from the book The Jungle Book by Rudyard Kipling}
   promptImage: ${PROMPT_IMAGE:Extract the title and author from the image, strictly in JSON format}
-  promptSubSummary: ${PROMPT_SUMMARY1:Taking the following context delimited by triple backquotes into consideration ```%s``` Write a concise summary of the following text delimited by triple backquotes. ```%s``` CONCISE SUMMARY:}
-  promptSummary: ${PROMPT_SUMMARY2:Please give me a summary with an introduction, three once sentence bullet points, and a conclusion from the following text delimited by triple backquotes. ```Text:%s``` SUMMARY:}
+  promptSubSummary: ${PROMPT_SUBSUMMARY:Taking the following context delimited by triple backquotes into consideration ```%s``` Write a concise summary of the following text delimited by triple backquotes. ```%s``` CONCISE SUMMARY:}
+  promptSummary: ${PROMPT_SUMMARY:Please give me a summary with an introduction, three once sentence bullet points, and a conclusion from the following text delimited by triple backquotes. ```Text:%s``` SUMMARY (Don't mention Project Gutenberg in summary):}
