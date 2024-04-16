@@ -119,10 +119,6 @@ public class BooksService {
                 int retry = 0;
                 try {
                     context = vertexAIClient.promptModel(promptSubSummary.formatted(context, content));
-                    while(context.contains(VertexModels.RETRY_MSG) && retry < 2) {
-                        context = vertexAIClient.promptModel(promptSubSummary.formatted(context, content));
-                        retry++;
-                    }
                 } catch (io.grpc.StatusRuntimeException statusRuntimeException) {
                     logger.warn("vertexAIClient.promptModel(promptSubSummary.formatted(context, content)) statusRuntimeException: " + statusRuntimeException.getMessage());
                     continue;
