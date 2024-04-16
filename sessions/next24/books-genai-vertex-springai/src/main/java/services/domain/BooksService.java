@@ -109,10 +109,10 @@ public class BooksService {
             char[] cbuf = new char[35000];
             int charsRead;
             String context = "";
-            logger.info("The prompt build summary: " +promptSubSummary.formatted(content, context));
+            logger.info("The prompt build summary: " +promptSubSummary.formatted(context, content));
             while ((charsRead = reader.read(cbuf)) != -1) {
                 content = new String(cbuf, 0, charsRead);
-                context = vertexAIClient.promptModel(promptSubSummary.formatted(content, context));
+                context = vertexAIClient.promptModel(promptSubSummary.formatted(context, content));
                 summary += "\n"+context;
                 logger.info("The prompt build summary: " +summary);
                 page++;
