@@ -171,7 +171,7 @@ public class DataAccess {
                 "book_id,\n" +
                 "summary,\n" +
                 "values (?,?)";
-        Object[] parameters = new Object[]{bookId, bookId, summary};
+        Object[] parameters = new Object[]{bookId, summary};
         int success =jdbcTemplate.update(sql, parameters);
         return success;
     }
