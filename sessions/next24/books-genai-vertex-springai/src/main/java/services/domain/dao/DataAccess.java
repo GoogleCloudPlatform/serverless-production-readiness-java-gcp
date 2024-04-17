@@ -15,7 +15,11 @@
  */
 package services.domain.dao;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -40,11 +44,29 @@ public class DataAccess {
 
     JdbcTemplate jdbcTemplate;
 
+    @Autowired
+    private Environment environment;
+
     private static final Logger logger = LoggerFactory.getLogger(DataAccess.class);
 
     @Autowired
-    public DataAccess(DataSource hikariDataSource) {
-        jdbcTemplate = new JdbcTemplate(hikariDataSource);
+    public DataAccess() {
+        jdbcTemplate = new JdbcTemplate(getDataSource());
+    }
+
+    public HikariDataSource getDataSource() {
+        HikariConfig config = new HikariConfig();
+        HikariDataSource ds;
+        config.setJdbcUrl(environment.getProperty("spring.datasource.url"));
+        config.setUsername(environment.getProperty("spring.datasource.username"));
+        config.setPassword(environment.getProperty("spring.datasource.password"));
+        config.addDataSourceProperty("cachePrepStmts", "true");
+        config.addDataSourceProperty("prepStmtCacheSize", "250");
+        config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+        config.addDataSourceProperty("databaseName", "library");
+        config.addDataSourceProperty("port", "5432");
+        ds = new HikariDataSource(config);
+        return ds;
     }
 
     public Map<String, Object> findBook(String title) {
