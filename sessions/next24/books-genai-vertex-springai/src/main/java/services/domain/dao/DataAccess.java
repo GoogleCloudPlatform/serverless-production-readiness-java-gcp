@@ -166,6 +166,16 @@ public class DataAccess {
         return success;
     }
 
+    public Integer insertSummaries(Integer bookId, String summary) {
+        String sql = "insert into bookSummaries (\n" +
+                "book_id,\n" +
+                "summary)\n" +
+                "values (?,?)";
+        Object[] parameters = new Object[]{bookId, summary};
+        int success =jdbcTemplate.update(sql, parameters);
+        return success;
+    }
+
     public Integer insertAuthor(String bio, String author) {
         final Map<String, Object> parameters = new HashMap<>();
         parameters.put("bio", bio);
