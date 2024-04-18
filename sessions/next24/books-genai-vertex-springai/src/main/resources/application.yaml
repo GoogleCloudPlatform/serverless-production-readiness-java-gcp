@@ -28,12 +28,10 @@ management:
 spring:
   main:
     lazy-initialization: true
-  # spring    lazy-initialization for datasource hikari
   datasource:
-    url: jdbc:postgresql://34.121.92.253.2:5000/library
-    username: postgres
-    password: password
-    type: org.springframework.jdbc.datasource.DriverManagerDataSource
+    url: ${DB_URL}
+    username: ${MY_USER}
+    password: ${MY_PASSWORD}
   cloud:
     config:
       modelAnalysisName: ${MODEL_ANALYSIS_NAME:gemini-pro}
