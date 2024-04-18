@@ -43,14 +43,12 @@ import java.util.stream.Collectors;
 public class DataAccess {
 
     JdbcTemplate jdbcTemplate;
-
-    @Autowired
     private Environment environment;
-
     private static final Logger logger = LoggerFactory.getLogger(DataAccess.class);
 
     @Autowired
-    public DataAccess() {
+    public DataAccess(Environment environment) {
+        this.environment = environment;
         jdbcTemplate = new JdbcTemplate(getDataSource());
     }
 
