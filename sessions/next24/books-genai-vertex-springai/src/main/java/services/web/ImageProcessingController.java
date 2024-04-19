@@ -183,7 +183,7 @@ public class ImageProcessingController {
 
         @Override
         public Response apply(Request request) {
-            logger.info("BookStore availability request: " + request);
+            logger.info(String.format("Called getBookAvailability(%s, %s)", request.title(), request.author()));
             return new Response(request.title(), request.author(), "The book is available for purchase in the book store in paperback format.");
         }
     }
