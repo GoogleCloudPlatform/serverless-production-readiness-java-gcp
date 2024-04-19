@@ -21,7 +21,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
+import org.springframework.boot.test.mock.mockito.MockBean;
+import services.domain.dao.DataAccess;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,8 +38,11 @@ public class BookImagesApplicationTests {
 
 	@Autowired private MockMvc mockMvc;
 	String mockBody;
-  
-	@BeforeEach
+        
+        @MockBean
+	private DataAccess dataAccess;  
+	
+        @BeforeEach
 	public void setup() throws JSONException {
 	  JSONObject message =
 		  new JSONObject()
