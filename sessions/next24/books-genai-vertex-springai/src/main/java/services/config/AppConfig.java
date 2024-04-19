@@ -21,28 +21,27 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-
 @Configuration
 public class AppConfig {
 
-    @Autowired
-    private Environment environment;
-
-    @Bean
-    public HikariDataSource getDataSource() {
-        HikariConfig config = new HikariConfig();
-        HikariDataSource ds;
-        config.setJdbcUrl(environment.getProperty("spring.datasource.url"));
-        config.setUsername(environment.getProperty("spring.datasource.username"));
-        config.setPassword(environment.getProperty("spring.datasource.password"));
-        config.addDataSourceProperty("cachePrepStmts", "true");
-        config.addDataSourceProperty("prepStmtCacheSize", "250");
-        config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
-        config.addDataSourceProperty("databaseName", "quickstart_db");
-        config.addDataSourceProperty("port", "5000");
-        ds = new HikariDataSource(config);
-        return ds;
-    }
+//    @Autowired
+//    private Environment environment;
+//
+//    @Bean
+//    public HikariDataSource getDataSource() {
+//        HikariConfig config = new HikariConfig();
+//        HikariDataSource ds;
+//        config.setJdbcUrl(environment.getProperty("spring.datasource.url"));
+//        config.setUsername(environment.getProperty("spring.datasource.username"));
+//        config.setPassword(environment.getProperty("spring.datasource.password"));
+//        config.addDataSourceProperty("cachePrepStmts", "true");
+//        config.addDataSourceProperty("prepStmtCacheSize", "250");
+//        config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+//        config.addDataSourceProperty("databaseName", "quickstart_db");
+//        config.addDataSourceProperty("port", "5000");
+//        ds = new HikariDataSource(config);
+//        return ds;
+//    }
 
 //    @Bean
 //    RestTemplate restTemplate() {

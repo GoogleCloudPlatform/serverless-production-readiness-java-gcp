@@ -26,6 +26,8 @@ management:
       exposure:
         include: "*"
 spring:
+  main:
+    lazy-initialization: true
   datasource:
     url: ${DB_URL}
     username: ${MY_USER}

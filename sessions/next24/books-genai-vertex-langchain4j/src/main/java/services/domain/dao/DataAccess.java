@@ -15,16 +15,18 @@
  */
 package services.domain.dao;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import services.domain.util.ScopeType;
-import javax.sql.DataSource;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.time.LocalDate;
@@ -40,10 +42,28 @@ public class DataAccess {
 
     JdbcTemplate jdbcTemplate;
 
+    private Environment environment;
     private static final Logger logger = LoggerFactory.getLogger(DataAccess.class);
+
     @Autowired
-    public DataAccess(DataSource hikariDataSource) {
-        jdbcTemplate = new JdbcTemplate(hikariDataSource);
+    public DataAccess(Environment environment) {
+        this.environment = environment;
+        jdbcTemplate = new JdbcTemplate(getDataSource());
+    }
+
+    public HikariDataSource getDataSource() {
+        HikariConfig config = new HikariConfig();
+        HikariDataSource ds;
+        config.setJdbcUrl(environment.getProperty("spring.datasource.url"));
+        config.setUsername(environment.getProperty("spring.datasource.username"));
+        config.setPassword(environment.getProperty("spring.datasource.password"));
+        config.addDataSourceProperty("cachePrepStmts", "true");
+        config.addDataSourceProperty("prepStmtCacheSize", "250");
+        config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+        config.addDataSourceProperty("databaseName", "library");
+        config.addDataSourceProperty("port", "5432");
+        ds = new HikariDataSource(config);
+        return ds;
     }
 
     public Map<String, Object> findBook(String title) {
