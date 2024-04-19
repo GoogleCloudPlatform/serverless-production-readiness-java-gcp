@@ -29,9 +29,9 @@ spring:
   main:
     lazy-initialization: true
   datasource:
-    url: ${DB_URL:jdbc:postgresql://0.0.0.0:2121/database}
-    username: ${MY_USER:pguser}
-    password: ${MY_PASSWORD:pword}
+    url: ${DB_URL}
+    username: ${MY_USER}
+    password: ${MY_PASSWORD}
   cloud:
     config:
       modelAnalysisName: ${MODEL_ANALYSIS_NAME:gemini-pro}
