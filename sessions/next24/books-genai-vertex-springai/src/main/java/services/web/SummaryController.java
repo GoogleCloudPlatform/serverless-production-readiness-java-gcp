@@ -49,11 +49,11 @@ public class SummaryController {
         String bucketName = (String) body.get("bucket");
         BufferedReader br = cloudStorageService.readFile(bucketName, fileName);
         long start = System.currentTimeMillis();
-        logger.info("Book summary flow : start");
+        logger.info("Book summarization flow : start");
 
         String summmary = booksService.createBookSummary(br, fileName);
 
-        logger.info("Book summary flow end " + (System.currentTimeMillis() - start) + "ms");
+        logger.info("Book summarization flow: end " + (System.currentTimeMillis() - start) + "ms");
 
         // return the response to the caller
         return new ResponseEntity<>(summmary, HttpStatus.OK);

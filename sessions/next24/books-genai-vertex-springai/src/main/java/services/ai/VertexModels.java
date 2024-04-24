@@ -24,7 +24,5 @@ public class VertexModels {
 
     public static final String GEMINI_PRO_VISION = "gemini-pro-vision";
 
-    public static final String GEMINI_PRO_VISION_VERSION = "gemini-1.0-pro-vision";
-
     public static final String RETRY_MSG = "Model response contains no data. Please try again!";
 }

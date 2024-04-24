@@ -59,6 +59,9 @@ public class BooksService {
     @Value("${workflows.summary.chunk.characters}")
     private Integer summaryChunkCharacters;
 
+    @Value("${spring.ai.vertex.ai.gemini.chat.options.model}")
+    String model;
+
     private static final Logger logger = LoggerFactory.getLogger(BooksService.class);
 
     @Autowired
@@ -120,7 +123,7 @@ public class BooksService {
             while ((charsRead = reader.read(cbuf)) != -1) {
                 content = new String(cbuf, 0, charsRead);
                 try {
-                    context = vertexAIClient.promptModel(promptSubSummary.formatted(context, content));
+                    context = vertexAIClient.promptModel(promptSubSummary.formatted(context, content), model);
                 } catch (io.grpc.StatusRuntimeException statusRuntimeException) {
                     logger.warn("vertexAIClient.promptModel(promptSubSummary.formatted(context, content)) statusRuntimeException: " + statusRuntimeException.getMessage());
                     continue;
@@ -137,12 +140,12 @@ public class BooksService {
             logger.info("The book "+bookTitle +" has pages: " +page);
             logger.info("The summary for book "+bookTitle +" is: " +summary);
             logger.info("The prompt summary: " +promptSummary.formatted(summary));
-            summary = vertexAIClient.promptModel(promptSummary.formatted(summary));
+            summary = vertexAIClient.promptModel(promptSummary.formatted(summary), model);
             dao.insertSummaries(bookId, summary);
         } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+            logger.error("File %s not found. Failed with exception %s", fileName, e.getMessage());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            logger.error("Reading from file %s failure. Failed with exception %s", fileName, e.getMessage());
         }
         return summary;
     }

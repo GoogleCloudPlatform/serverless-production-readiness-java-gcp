@@ -83,6 +83,9 @@ public class ImageProcessingController {
     @Value("${prompts.promptImage}")
     private String promptImage;
 
+    @Value("${spring.ai.vertex.ai.gemini.chat.options.model}")    
+    private String model;
+
     public ImageProcessingController(FirestoreService eventService, BooksService booksService, VertexAIClient vertexAIClient) {
         this.eventService = eventService;
         this.booksService = booksService;
@@ -116,11 +119,11 @@ public class ImageProcessingController {
         String fileName = (String)body.get("name");
         String bucketName = (String)body.get("bucket");
 
-        logger.info("New picture uploaded " + fileName);
+        logger.info("New picture uploaded to Cloud Storage" + fileName);
 
         // multi-modal call to retrieve text from the uploaded image
         // property file ```promptImage: ${PROMPT_IMAGE:Extract the title and author from the image, strictly in JSON format}```
-        String response = vertexAIClient.promptOnImage(promptImage, bucketName, fileName);
+        String response = vertexAIClient.promptOnImage(promptImage, bucketName, fileName, model);
 
         // parse the response and extract the data
         Map<String, Object> jsonMap = JsonUtility.parseJsonToMap(response);
@@ -128,11 +131,12 @@ public class ImageProcessingController {
         // get book details
         String title = (String) jsonMap.get("title");
         String author = (String) jsonMap.get("author");
-        logger.info(String.format("Result: Author %s, Title %s", title, author));
+        logger.info(String.format("Image Analysis Result: Author %s, Title %s", title, author));
 
         // retrieve the book summary from the database
         String summary = booksService.getBookSummary(title);
-        logger.info("The summary of the book:"+ title+ " is: " + summary);
+        logger.info("The summary of the book "+ title+ ",as retrieved from the database, is: " + summary);
+        logger.info("End of summary of the book "+ title+ ",as retrieved from the database");
 
         // Function calling BookStoreService
         SystemMessage systemMessage = new SystemMessage("""
@@ -147,7 +151,8 @@ public class ImageProcessingController {
 
         String bookStoreResponse = vertexAIClient.promptModelwithFunctionCalls(systemMessage, 
                                                                                userMessage, 
-                                                                               "bookStoreAvailability");
+                                                                               "bookStoreAvailability",
+                                                                               model);
 
         // Saving result to Firestore
         if (bookStoreResponse != null) {
