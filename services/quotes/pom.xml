@@ -102,7 +102,11 @@
       <artifactId>toxiproxy</artifactId>
       <scope>test</scope>
     </dependency>
-
+    <dependency> <!-- Temp fix for https://github.com/spring-projects/spring-data-commons/issues/3025 -->
+    	<groupId>org.springframework.data</groupId>
+    	<artifactId>spring-data-commons</artifactId>
+    	<version>3.2.x-3025-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 
   <dependencyManagement>

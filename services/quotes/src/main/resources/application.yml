@@ -13,22 +13,22 @@ management:
 target: local
 
 spring:
-#  config:
-#    activate:
-#      on-profile: cloud-prod
-##  datasource:
-#    url: 'jdbc:postgresql://${DB_HOST:127.0.0.1}/${DB_DATABASE:quote_db}'
-#    username: '${DB_USER:user}'
-#    password: '${DB_PASS:password}'
-#  jpa:
-#    properties:
-#      hibernate:
-#        jdbc:
-#          lob:
-#            non_contextual_creation: true
-#        dialect: org.hibernate.dialect.PostgreSQLDialect
-#    hibernate:
-#      ddl-auto: update
+ config:
+   activate:
+     on-profile: cloud-dev
+ datasource:
+   url: 'jdbc:postgresql://${DB_HOST:127.0.0.1}/${DB_DATABASE:quote_db}'
+   username: '${DB_USER:user}'
+   password: '${DB_PASS:password}'
+ jpa:
+   properties:
+     hibernate:
+       jdbc:
+         lob:
+           non_contextual_creation: true
+       dialect: org.hibernate.dialect.PostgreSQLDialect
+   hibernate:
+     ddl-auto: update
 
 #  datasource:
 #    url: jdbc:h2:mem:test
@@ -39,3 +39,21 @@ spring:
 #    spring.jpa.database-platform: org.hibernate.dialect.H2Dialect
 #  h2:
 #    console.enabled: true
+---
+spring:
+ config:
+   activate:
+     on-profile: cloud-prod
+ datasource:
+   url: 'jdbc:postgresql://${DB_HOST:127.0.0.1}/${DB_DATABASE:quote_db}'
+   username: '${DB_USER:user}'
+   password: '${DB_PASS:password}'
+ jpa:
+   properties:
+     hibernate:
+       jdbc:
+         lob:
+           non_contextual_creation: true
+       dialect: org.hibernate.dialect.PostgreSQLDialect
+   hibernate:
+     ddl-auto: none
