@@ -11,6 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+substitutions:
+  _REPO_NAME: maven-demo-app
+  _APP_NAME: quotes
+  _DIR: ./services/quotes
+  _PIPELINE_NAME: security-demo-pipeline
 steps:
   # run tests first
 - id: 'test'
@@ -22,21 +27,30 @@ steps:
   args: ["verify"]
 
   # build service image
-- id: 'build-project'
+- id: 'build-application'
   name: maven:3.9.5-eclipse-temurin-21
   entrypoint: mvn
   volumes:
   - name: 'maven-repository'
     path: '/root/.m2'
-  args: ["spring-boot:build-image", "-DskipTests", "-Dspring-boot.build-image.imageName=quotes"]
-
-  # tag then store image in registry
-- id: 'tag-image'
-  name: gcr.io/cloud-builders/docker
-  args: ["tag", "quotes", "gcr.io/$PROJECT_ID/quotes"]
-  # Push the container image to Artifact Registry
-- id: 'store-image'
+  args: ["spring-boot:build-image", "-DskipTests", "-Dspring-boot.build-image.imageName={_APP_NAME}}"]
+- id: "build-image"
   name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'gcr.io/$PROJECT_ID/quotes']
+  args: ['build', '.', '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_APP_NAME}:${COMMIT_SHA}', '-f', 'Dockerfile']
+  dir: ${_DIR}
+  waitFor: ['build-application']
+- id: deploy
+  name: gcr.io/google.com/cloudsdktool/cloud-sdk
+  entrypoint: /bin/bash
+  args:
+    - -c
+    - |
+      gcloud deploy releases create rel-${SHORT_SHA} \
+      --delivery-pipeline=${_PIPELINE_NAME} \
+      --region=us-central1 \
+      --annotations=commitId=${REVISION_ID} \
+      --images=${_APP_NAME}:${COMMIT_SHA}")
+  waitFor: ['build-image']
+    
 
-images: ["gcr.io/$PROJECT_ID/quotes"]
+images: ["gcr.io/$PROJECT_ID/${_REPO_NAME}/${_APP_NAME}:${COMMIT_SHA}"]
