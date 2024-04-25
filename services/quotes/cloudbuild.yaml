@@ -35,7 +35,7 @@ steps:
   volumes:
   - name: 'maven-repository'
     path: '/root/.m2'
-  args: ["spring-boot:build-image", "-DskipTests", "-Dspring-boot.build-image.imageName={_APP_NAME}}"]
+  args: ["spring-boot:build-image", "-DskipTests", "-Dspring-boot.build-image.imageName={_APP_NAME}"]
 - id: "build-image"
   name: 'gcr.io/cloud-builders/docker'
   args: ['build', '.', '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_APP_NAME}:${COMMIT_SHA}', '-f', 'Dockerfile']
