@@ -14,7 +14,7 @@
 substitutions:
   _REPO_NAME: maven-demo-app
   _APP_NAME: quotes
-  _DIR: ./services/quotes
+  _DIR: services/quotes
   _PIPELINE_NAME: security-demo-pipeline
 steps:
   # run tests first
