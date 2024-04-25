@@ -14,13 +14,14 @@
 substitutions:
   _REPO_NAME: maven-demo-app
   _APP_NAME: quotes
-  _DIR: services/quotes
+  _DIR: ./services/quotes
   _PIPELINE_NAME: security-demo-pipeline
 steps:
   # run tests first
 - id: 'test'
   name: maven:3.9.5-eclipse-temurin-21
   entrypoint: mvn
+  dir: ${_DIR}
   volumes:
   - name: 'maven-repository'
     path: '/root/.m2'
@@ -30,6 +31,7 @@ steps:
 - id: 'build-application'
   name: maven:3.9.5-eclipse-temurin-21
   entrypoint: mvn
+  dir: ${_DIR}
   volumes:
   - name: 'maven-repository'
     path: '/root/.m2'
