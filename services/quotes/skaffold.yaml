@@ -6,7 +6,7 @@ build:
   # local: 
   #   push: false
   artifacts:
-  - image: myspringbootapp
+  - image: quotes
     context: myspringbootapp
     docker:
       dockerfile: Dockerfile    

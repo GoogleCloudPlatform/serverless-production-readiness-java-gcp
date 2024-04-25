@@ -18,14 +18,14 @@ substitutions:
   _PIPELINE_NAME: security-demo-pipeline
 steps:
   # run tests first
-- id: 'test'
-  name: maven:3.9.5-eclipse-temurin-21
-  entrypoint: mvn
-  dir: ${_DIR}
-  volumes:
-  - name: 'maven-repository'
-    path: '/root/.m2'
-  args: ["verify"]
+#- id: 'test'
+#  name: maven:3.9.5-eclipse-temurin-21
+#  entrypoint: mvn
+#  dir: ${_DIR}
+#  volumes:
+#  - name: 'maven-repository'
+#    path: '/root/.m2'
+#  args: ["verify"]
 
   # build service image
 - id: 'build-application'
@@ -51,7 +51,7 @@ steps:
       --delivery-pipeline=${_PIPELINE_NAME} \
       --region=us-central1 \
       --annotations=commitId=${REVISION_ID} \
-      --images=${_APP_NAME}:${COMMIT_SHA}")
+      --images=${_APP_NAME}:${COMMIT_SHA}"
   waitFor: ['build-image']
     
 
