@@ -44,6 +44,7 @@ steps:
 - id: deploy
   name: gcr.io/google.com/cloudsdktool/cloud-sdk
   entrypoint: /bin/bash
+  dir: ${_DIR}
   args:
     - -c
     - |
@@ -54,5 +55,4 @@ steps:
       --images=${_APP_NAME}=${COMMIT_SHA}
   waitFor: ['build-image']
     
-
 images: ["gcr.io/$PROJECT_ID/${_REPO_NAME}/${_APP_NAME}:${COMMIT_SHA}"]
