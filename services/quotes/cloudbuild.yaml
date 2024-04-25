@@ -51,7 +51,7 @@ steps:
       --delivery-pipeline=${_PIPELINE_NAME} \
       --region=us-central1 \
       --annotations=commitId=${REVISION_ID} \
-      --images=${_APP_NAME}:${COMMIT_SHA}
+      --images=${_APP_NAME}=${COMMIT_SHA}
   waitFor: ['build-image']
     
 
