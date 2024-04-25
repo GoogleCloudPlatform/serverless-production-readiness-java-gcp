@@ -1,0 +1,51 @@
+apiVersion: skaffold/v2beta26
+kind: Config
+metadata:
+  name: myspringbootapp
+build:
+  # local: 
+  #   push: false
+  artifacts:
+  - image: myspringbootapp
+    context: myspringbootapp
+    docker:
+      dockerfile: Dockerfile    
+    sync:
+      auto: true      
+deploy:
+   statusCheck: true
+   statusCheckDeadlineSeconds: 240
+   kubectl:
+    manifests:
+      - k8s/*
+profiles:
+  - name: dev
+    deploy:
+      statusCheck: true
+      statusCheckDeadlineSeconds: 240
+      kubectl:
+       manifests:
+         - k8s/*
+  - name: test
+    deploy:
+      statusCheck: true
+      statusCheckDeadlineSeconds: 240
+      kubectl:
+        manifests:
+         - k8s/*
+  - name: staging
+    deploy:
+      kubectl:
+        manifests:
+         - k8s/*
+  - name: prod
+    deploy:
+      statusCheck: true
+      statusCheckDeadlineSeconds: 240
+      kubectl:
+        manifests:
+         - k8s/*
+portForward:
+- resourceType: deployment
+  resourceName: myspringbootapp
+  port: 8080
