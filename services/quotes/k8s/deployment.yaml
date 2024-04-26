@@ -43,7 +43,7 @@ spec:
     spec:
       containers:
       - name: demo-app
-        image: quotes
+        image: demo-app
         env:
           - name: PORT
             value: "8080"
