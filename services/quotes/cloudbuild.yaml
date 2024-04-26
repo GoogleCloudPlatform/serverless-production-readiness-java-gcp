@@ -41,6 +41,11 @@ steps:
   args: ['build', '.', '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_APP_NAME}:${COMMIT_SHA}', '-f', 'Dockerfile']
   dir: ${_DIR}
   waitFor: ['build-application']
+- id: "push-image"
+  name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_APP_NAME}:${COMMIT_SHA}']
+  dir: ${_DIR}
+  waitFor: ['build-image']
 - id: deploy
   name: gcr.io/google.com/cloudsdktool/cloud-sdk
   entrypoint: /bin/bash
@@ -53,6 +58,6 @@ steps:
       --region=us-central1 \
       --annotations=commitId=${REVISION_ID} \
       --images=${_APP_NAME}=${COMMIT_SHA}
-  waitFor: ['build-image']
+  waitFor: ['push-image']
     
 images: ["gcr.io/$PROJECT_ID/${_REPO_NAME}/${_APP_NAME}:${COMMIT_SHA}"]
