@@ -44,6 +44,7 @@ steps:
 - id: "push-image"
   name: 'gcr.io/cloud-builders/docker'
   entrypoint: /bin/bash
+  dir: ${_DIR}
   args:
     - -c
     - |
