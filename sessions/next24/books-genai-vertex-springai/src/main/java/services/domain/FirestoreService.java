@@ -60,8 +60,8 @@ public class FirestoreService {
     Map<String, Object> data = new HashMap<>();
     data.put("title", title);
     data.put("author", author);
-    data.put("summary", summary);
-    data.put("modelResponse", modelResponse);
+    data.put("summaryInDatabase", summary);
+    data.put("finalModelResponse", modelResponse);
     data.put("created", new Date());
 
     return doc.set(data, SetOptions.merge());

@@ -24,7 +24,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.2.2</version>
+    <version>3.2.5</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <artifactId>bff</artifactId>
@@ -34,7 +34,7 @@
   <properties>
     <java.version>21</java.version>
     <spring-cloud.version>2023.0.0</spring-cloud.version>
-    <testcontainers.version>1.19.4</testcontainers.version>
+    <testcontainers.version>1.19.7</testcontainers.version>
   </properties>
   <dependencies>
     <dependency>
@@ -99,7 +99,7 @@
       <dependency>
         <groupId>com.google.cloud</groupId>
         <artifactId>libraries-bom</artifactId>
-        <version>26.28.0</version>
+        <version>26.37.0</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>

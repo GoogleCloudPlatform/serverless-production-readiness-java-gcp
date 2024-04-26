@@ -54,7 +54,7 @@ public class BookAnalysisController {
     this.vertexAIClient = vertexAIClient;
   }
 
-  @Value("${spring.cloud.config.modelAnalysisName}")
+  @Value("${spring.ai.vertex.ai.gemini.chat.options.model}")
   private String model;
 
   @PostConstruct
@@ -83,7 +83,7 @@ public class BookAnalysisController {
     start = System.currentTimeMillis();
 
     // submit prompt to the LLM via LLM orchestration framework
-    String response = vertexAIClient.promptModel(promptWithContext);
+    String response = vertexAIClient.promptModel(promptWithContext, model);
     logger.info("Book analysis flow: prompt LLM: " + (System.currentTimeMillis() - start) + "ms");
 
     // return the response to the caller
