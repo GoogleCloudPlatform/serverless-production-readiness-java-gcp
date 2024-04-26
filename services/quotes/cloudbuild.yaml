@@ -69,8 +69,7 @@ steps:
       -kms_digest_alg=${_KMS_DIGEST_ALG} \
       -note_name=${_NOTE_NAME}
       fi
-  waitFor: ['push-image']
-    
+  waitFor: ['push-image']    
 - id: deploy
   name: gcr.io/google.com/cloudsdktool/cloud-sdk
   entrypoint: /bin/bash
