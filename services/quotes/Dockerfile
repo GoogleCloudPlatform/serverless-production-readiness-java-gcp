@@ -1,11 +1,11 @@
-FROM eclipse-temurin:17-jre as builder
+FROM eclipse-temurin:21.0.1_12-jre as builder
+
 WORKDIR application
 ARG JAR_FILE=target/*.jar
 COPY ${JAR_FILE} application.jar
 RUN java -Djarmode=layertools -jar application.jar extract
 
-#FROM gcr.io/distroless/java17-debian11
-from bellsoft/liberica-openjdk-debian:17.0.7-7
+FROM eclipse-temurin:21.0.1_12-jre
 WORKDIR application
 COPY --from=builder application/dependencies/ ./
 COPY --from=builder application/spring-boot-loader/ ./
