@@ -52,6 +52,25 @@ steps:
       docker image inspect us-central1-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_APP_NAME}:${COMMIT_SHA} --format '{{index .RepoDigests 0}}' > image-digest.txt &&
       cat image-digest.txt
   waitFor: ['build-image']
+- id: cve-check
+  name: gcr.io/$PROJECT_ID/kritis-signer
+  dir: ${_DIR}
+  entrypoint: /bin/bash
+  args:
+    - -c
+    - |
+      if [ "$BRANCH_NAME" == "main" ]; then
+      /kritis/signer \
+      -v=10 \
+      -alsologtostderr \
+      -image=$(/bin/cat image-digest.txt) \
+      -policy=./vulnz-signing-policy.yaml \
+      -kms_key_name=${_KMS_KEY_NAME} \
+      -kms_digest_alg=${_KMS_DIGEST_ALG} \
+      -note_name=${_NOTE_NAME}
+      fi
+  waitFor: ['push-image']
+    
 - id: deploy
   name: gcr.io/google.com/cloudsdktool/cloud-sdk
   entrypoint: /bin/bash
@@ -64,6 +83,6 @@ steps:
       --region=us-central1 \
       --annotations=commitId=${REVISION_ID} \
       --images=${_APP_NAME}=$(/bin/cat image-digest.txt)
-  waitFor: ['push-image']
+  waitFor: ['cve-check']
     
 images: ["us-central1-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_APP_NAME}:${COMMIT_SHA}"]
