@@ -31,6 +31,7 @@ steps:
 - id: 'build-application'
   name: maven:3.9.5-eclipse-temurin-21
   entrypoint: mvn
+  dir: ${_DIR}
   volumes:
   - name: 'maven-repository'
     path: '/root/.m2'
