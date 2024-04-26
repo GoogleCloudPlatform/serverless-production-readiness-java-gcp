@@ -47,7 +47,6 @@ steps:
   args:
     - -c
     - |
-      docker push us-central1-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_APP_NAME}:${COMMIT_SHA} &&
       docker image inspect us-central1-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_APP_NAME}:${COMMIT_SHA} --format '{{index .RepoDigests 0}}' > image-digest.txt &&
       cat image-digest.txt
   waitFor: ['build-image']
@@ -65,4 +64,4 @@ steps:
       --images=${_APP_NAME}=$(/bin/cat image-digest.txt)
   waitFor: ['push-image']
     
-images: ["gcr.io/$PROJECT_ID/${_REPO_NAME}/${_APP_NAME}:${COMMIT_SHA}"]
+images: ["us-central1-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_APP_NAME}:${COMMIT_SHA}"]
