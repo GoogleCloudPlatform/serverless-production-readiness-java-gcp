@@ -31,11 +31,10 @@ steps:
 - id: 'build-application'
   name: maven:3.9.5-eclipse-temurin-21
   entrypoint: mvn
-  dir: ${_DIR}
   volumes:
   - name: 'maven-repository'
     path: '/root/.m2'
-  args: ["spring-boot:build-image", "-DskipTests", "-Dspring-boot.build-image.imageName=${_APP_NAME}"]
+  args: [ "package", "-Dmaven.test.skip=true" ]
 - id: "build-image"
   name: 'gcr.io/cloud-builders/docker'
   args: ['build', '.', '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_APP_NAME}:${COMMIT_SHA}', '-f', 'Dockerfile']
@@ -43,8 +42,13 @@ steps:
   waitFor: ['build-application']
 - id: "push-image"
   name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_APP_NAME}:${COMMIT_SHA}']
-  dir: ${_DIR}
+  entrypoint: /bin/bash
+  args:
+    - -c
+    - |
+      docker push us-central1-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_APP_NAME}:${COMMIT_SHA} &&
+      docker image inspect us-central1-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_APP_NAME}:${COMMIT_SHA} --format '{{index .RepoDigests 0}}' > image-digest.txt &&
+      cat image-digest.txt
   waitFor: ['build-image']
 - id: deploy
   name: gcr.io/google.com/cloudsdktool/cloud-sdk
@@ -57,7 +61,7 @@ steps:
       --delivery-pipeline=${_PIPELINE_NAME} \
       --region=us-central1 \
       --annotations=commitId=${REVISION_ID} \
-      --images=${_APP_NAME}=${COMMIT_SHA}
+      --images=${_APP_NAME}=$(/bin/cat image-digest.txt)
   waitFor: ['push-image']
     
 images: ["gcr.io/$PROJECT_ID/${_REPO_NAME}/${_APP_NAME}:${COMMIT_SHA}"]
