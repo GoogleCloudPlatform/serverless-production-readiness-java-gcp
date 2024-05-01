@@ -13,6 +13,8 @@ management:
 target: local
 
 spring:
+  flyway:
+    enabled: true
 #  config:
 #    activate:
 #      on-profile: cloud-prod

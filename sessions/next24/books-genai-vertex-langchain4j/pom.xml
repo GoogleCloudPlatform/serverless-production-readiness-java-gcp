@@ -116,7 +116,7 @@
     <dependency>
         <groupId>org.testcontainers</groupId>
         <artifactId>ollama</artifactId>
-        <version>1.19.7</version>
+        <version>${testcontainers.version}</version>
         <scope>test</scope>
     </dependency>
     <dependency>
@@ -125,7 +125,6 @@
       <version>5.4.0</version>
       <scope>test</scope>
     </dependency>
-
 
     <dependency>
       <groupId>org.testcontainers</groupId>
