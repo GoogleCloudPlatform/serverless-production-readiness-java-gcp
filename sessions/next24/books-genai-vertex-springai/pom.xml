@@ -110,6 +110,11 @@
       <artifactId>spring-ai-ollama</artifactId>
       <optional>true</optional>
     </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>toxiproxy</artifactId>
+      <scope>test</scope>
+    </dependency>
 
     <dependency>
       <groupId>org.testcontainers</groupId>

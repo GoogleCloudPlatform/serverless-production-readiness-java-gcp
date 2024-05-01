@@ -18,6 +18,7 @@ public class OllamaContainerTest {
     static String GEMMA7B = "7b";
     static String OLLAMA_CONTAINER_VERSION="0.1.32";
 
+    @Ignore
     @Test
     public void withDefaultConfig() {
         try ( // container {

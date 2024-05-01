@@ -33,8 +33,8 @@ import java.util.Map;
 @EnabledIfEnvironmentVariable(named = "VERTEX_AI_GEMINI_PROJECT_ID", matches = ".*")
 @EnabledIfEnvironmentVariable(named = "VERTEX_AI_GEMINI_LOCATION", matches = ".*")
 @TestPropertySource(properties = {"spring.ai.vertex.ai.gemini.project-id=${VERTEX_AI_GEMINI_PROJECT_ID}",
-        "spring.ai.vertex.ai.gemini.location=${VERTEX_AI_GEMINI_LOCATION}",
-        "spring.ai.vertex.ai.gemini.transport=rest"})
+    "spring.ai.vertex.ai.gemini.location=${VERTEX_AI_GEMINI_LOCATION}",
+    "spring.ai.vertex.ai.gemini.transport=rest"})
 public class SummarizationTests {
 
     @Autowired
@@ -71,10 +71,10 @@ public class SummarizationTests {
         Message userMessage = userPromptTemplate.createMessage();
 
         ChatResponse response = chatClient.call(new Prompt(List.of(userMessage, systemMessage),
-                        VertexAiGeminiChatOptions.builder()
-                                .withTemperature(0.4f)
-                                .withModel(model)
-                                .build()));
+            VertexAiGeminiChatOptions.builder()
+                .withTemperature(0.4f)
+                .withModel(model)
+                .build()));
 
         System.out.println(response.getResult().getOutput().getContent());
     }
