@@ -1,9 +1,12 @@
 package services;
 
+import com.google.cloud.vertexai.Transport;
+import com.google.cloud.vertexai.VertexAI;
+
 import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
-import org.springframework.ai.autoconfigure.vertexai.gemini.VertexAiGeminiAutoConfiguration;
 import org.springframework.ai.chat.ChatResponse;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.prompt.Prompt;
@@ -14,54 +17,40 @@ import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatClient;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.util.List;
 import java.util.Map;
 
 @SpringBootTest
-@SpringJUnitConfig
 @ActiveProfiles(value = "test")
 @EnabledIfEnvironmentVariable(named = "VERTEX_AI_GEMINI_PROJECT_ID", matches = ".*")
 @EnabledIfEnvironmentVariable(named = "VERTEX_AI_GEMINI_LOCATION", matches = ".*")
-@TestPropertySource(properties = {"spring.ai.vertex.ai.gemini.project-id=${VERTEX_AI_GEMINI_PROJECT_ID}",
-    "spring.ai.vertex.ai.gemini.location=${VERTEX_AI_GEMINI_LOCATION}",
-    "spring.ai.vertex.ai.gemini.transport=rest"})
+@EnabledIfEnvironmentVariable(named = "MODEL", matches = ".*")
 public class SummarizationTests {
 
     @Autowired
     private VertexAiGeminiChatClient chatClient;
 
-    private Resource systemResource = new ClassPathResource("/prompts/system-message.st");
-    private Resource initialResource = new ClassPathResource("/prompts/initial-message.st");
-    private Resource resourceResource = new ClassPathResource("/prompts/refine-message.st");
+    @Value("classpath:/prompts/system-message.st")
+    private Resource systemResource;
+    @Value("classpath:/prompts/initial-message.st")
+    private Resource initialResource;
+    @Value("classpath:/prompts/refine-message.st")
+    private Resource resourceResource;
 
-    @Value("${spring.ai.vertex.ai.gemini.chat.options.model}")
-    String model;
+    @Value("classpath:/books/The_Wasteland-TSEliot-public.txt")
+    private Resource resource;
 
-    private Resource resource = new DefaultResourceLoader().getResource("The_Jungle_Book-Rudyard_Kipling-1894-public.txt");
-
-//    @Configuration(proxyBeanMethods = false)
-//    @ImportAutoConfiguration(VertexAiGeminiAutoConfiguration.class)
-//    static class Config {
-//    }
-
-    @Ignore
     @Test
     public void stuffTest(){
         TextReader textReader = new TextReader(resource);
-        textReader.getCustomMetadata().put("filename", "The_Jungle_Book-Rudyard_Kipling-1894-public.txt");
-
         String bookTest = textReader.get().getFirst().getContent();
-        System.out.println(bookTest);
+        // System.out.println(bookTest);
 
         SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(systemResource);
         Message systemMessage = systemPromptTemplate.createMessage(Map.of("name", "Gemini", "voice", "literary critic"));
@@ -70,12 +59,37 @@ public class SummarizationTests {
         PromptTemplate userPromptTemplate = new PromptTemplate(initialResource,Map.of("content", bookTest));
         Message userMessage = userPromptTemplate.createMessage();
 
+        long start = System.currentTimeMillis();
         ChatResponse response = chatClient.call(new Prompt(List.of(userMessage, systemMessage),
             VertexAiGeminiChatOptions.builder()
                 .withTemperature(0.4f)
-                .withModel(model)
                 .build()));
 
         System.out.println(response.getResult().getOutput().getContent());
+        System.out.print("Summarization took " + (System.currentTimeMillis() - start) + " milliseconds");
+    }
+
+    // @todo uncomment next line to test
+    // @SpringBootConfiguration
+    public static class TestConfiguration {
+
+        @Bean
+        public VertexAI vertexAiApi() {
+            String projectId = System.getenv("VERTEX_AI_GEMINI_PROJECT_ID");
+            String location = System.getenv("VERTEX_AI_GEMINI_LOCATION");
+            return new VertexAI.Builder().setProjectId(projectId)
+                .setLocation(location)
+                .setTransport(Transport.REST)
+                .build();
+        }
+
+        @Bean
+        public VertexAiGeminiChatClient vertexAiEmbedding(VertexAI vertexAi) {
+            String model = System.getenv("MODEL");
+            return new VertexAiGeminiChatClient(vertexAi,
+                VertexAiGeminiChatOptions.builder()
+                    .withModel(model)
+                    .build());
+        }
     }
 }

@@ -59,17 +59,17 @@ public class FirestoreNetworkFailuresTests {
   private static final Network network = Network.newNetwork();
 
   private static Proxy firestoreProxy;
-  
+
   @BeforeEach
   public void setup() throws IOException{
-		firestoreProxy.toxics().getAll().forEach(toxic -> {
-			try {
-				toxic.remove();
-			}
-			catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		});
+    firestoreProxy.toxics().getAll().forEach(toxic -> {
+      try {
+        toxic.remove();
+      }
+      catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    });
 
     FirestoreOptions options = FirestoreOptions.getDefaultInstance().toBuilder()
         .setHost(firestoreEmulator.getEmulatorEndpoint())
@@ -86,12 +86,12 @@ public class FirestoreNetworkFailuresTests {
       new FirestoreEmulatorContainer(
           DockerImageName.parse(
               "gcr.io/google.com/cloudsdktool/google-cloud-cli:emulators"))
-              .withNetwork(network).withNetworkAliases("firestore");
+          .withNetwork(network).withNetworkAliases("firestore");
 
-	@Container
-	private static final ToxiproxyContainer toxiproxy = new ToxiproxyContainer("ghcr.io/shopify/toxiproxy:2.5.0")
-			.withNetwork(network);
-                    
+  @Container
+  private static final ToxiproxyContainer toxiproxy = new ToxiproxyContainer("ghcr.io/shopify/toxiproxy:2.5.0")
+      .withNetwork(network);
+
   @DynamicPropertySource
   static void emulatorProperties(DynamicPropertyRegistry registry) throws IOException{
     firestoreEmulator.start();
@@ -134,80 +134,80 @@ public class FirestoreNetworkFailuresTests {
   void testEventRepositoryStoreQuoteWithLatencyandTimeout() throws ExecutionException, InterruptedException, IOException {
     firestoreProxy.toxics().latency("firestore-latency", ToxicDirection.DOWNSTREAM, 1600).setJitter(100);
 
-		try {
-			assertTimeout(Duration.ofSeconds(1), () -> {
+    try {
+      assertTimeout(Duration.ofSeconds(1), () -> {
         ApiFuture<WriteResult> writeResult = eventService.storeBookInfo("The_Jungle_Book-Rudyard_Kipling-1894-public.txt",
             "The Jungle Book",
             "Rudyard Kipling",
             "The Jungle Book is a collection of stories by the English author Rudyard Kipling. Most of the characters are animals such as Shere Khan the tiger and Baloo the bear, though a principal character",
             "modelResponse");
         Assertions.assertNotNull(writeResult.get().getUpdateTime());
-			});
-		}catch (AssertionFailedError e){
-			System.out.println("Test and encounter exception" + e.getMessage());
-		}
-	}
-
-  @Test
-	@DisplayName("Retry: Test with timeout, remove latency, then retry successfully")
-	void testEventRepositoryStoreQuoteWithTimeoutandRetries() throws IOException, InterruptedException, ExecutionException {
-    Latency latency = firestoreProxy.toxics().latency("firestore-latency", ToxicDirection.DOWNSTREAM, 1600).setJitter(100);
-
-		try {
-			assertTimeout(Duration.ofSeconds(1), () -> {
-        ApiFuture<WriteResult> writeResult = eventService.storeBookInfo("The_Jungle_Book-Rudyard_Kipling-1894-public.txt",
-            "The Jungle Book",
-            "Rudyard Kipling",
-            "The Jungle Book is a collection of stories by the English author Rudyard Kipling. Most of the characters are animals such as Shere Khan the tiger and Baloo the bear, though a principal character",
-            "modelResponse");
-        Assertions.assertNotNull(writeResult.get().getUpdateTime());    
-			});
-		}catch (AssertionFailedError e){
-			System.out.println("Test and encounter exception" + e.getMessage());
-		}
-
-    System.out.println("Remove latency, second request should succeed");
-		try {
-			latency.remove();
-		}catch(IOException e){
-			throw new RuntimeException(e);
-		}
-
-    ApiFuture<WriteResult> writeResult = eventService.storeBookInfo("The_Jungle_Book-Rudyard_Kipling-1894-public.txt",
-        "The Jungle Book",
-        "Rudyard Kipling",
-        "The Jungle Book is a collection of stories by the English author Rudyard Kipling. Most of the characters are animals such as Shere Khan the tiger and Baloo the bear, though a principal character",
-        "modelResponse");
-    Assertions.assertNotNull(writeResult.get().getUpdateTime());    
+      });
+    }catch (AssertionFailedError e){
+      System.out.println("Test and encounter exception" + e.getMessage());
+    }
   }
 
-	@Test
-	void withToxiProxyConnectionDown() throws IOException, InterruptedException, ExecutionException {
-		firestoreProxy.toxics().bandwidth("firestore-cut-connection-downstream", ToxicDirection.DOWNSTREAM, 0);
-		firestoreProxy.toxics().bandwidth("firestore-cut-connection-upstream", ToxicDirection.UPSTREAM, 0);
+  @Test
+  @DisplayName("Retry: Test with timeout, remove latency, then retry successfully")
+  void testEventRepositoryStoreQuoteWithTimeoutandRetries() throws IOException, InterruptedException, ExecutionException {
+    Latency latency = firestoreProxy.toxics().latency("firestore-latency", ToxicDirection.DOWNSTREAM, 1600).setJitter(100);
 
-		try {
-			assertTimeoutPreemptively(Duration.ofSeconds(5), () -> {
+    try {
+      assertTimeout(Duration.ofSeconds(1), () -> {
         ApiFuture<WriteResult> writeResult = eventService.storeBookInfo("The_Jungle_Book-Rudyard_Kipling-1894-public.txt",
             "The Jungle Book",
             "Rudyard Kipling",
             "The Jungle Book is a collection of stories by the English author Rudyard Kipling. Most of the characters are animals such as Shere Khan the tiger and Baloo the bear, though a principal character",
             "modelResponse");
-        Assertions.assertNotNull(writeResult.get().getUpdateTime());    
-          });
-		}catch (AssertionFailedError e){
-			System.out.println("Test and encounter exception" + e.getMessage());
-		}
+        Assertions.assertNotNull(writeResult.get().getUpdateTime());
+      });
+    }catch (AssertionFailedError e){
+      System.out.println("Test and encounter exception" + e.getMessage());
+    }
 
-		firestoreProxy.toxics().get("firestore-cut-connection-downstream").remove();
-		firestoreProxy.toxics().get("firestore-cut-connection-upstream").remove();
+    System.out.println("Remove latency, second request should succeed");
+    try {
+      latency.remove();
+    }catch(IOException e){
+      throw new RuntimeException(e);
+    }
 
     ApiFuture<WriteResult> writeResult = eventService.storeBookInfo("The_Jungle_Book-Rudyard_Kipling-1894-public.txt",
         "The Jungle Book",
         "Rudyard Kipling",
         "The Jungle Book is a collection of stories by the English author Rudyard Kipling. Most of the characters are animals such as Shere Khan the tiger and Baloo the bear, though a principal character",
         "modelResponse");
-    Assertions.assertNotNull(writeResult.get().getUpdateTime());    
+    Assertions.assertNotNull(writeResult.get().getUpdateTime());
+  }
+
+  @Test
+  void withToxiProxyConnectionDown() throws IOException, InterruptedException, ExecutionException {
+    firestoreProxy.toxics().bandwidth("firestore-cut-connection-downstream", ToxicDirection.DOWNSTREAM, 0);
+    firestoreProxy.toxics().bandwidth("firestore-cut-connection-upstream", ToxicDirection.UPSTREAM, 0);
+
+    try {
+      assertTimeoutPreemptively(Duration.ofSeconds(5), () -> {
+        ApiFuture<WriteResult> writeResult = eventService.storeBookInfo("The_Jungle_Book-Rudyard_Kipling-1894-public.txt",
+            "The Jungle Book",
+            "Rudyard Kipling",
+            "The Jungle Book is a collection of stories by the English author Rudyard Kipling. Most of the characters are animals such as Shere Khan the tiger and Baloo the bear, though a principal character",
+            "modelResponse");
+        Assertions.assertNotNull(writeResult.get().getUpdateTime());
+      });
+    }catch (AssertionFailedError e){
+      System.out.println("Test and encounter exception" + e.getMessage());
+    }
+
+    firestoreProxy.toxics().get("firestore-cut-connection-downstream").remove();
+    firestoreProxy.toxics().get("firestore-cut-connection-upstream").remove();
+
+    ApiFuture<WriteResult> writeResult = eventService.storeBookInfo("The_Jungle_Book-Rudyard_Kipling-1894-public.txt",
+        "The Jungle Book",
+        "Rudyard Kipling",
+        "The Jungle Book is a collection of stories by the English author Rudyard Kipling. Most of the characters are animals such as Shere Khan the tiger and Baloo the bear, though a principal character",
+        "modelResponse");
+    Assertions.assertNotNull(writeResult.get().getUpdateTime());
     System.out.println("Restore network connection and test succesfully!");
-	}  
+  }
 }
