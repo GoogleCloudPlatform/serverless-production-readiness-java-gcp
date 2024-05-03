@@ -9,6 +9,7 @@ import com.google.cloud.firestore.FirestoreOptions;
 import com.google.cloud.firestore.WriteResult;
 
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import services.domain.FirestoreService;
 
 import java.util.Collections;
@@ -25,6 +26,7 @@ import org.testcontainers.utility.DockerImageName;
 
 @ActiveProfiles(value = "test")
 @SpringBootTest
+@ContextConfiguration(classes = FirestoreServiceTests.class)
 @Testcontainers
 public class FirestoreServiceTests {
   @BeforeEach
