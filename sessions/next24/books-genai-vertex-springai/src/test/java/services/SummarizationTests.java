@@ -70,7 +70,7 @@ public class SummarizationTests {
     }
 
     // @todo uncomment next line to test
-    // @SpringBootConfiguration
+     @SpringBootConfiguration
     public static class TestConfiguration {
 
         @Bean

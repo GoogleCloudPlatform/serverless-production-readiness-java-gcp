@@ -38,6 +38,7 @@ import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.FirestoreEmulatorContainer;
@@ -53,6 +54,7 @@ import services.domain.FirestoreService;
  */
 @SpringBootTest
 @Testcontainers
+@ContextConfiguration(classes = FirestoreNetworkFailuresTests.class)
 @ActiveProfiles("test")
 public class FirestoreNetworkFailuresTests {
 
