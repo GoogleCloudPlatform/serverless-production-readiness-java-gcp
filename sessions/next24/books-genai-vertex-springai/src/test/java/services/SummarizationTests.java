@@ -3,8 +3,6 @@ package services;
 import com.google.cloud.vertexai.Transport;
 import com.google.cloud.vertexai.VertexAI;
 
-import org.junit.Ignore;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.ai.chat.ChatResponse;
@@ -126,8 +124,6 @@ public class SummarizationTests {
 
         return response.getResult().getOutput().getContent();
     }
-
-    // @todo uncomment next line to test
      @SpringBootConfiguration
     public static class TestConfiguration {
 
