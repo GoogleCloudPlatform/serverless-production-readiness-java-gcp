@@ -1,8 +1,13 @@
 package services;
 
+import org.junit.Ignore;
+import org.junit.Test;
 import org.springframework.ai.autoconfigure.ollama.OllamaAutoConfiguration;
 import org.springframework.ai.autoconfigure.vertexai.gemini.VertexAiGeminiAutoConfiguration;
+import org.springframework.ai.chat.ChatResponse;
+import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatClient;
+import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.client.RestClientAutoConfiguration;
@@ -41,18 +46,18 @@ public class OllamaChatModelTest {
         DockerImageName.parse(imageName).asCompatibleSubstituteFor("ollama/ollama")
     );
 
-    // @Test
-    // @Ignore
-    // void simplexample() {
-    //
-    //     ChatResponse chatResponse = chatClient.call(new Prompt("tell me a joke",
-    //         VertexAiGeminiChatOptions.builder()
-    //             .withTemperature(0.4f)
-    //             .withModel("gemma:7b")
-    //             .build()));
-    //
-    //     System.out.println(chatResponse.getResult().getOutput().getContent());
-    // }
+    @Ignore
+    @Test
+    void simplexample() {
+    
+        ChatResponse chatResponse = chatClient.call(new Prompt("tell me a joke",
+            VertexAiGeminiChatOptions.builder()
+                .withTemperature(0.4f)
+                .withModel("gemma:7b")
+                .build()));
+    
+        System.out.println(chatResponse.getResult().getOutput().getContent());
+    }
 
     @DynamicPropertySource
     static void registerOllamaProperties(DynamicPropertyRegistry registry) {
