@@ -3,8 +3,6 @@ package services;
 import com.google.cloud.vertexai.Transport;
 import com.google.cloud.vertexai.VertexAI;
 
-import org.junit.Ignore;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.ai.chat.ChatResponse;
@@ -41,7 +39,7 @@ public class SummarizationTests {
     @Value("classpath:/prompts/initial-message.st")
     private Resource initialResource;
     @Value("classpath:/prompts/refine-message.st")
-    private Resource resourceResource;
+    private Resource refineResource;
 
     @Value("classpath:/books/The_Wasteland-TSEliot-public.txt")
     private Resource resource;
@@ -69,8 +67,7 @@ public class SummarizationTests {
         System.out.print("Summarization took " + (System.currentTimeMillis() - start) + " milliseconds");
     }
 
-    // @todo uncomment next line to test
-     @SpringBootConfiguration
+    @SpringBootConfiguration
     public static class TestConfiguration {
 
         @Bean

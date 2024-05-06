@@ -49,16 +49,16 @@ public class FunctionCallingApplication {
 			new Transaction("003"), new Status("rejected"));
 
 	// The spring.ai.<model>.chat.options.functions=paymentStatus properties
-	// are used to register the paymentStatus function with the AI Models
-	// @Bean
-	// @Description("Get the status of a payment transaction")
-	// public Function<Transaction, Status> paymentStatus() {
-	// 	return transaction -> DATASET.get(transaction);
-	// }
+	// are used to register the paymentStatus function with the AI Mo
+	@Bean
+		@Description("Get the status of a payment transaction")
+		public Function<Transaction, Status> paymentStatus() {
+			return transaction -> DATASET.get(transaction);
+		}
 
 	@Bean
 	@Description("Get the list statuses of a list of payment transactions")
-	public Function<Transactions, Statuses> paymentStatus() {
+	public Function<Transactions, Statuses> paymentStatuses() {
 		return transactions -> {
 			return new Statuses(transactions.transactions().stream().map(t -> DATASET.get(t)).toList());
 		};

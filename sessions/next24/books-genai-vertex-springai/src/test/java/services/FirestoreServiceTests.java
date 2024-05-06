@@ -1,18 +1,16 @@
 package services;
 
-import static org.junit.Assert.assertNotNull;
-
 import com.google.api.core.ApiFuture;
 import com.google.cloud.NoCredentials;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.FirestoreOptions;
 import com.google.cloud.firestore.WriteResult;
 
+import org.junit.jupiter.api.Assertions;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import services.domain.FirestoreService;
 
-import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,6 +59,6 @@ public class FirestoreServiceTests {
         "Rudyard Kipling",
         "The Jungle Book is a collection of stories by the English author Rudyard Kipling. Most of the characters are animals such as Shere Khan the tiger and Baloo the bear, though a principal character",
         "modelResponse");
-    assertNotNull(writeResult.get().getUpdateTime());
+    Assertions.assertNotNull(writeResult.get().getUpdateTime());
   }
 }
