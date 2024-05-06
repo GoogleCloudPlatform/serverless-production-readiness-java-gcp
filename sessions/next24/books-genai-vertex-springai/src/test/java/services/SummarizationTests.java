@@ -81,7 +81,7 @@ public class SummarizationTests {
         }
 
         @Bean
-        public VertexAiGeminiChatClient vertexAiEmbedding(VertexAI vertexAi) {
+        public VertexAiGeminiChatClient vertexAIChatClient(VertexAI vertexAi) {
             String model = System.getenv("MODEL");
             return new VertexAiGeminiChatClient(vertexAi,
                 VertexAiGeminiChatOptions.builder()

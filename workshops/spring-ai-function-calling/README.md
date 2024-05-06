@@ -83,14 +83,7 @@ VERTEX_AI_GEMINI: Your transaction has been rejected.
 
 
 ## Related [Spring AI](https://docs.spring.io/spring-ai/reference/0.8-SNAPSHOT/) documentation:
-
-* [Spring AI OpenAI](https://docs.spring.io/spring-ai/reference/0.8-SNAPSHOT/api/clients/openai-chat.html) and [Function Calling](https://docs.spring.io/spring-ai/reference/0.8-SNAPSHOT/api/clients/functions/openai-chat-functions.html)
-
-* [Spring AI Azure OpenAI](https://docs.spring.io/spring-ai/reference/0.8-SNAPSHOT/api/clients/azure-openai-chat.html) and [Function Calling](https://docs.spring.io/spring-ai/reference/0.8-SNAPSHOT/api/clients/functions/azure-open-ai-chat-functions.html)
-
 * [Spring AI Google VertexAI Gemini](https://docs.spring.io/spring-ai/reference/0.8-SNAPSHOT/api/clients/vertexai-gemini-chat.html) and [Function Calling](https://docs.spring.io/spring-ai/reference/0.8-SNAPSHOT/api/clients/functions/vertexai-gemini-chat-functions.html)
-
-* [Spring AI Mistral AI](https://docs.spring.io/spring-ai/reference/0.8-SNAPSHOT/api/clients/mistralai-chat.html) and [Function Calling](https://docs.spring.io/spring-ai/reference/0.8-SNAPSHOT/api/clients/functions/mistralai-chat-functions.html)
 
 ## Native (GraalVM) Build
 
