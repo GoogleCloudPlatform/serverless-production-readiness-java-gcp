@@ -1,3 +1,4 @@
+
 package services;
 
 import org.junit.Ignore;
@@ -31,8 +32,8 @@ import static java.time.Duration.ofSeconds;
 @Testcontainers
 @ActiveProfiles(value = "test")
 @TestPropertySource(properties = {"spring.ai.vertex.ai.gemini.project-id=${VERTEX_AI_GEMINI_PROJECT_ID}",
-    "spring.ai.vertex.ai.gemini.location=${VERTEX_AI_GEMINI_LOCATION}",
-    "spring.ai.vertex.ai.gemini.transport=rest"})
+        "spring.ai.vertex.ai.gemini.location=${VERTEX_AI_GEMINI_LOCATION}",
+        "spring.ai.vertex.ai.gemini.transport=rest"})
 public class OllamaChatModelTest {
     static String MODEL_NAME = "gemma:7b";
     static String imageName = "tc-ollama-gemma-7b";
@@ -43,26 +44,26 @@ public class OllamaChatModelTest {
     @ServiceConnection
     @Container
     static OllamaContainer ollama = new OllamaContainer(
-        DockerImageName.parse(imageName).asCompatibleSubstituteFor("ollama/ollama")
+            DockerImageName.parse(imageName).asCompatibleSubstituteFor("ollama/ollama")
     );
 
     @Ignore
     @Test
     void simplexample() {
-    
+
         ChatResponse chatResponse = chatClient.call(new Prompt("tell me a joke",
-            VertexAiGeminiChatOptions.builder()
-                .withTemperature(0.4f)
-                .withModel("gemma:7b")
-                .build()));
-    
+                VertexAiGeminiChatOptions.builder()
+                        .withTemperature(0.4f)
+                        .withModel("gemma:7b")
+                        .build()));
+
         System.out.println(chatResponse.getResult().getOutput().getContent());
     }
 
     @DynamicPropertySource
     static void registerOllamaProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.ai.vertex.ai.gemini.api-endpoint",
-            () -> String.format("http://%s:%d", ollama.getHost(), ollama.getFirstMappedPort()));
+                () -> String.format("http://%s:%d", ollama.getHost(), ollama.getFirstMappedPort()));
     }
 
     @Configuration(proxyBeanMethods = false)
