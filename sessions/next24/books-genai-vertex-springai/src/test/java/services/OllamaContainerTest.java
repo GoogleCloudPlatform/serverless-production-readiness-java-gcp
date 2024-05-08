@@ -3,7 +3,6 @@ package services;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.testcontainers.ollama.OllamaContainer;
-import org.testcontainers.utility.Base58;
 import org.testcontainers.utility.DockerImageName;
 
 import static io.restassured.RestAssured.given;
