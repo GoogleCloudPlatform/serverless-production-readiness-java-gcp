@@ -69,7 +69,6 @@ public class SummarizationTests {
     public void summarizationTest(){
         TextReader textReader = new TextReader(resource);
         String bookTest = textReader.get().getFirst().getContent();
-        // System.out.println(bookTest);
 
         SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(systemResource);
         Message systemMessage = systemPromptTemplate.createMessage(Map.of("name", "Gemini", "voice", "literary critic"));
@@ -149,7 +148,7 @@ public class SummarizationTests {
                 VertexAiGeminiChatOptions.builder()
                         .withTemperature(0.4f)
                         .build()));
-        System.out.print("Summarization took " + (System.currentTimeMillis() - start) + " milliseconds");
+        System.out.println("Summarization took " + (System.currentTimeMillis() - start) + " milliseconds");
         return response.getResult().getOutput().getContent();
     }
 
@@ -167,7 +166,7 @@ public class SummarizationTests {
                 VertexAiGeminiChatOptions.builder()
                         .withTemperature(0.4f)
                         .build()));
-        System.out.print("Summarization took " + (System.currentTimeMillis() - start) + " milliseconds");
+        System.out.println("Summarization took " + (System.currentTimeMillis() - start) + " milliseconds");
         String output = response.getResult().getOutput().getContent();
         System.out.println(output+"\n\n\n\n\n");
         return output;
