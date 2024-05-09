@@ -149,11 +149,12 @@ public class SummarizationTests {
                 VertexAiGeminiChatOptions.builder()
                         .withTemperature(0.4f)
                         .build()));
-
+        System.out.print("Summarization took " + (System.currentTimeMillis() - start) + " milliseconds");
         return response.getResult().getOutput().getContent();
     }
 
     private String processChunk(String context, String chunk, Message systemMessage) {
+        long start = System.currentTimeMillis();
         PromptTemplate userPromptTemplate = null;
         if(context.trim().equals("")) {
             userPromptTemplate = new PromptTemplate(subsummaryOverlapResource, Map.of("content", chunk));
@@ -166,6 +167,7 @@ public class SummarizationTests {
                 VertexAiGeminiChatOptions.builder()
                         .withTemperature(0.4f)
                         .build()));
+        System.out.print("Summarization took " + (System.currentTimeMillis() - start) + " milliseconds");
         String output = response.getResult().getOutput().getContent();
         System.out.println(output+"\n\n\n\n\n");
         return output;
