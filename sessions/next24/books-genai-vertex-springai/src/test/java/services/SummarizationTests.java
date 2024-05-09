@@ -22,9 +22,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -65,78 +63,78 @@ public class SummarizationTests {
     private static final int CHUNK_SIZE = 10000;  // Number of words in each window
     private static final int OVERLAP_SIZE = 2000;
 
-    @Test
-    public void summarizationTest(){
-        TextReader textReader = new TextReader(resource);
-        String bookTest = textReader.get().getFirst().getContent();
-
-        SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(systemResource);
-        Message systemMessage = systemPromptTemplate.createMessage(Map.of("name", "Gemini", "voice", "literary critic"));
-
-
-        PromptTemplate userPromptTemplate = new PromptTemplate(initialResource,Map.of("content", bookTest));
-        Message userMessage = userPromptTemplate.createMessage();
-
-        long start = System.currentTimeMillis();
-        ChatResponse response = chatClient.call(new Prompt(List.of(userMessage, systemMessage),
-            VertexAiGeminiChatOptions.builder()
-                .withTemperature(0.4f)
-                .build()));
-
-        System.out.println(response.getResult().getOutput().getContent());
-        System.out.print("Summarization took " + (System.currentTimeMillis() - start) + " milliseconds");
-    }
-
-    @Test
-    public void summarizationChunkTest(){
-        TextReader textReader = new TextReader(resource);
-        String bookTest = textReader.get().getFirst().getContent();
-
-        SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(systemSummaryResource);
-        Message systemMessage = systemPromptTemplate.createMessage();
-
-        int length = bookTest.length();
-        String subcontext = "";
-        String context = "";
-        for (int i = 0; i < length; i += CHUNK_SIZE) {
-            int end = Math.min(i + CHUNK_SIZE, length);
-            String chunk = bookTest.substring(i, end);
-
-            // Process the chunk here
-            subcontext = processChunk(context, chunk, systemMessage);
-            context += "\n"+subcontext;
-        }
-
-        String output = processSummary(context, systemMessage);
-
-        System.out.println(output);
-    }
-
-
-    @Test
-    public void summarizationOverlappingWindowsTest(){
-        TextReader textReader = new TextReader(resource);
-        String bookTest = textReader.get().getFirst().getContent();
-
-        SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(systemSummaryResource);
-        Message systemMessage = systemPromptTemplate.createMessage();
-
-        int length = bookTest.length();
-        String subcontext = "";
-        String context = "";
-        for (int i = 0; i < length; i += CHUNK_SIZE-OVERLAP_SIZE) {
-            int end = Math.min(i + CHUNK_SIZE, length);
-            String chunk = bookTest.substring(i, end);
-
-            // Process the chunk here
-            subcontext = processChunk("", chunk, systemMessage);
-            context += "\n"+subcontext;
-        }
-
-        String output = processSummary(context, systemMessage);
-
-        System.out.println(output);
-    }
+//    @Test
+//    public void summarizationTest(){
+//        TextReader textReader = new TextReader(resource);
+//        String bookTest = textReader.get().getFirst().getContent();
+//
+//        SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(systemResource);
+//        Message systemMessage = systemPromptTemplate.createMessage(Map.of("name", "Gemini", "voice", "literary critic"));
+//
+//
+//        PromptTemplate userPromptTemplate = new PromptTemplate(initialResource,Map.of("content", bookTest));
+//        Message userMessage = userPromptTemplate.createMessage();
+//
+//        long start = System.currentTimeMillis();
+//        ChatResponse response = chatClient.call(new Prompt(List.of(userMessage, systemMessage),
+//            VertexAiGeminiChatOptions.builder()
+//                .withTemperature(0.4f)
+//                .build()));
+//
+//        System.out.println(response.getResult().getOutput().getContent());
+//        System.out.print("Summarization took " + (System.currentTimeMillis() - start) + " milliseconds");
+//    }
+//
+//    @Test
+//    public void summarizationChunkTest(){
+//        TextReader textReader = new TextReader(resource);
+//        String bookTest = textReader.get().getFirst().getContent();
+//
+//        SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(systemSummaryResource);
+//        Message systemMessage = systemPromptTemplate.createMessage();
+//
+//        int length = bookTest.length();
+//        String subcontext = "";
+//        String context = "";
+//        for (int i = 0; i < length; i += CHUNK_SIZE) {
+//            int end = Math.min(i + CHUNK_SIZE, length);
+//            String chunk = bookTest.substring(i, end);
+//
+//            // Process the chunk here
+//            subcontext = processChunk(context, chunk, systemMessage);
+//            context += "\n"+subcontext;
+//        }
+//
+//        String output = processSummary(context, systemMessage);
+//
+//        System.out.println(output);
+//    }
+//
+//
+//    @Test
+//    public void summarizationOverlappingWindowsTest(){
+//        TextReader textReader = new TextReader(resource);
+//        String bookTest = textReader.get().getFirst().getContent();
+//
+//        SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(systemSummaryResource);
+//        Message systemMessage = systemPromptTemplate.createMessage();
+//
+//        int length = bookTest.length();
+//        String subcontext = "";
+//        String context = "";
+//        for (int i = 0; i < length; i += CHUNK_SIZE-OVERLAP_SIZE) {
+//            int end = Math.min(i + CHUNK_SIZE, length);
+//            String chunk = bookTest.substring(i, end);
+//
+//            // Process the chunk here
+//            subcontext = processChunk("", chunk, systemMessage);
+//            context += "\n"+subcontext;
+//        }
+//
+//        String output = processSummary(context, systemMessage);
+//
+//        System.out.println(output);
+//    }
 
     private String processSummary(String context, Message systemMessage) {
         long start = System.currentTimeMillis();
@@ -150,6 +148,15 @@ public class SummarizationTests {
                         .build()));
         System.out.println("Summarization took " + (System.currentTimeMillis() - start) + " milliseconds");
         return response.getResult().getOutput().getContent();
+    }
+
+
+    private Map<Integer, String> processChunk(Integer index, String context, String chunk, Message systemMessage) {
+
+        Map outputWithIndex = new HashMap<Integer, String>();
+        String output = processChunk(context, chunk, systemMessage);
+        outputWithIndex.put(index, output);
+        return outputWithIndex;
     }
 
     private String processChunk(String context, String chunk, Message systemMessage) {
@@ -180,33 +187,38 @@ public class SummarizationTests {
         Message systemMessage = systemPromptTemplate.createMessage();
 
         int length = bookText.length();
-        List<CompletableFuture<String>> futures = new ArrayList<>();
-
+        List<CompletableFuture<Map<Integer, String>>> futures = new ArrayList<>();
         ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
+        Map<Integer, String> resultMap = new TreeMap<>(); // TreeMap to automatically sort by key
 
-        String previousChunk = "";
         for (int i = 0; i < length; i += (CHUNK_SIZE - OVERLAP_SIZE)) {
+            final int index = i / (CHUNK_SIZE - OVERLAP_SIZE); // Calculate chunk index
             int start = i;
             int end = Math.min(start + CHUNK_SIZE, length);
             String chunk = bookText.substring(start, end);
-            CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> processChunk("", chunk, systemMessage), executor);
+
+            CompletableFuture<Map<Integer, String>> future = CompletableFuture.supplyAsync(() -> processChunk(index, "", chunk, systemMessage), executor);
             futures.add(future);
         }
 
-        CompletableFuture<Void> allFutures = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
-        CompletableFuture<List<String>> allPageContentsFuture = allFutures.thenApply(v -> {
-            return futures.stream()
-                    .map(CompletableFuture::join)
-                    .collect(Collectors.toList());
-        });
+        // Wait for all futures to complete and collect the results in resultMap
+        CompletableFuture<Void> allDone = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                .thenAccept(v -> futures.forEach(f -> f.thenAccept(resultMap::putAll)));
 
-        List<String> results = allPageContentsFuture.get();  // Block and get all results
-        String context = String.join("\n", results);  // Join all results into a single context
+        allDone.get(); // Wait for all processing to complete
 
+        // Build the final context string from the sorted entries in the resultMap
+        StringBuilder contextBuilder = new StringBuilder();
+        for (Map.Entry<Integer, String> entry : resultMap.entrySet()) {
+//            System.out.println("Index " + entry.getKey() + ": " + entry.getValue());
+            contextBuilder.append(entry.getValue()).append("\n");
+        }
+
+        String context = contextBuilder.toString();
         String output = processSummary(context, systemMessage);
         System.out.println(output);
 
-        executor.shutdown();  // Shutdown the executor
+        executor.shutdown(); // Shutdown the executor
     }
 
 
