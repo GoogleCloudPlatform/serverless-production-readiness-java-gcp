@@ -22,8 +22,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 @SpringBootTest
 @ActiveProfiles(value = "test")
@@ -166,6 +171,45 @@ public class SummarizationTests {
 
         return response.getResult().getOutput().getContent();
     }
+
+    @Test
+    public void summarizationChunkParallelTest() throws Exception {
+        TextReader textReader = new TextReader(resource);
+        String bookText = textReader.get().getFirst().getContent();
+        SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(systemSummaryResource);
+        Message systemMessage = systemPromptTemplate.createMessage();
+
+        int length = bookText.length();
+        List<CompletableFuture<String>> futures = new ArrayList<>();
+
+        ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();  // Create a virtual thread per task executor
+
+        for (int i = 0; i < length; i += CHUNK_SIZE) {
+            int start = i;
+            int end = Math.min(start + CHUNK_SIZE, length);
+            String chunk = bookText.substring(start, end);
+
+            CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> processChunk("", chunk, systemMessage), executor);
+            futures.add(future);
+        }
+
+        CompletableFuture<Void> allFutures = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+        CompletableFuture<List<String>> allPageContentsFuture = allFutures.thenApply(v -> {
+            return futures.stream()
+                    .map(CompletableFuture::join)
+                    .collect(Collectors.toList());
+        });
+
+        List<String> results = allPageContentsFuture.get();  // Block and get all results
+        String context = String.join("\n", results);  // Join all results into a single context
+
+        String output = processSummary(context, systemMessage);
+        System.out.println(output);
+
+        executor.shutdown();  // Shutdown the executor
+    }
+
+
      @SpringBootConfiguration
     public static class TestConfiguration {
 
