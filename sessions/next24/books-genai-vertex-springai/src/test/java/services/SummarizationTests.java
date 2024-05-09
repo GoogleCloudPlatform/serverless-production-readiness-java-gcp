@@ -51,6 +51,9 @@ public class SummarizationTests {
 
     @Value("classpath:/prompts/subsummary-message.st")
     private Resource subsummaryResource;
+
+    @Value("classpath:/prompts/subsummary-overlap-message.st")
+    private Resource subsummaryOverlapResource;
     @Value("classpath:/prompts/summary-message.st")
     private Resource summaryResource;
 
@@ -58,7 +61,7 @@ public class SummarizationTests {
     private static final int OVERLAP_SIZE = 5000;
 
     @Test
-    public void stuffTest(){
+    public void summarizationTest(){
         TextReader textReader = new TextReader(resource);
         String bookTest = textReader.get().getFirst().getContent();
         // System.out.println(bookTest);
@@ -81,7 +84,7 @@ public class SummarizationTests {
     }
 
     @Test
-    public void summarizationTest(){
+    public void summarizationChunkTest(){
         TextReader textReader = new TextReader(resource);
         String bookTest = textReader.get().getFirst().getContent();
 
@@ -123,7 +126,7 @@ public class SummarizationTests {
             String chunk = bookTest.substring(i, end);
 
             // Process the chunk here
-            subcontext = processChunk(context, chunk, systemMessage);
+            subcontext = processChunk("", chunk, systemMessage);
             context += "\n"+subcontext;
             System.out.println(subcontext+"\n\n\n\n\n");
         }
@@ -136,7 +139,7 @@ public class SummarizationTests {
     private String processSummary(String context, Message systemMessage) {
         long start = System.currentTimeMillis();
         System.out.println(context+"\n\n\n\n\n");
-        PromptTemplate userPromptTemplate = new PromptTemplate(summaryResource,Map.of("context", context));
+        PromptTemplate userPromptTemplate = new PromptTemplate(summaryResource,Map.of("content", context));
         Message userMessage = userPromptTemplate.createMessage();
 
         ChatResponse response = chatClient.call(new Prompt(List.of(userMessage, systemMessage),
@@ -148,7 +151,12 @@ public class SummarizationTests {
     }
 
     private String processChunk(String context, String chunk, Message systemMessage) {
-        PromptTemplate userPromptTemplate = new PromptTemplate(subsummaryResource,Map.of("context", context,"content", chunk));
+        PromptTemplate userPromptTemplate = null;
+        if(context.trim().equals("")) {
+            userPromptTemplate = new PromptTemplate(subsummaryOverlapResource, Map.of("content", chunk));
+        } else {
+            userPromptTemplate = new PromptTemplate(subsummaryResource, Map.of("context", context, "content", chunk));
+        }
         Message userMessage = userPromptTemplate.createMessage();
 
         ChatResponse response = chatClient.call(new Prompt(List.of(userMessage, systemMessage),
