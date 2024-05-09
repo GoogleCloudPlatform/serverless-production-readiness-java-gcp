@@ -20,7 +20,7 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.testcontainers.ollama.OllamaContainer;
 import org.testcontainers.utility.DockerImageName;
 
-@Disabled 
+@Disabled
 @Testcontainers
 @SpringBootTest
 public class OllamaChatModelTest {
@@ -43,17 +43,17 @@ public class OllamaChatModelTest {
 
     @Test
     public void simplexample() {
-		var request = GenerateRequest
-			.builder("What is the Gemma model?")
-			.withModel(MODEL_NAME)
-			.withStream(false)
-            .withOptions(OllamaOptions.create()
-                    .withTemperature(0.4f))
-			.build();
+        var request = GenerateRequest
+                .builder("What is the Gemma model?")
+                .withModel(MODEL_NAME)
+                .withStream(false)
+                .withOptions(OllamaOptions.create()
+                        .withTemperature(0.4f))
+                .build();
 
-        long start = System.currentTimeMillis();            
-		GenerateResponse chatResponse = ollamaApi.generate(request);
-        
+        long start = System.currentTimeMillis();
+        GenerateResponse chatResponse = ollamaApi.generate(request);
+
         System.out.print("Generation test took " + (System.currentTimeMillis() - start) + " milliseconds");
         System.out.println("Response: " + chatResponse.response());
     }

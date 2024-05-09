@@ -21,8 +21,8 @@ public class OllamaContainerTest {
     @Test
     public void withDefaultConfig() {
         try ( // container {
-            OllamaContainer ollama = new OllamaContainer("ollama/ollama:" + OLLAMA_CONTAINER_VERSION);
-            // }
+              OllamaContainer ollama = new OllamaContainer("ollama/ollama:" + OLLAMA_CONTAINER_VERSION);
+              // }
         ) {
             ollama.start();
 
@@ -53,28 +53,28 @@ public class OllamaContainerTest {
             // }
 
             String modelName = given()
-                .baseUri(ollama.getEndpoint())
-                .get("/api/tags")
-                .jsonPath()
-                .getString("models[0].name");
+                    .baseUri(ollama.getEndpoint())
+                    .get("/api/tags")
+                    .jsonPath()
+                    .getString("models[0].name");
             assertThat(modelName).contains("gemma");
             // commitToImage {
             ollama.commitToImage(newImageName);
             // }
         }
         try (
-            // substitute {
-            OllamaContainer ollama = new OllamaContainer(
-                DockerImageName.parse(newImageName).asCompatibleSubstituteFor("ollama/ollama")
-            )
-            // }
+                // substitute {
+                OllamaContainer ollama = new OllamaContainer(
+                        DockerImageName.parse(newImageName).asCompatibleSubstituteFor("ollama/ollama")
+                )
+                // }
         ) {
             ollama.start();
             String modelName = given()
-                .baseUri(ollama.getEndpoint())
-                .get("/api/tags")
-                .jsonPath()
-                .getString("models[0].name");
+                    .baseUri(ollama.getEndpoint())
+                    .get("/api/tags")
+                    .jsonPath()
+                    .getString("models[0].name");
             assertThat(modelName).contains("gemma");
         }
     }
