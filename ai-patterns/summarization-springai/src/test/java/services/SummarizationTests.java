@@ -25,7 +25,6 @@ import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
-import org.springframework.ai.document.Document;
 import org.springframework.ai.reader.TextReader;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatClient;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatOptions;
@@ -41,7 +40,6 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 @SpringBootTest
 @ActiveProfiles(value = "test")
@@ -79,7 +77,7 @@ public class SummarizationTests {
     private static final int OVERLAP_SIZE = 2000;
 
     @Test
-    public void summarizationTest(){
+    public void summarizationStuffTest(){
         TextReader textReader = new TextReader(resource);
         String bookTest = textReader.get().getFirst().getContent();
 
@@ -101,7 +99,7 @@ public class SummarizationTests {
     }
 
     @Test
-    public void summarizationChunkTest(){
+    public void summarizationChunkRefineTest(){
         TextReader textReader = new TextReader(resource);
         String bookTest = textReader.get().getFirst().getContent();
 
@@ -127,7 +125,7 @@ public class SummarizationTests {
 
 
     @Test
-    public void summarizationOverlappingWindowsTest(){
+    public void summarizationChunkRefineOverlappingWindowsTest(){
         TextReader textReader = new TextReader(resource);
         String bookTest = textReader.get().getFirst().getContent();
 
@@ -151,51 +149,8 @@ public class SummarizationTests {
         System.out.println(output);
     }
 
-    private String processSummary(String context, Message systemMessage) {
-        long start = System.currentTimeMillis();
-        System.out.println(context+"\n\n\n\n\n");
-        PromptTemplate userPromptTemplate = new PromptTemplate(summaryResource,Map.of("content", context));
-        Message userMessage = userPromptTemplate.createMessage();
-
-        ChatResponse response = chatClient.call(new Prompt(List.of(userMessage, systemMessage),
-                VertexAiGeminiChatOptions.builder()
-                        .withTemperature(0.4f)
-                        .build()));
-        System.out.println("Summarization took " + (System.currentTimeMillis() - start) + " milliseconds");
-        return response.getResult().getOutput().getContent();
-    }
-
-
-    private Map<Integer, String> processChunk(Integer index, String context, String chunk, Message systemMessage) {
-
-        Map outputWithIndex = new HashMap<Integer, String>();
-        String output = processChunk(context, chunk, systemMessage);
-        outputWithIndex.put(index, output);
-        return outputWithIndex;
-    }
-
-    private String processChunk(String context, String chunk, Message systemMessage) {
-        long start = System.currentTimeMillis();
-        PromptTemplate userPromptTemplate = null;
-        if(context.trim().equals("")) {
-            userPromptTemplate = new PromptTemplate(subsummaryOverlapResource, Map.of("content", chunk));
-        } else {
-            userPromptTemplate = new PromptTemplate(subsummaryResource, Map.of("context", context, "content", chunk));
-        }
-        Message userMessage = userPromptTemplate.createMessage();
-
-        ChatResponse response = chatClient.call(new Prompt(List.of(userMessage, systemMessage),
-                VertexAiGeminiChatOptions.builder()
-                        .withTemperature(0.4f)
-                        .build()));
-        System.out.println("Summarization took " + (System.currentTimeMillis() - start) + " milliseconds");
-        String output = response.getResult().getOutput().getContent();
-        System.out.println(output+"\n\n\n\n\n");
-        return output;
-    }
-
     @Test
-    public void summarizationChunkParallelTest() throws Exception {
+    public void summarizationChunkMapReduceTest() throws Exception {
         TextReader textReader = new TextReader(resource);
         String bookText = textReader.get().getFirst().getContent();
         SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(systemSummaryResource);
@@ -236,6 +191,48 @@ public class SummarizationTests {
         executor.shutdown(); // Shutdown the executor
     }
 
+    private String processSummary(String context, Message systemMessage) {
+        long start = System.currentTimeMillis();
+        System.out.println(context+"\n\n\n\n\n");
+        PromptTemplate userPromptTemplate = new PromptTemplate(summaryResource,Map.of("content", context));
+        Message userMessage = userPromptTemplate.createMessage();
+
+        ChatResponse response = chatClient.call(new Prompt(List.of(userMessage, systemMessage),
+            VertexAiGeminiChatOptions.builder()
+                .withTemperature(0.4f)
+                .build()));
+        System.out.println("Summarization took " + (System.currentTimeMillis() - start) + " milliseconds");
+        return response.getResult().getOutput().getContent();
+    }
+
+
+    private Map<Integer, String> processChunk(Integer index, String context, String chunk, Message systemMessage) {
+
+        Map outputWithIndex = new HashMap<Integer, String>();
+        String output = processChunk(context, chunk, systemMessage);
+        outputWithIndex.put(index, output);
+        return outputWithIndex;
+    }
+
+    private String processChunk(String context, String chunk, Message systemMessage) {
+        long start = System.currentTimeMillis();
+        PromptTemplate userPromptTemplate = null;
+        if(context.trim().equals("")) {
+            userPromptTemplate = new PromptTemplate(subsummaryOverlapResource, Map.of("content", chunk));
+        } else {
+            userPromptTemplate = new PromptTemplate(subsummaryResource, Map.of("context", context, "content", chunk));
+        }
+        Message userMessage = userPromptTemplate.createMessage();
+
+        ChatResponse response = chatClient.call(new Prompt(List.of(userMessage, systemMessage),
+            VertexAiGeminiChatOptions.builder()
+                .withTemperature(0.4f)
+                .build()));
+        System.out.println("Summarization took " + (System.currentTimeMillis() - start) + " milliseconds");
+        String output = response.getResult().getOutput().getContent();
+        System.out.println(output+"\n\n\n\n\n");
+        return output;
+    }
 
      @SpringBootConfiguration
     public static class TestConfiguration {
