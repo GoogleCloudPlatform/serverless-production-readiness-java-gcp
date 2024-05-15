@@ -60,3 +60,5 @@ build.sh
 build-native.sh
 
 .vscode/
+
+*.jsa
