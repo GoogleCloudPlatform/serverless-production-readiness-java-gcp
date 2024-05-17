@@ -5,14 +5,16 @@ management:
   endpoint:
     health:
       show-details: always
-  endpoints:
-    web:
-      exposure:
-        include: "*"
+  # endpoints:
+  #   web:
+  #     exposure:
+  #       include: "*"
 
-target: local
+target: dev
 
 spring:
+  flyway:
+    enabled: false
 #  config:
 #    activate:
 #      on-profile: cloud-prod
