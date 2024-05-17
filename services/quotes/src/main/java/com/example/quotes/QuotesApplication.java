@@ -17,10 +17,18 @@ package com.example.quotes;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.RuntimeHintsRegistrar;
+import org.springframework.aot.hint.ExecutableMode;
+import org.springframework.context.annotation.ImportRuntimeHints;
+
+import org.flywaydb.core.internal.configuration.PostgreSQLConfigurationExtension;
+
 
 /**
  * Application to manage book quotes
  */
+@ImportRuntimeHints(FlywayReflectionHints.class)
 @SpringBootApplication
 public class QuotesApplication {
 
@@ -35,4 +43,18 @@ public class QuotesApplication {
 
     SpringApplication.run(QuotesApplication.class, args);
   }
+
+  class FlywayReflectionHints implements RuntimeHintsRegistrar {
+    @Override
+    public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+        hints.reflection().registerMethod(
+                PostgreSQLConfigurationExtension.class.getDeclaredMethod("isTransactionalLock"),
+                ExecutableMode.INVOKE
+        );
+        hints.reflection().registerMethod(
+                PostgreSQLConfigurationExtension.class.getDeclaredMethod("getNamespace"),
+                ExecutableMode.INVOKE
+        );        
+    }
+}
 }

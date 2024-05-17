@@ -132,7 +132,7 @@
         <configuration>
           <buildArgs>
             <buildArgs>--enable-url-protocols=http</buildArgs>
-            <buildArgs>-Ob</buildArgs>
+            <buildArgs>--gc=G1 --strict-image-heap</buildArgs>
           </buildArgs>
         </configuration>
       </plugin>
