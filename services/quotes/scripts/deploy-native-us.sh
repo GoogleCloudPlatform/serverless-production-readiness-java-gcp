@@ -4,8 +4,8 @@ echo   "Project id: $PROJECT_ID"
 
 echo "Deploy: 2Gi and 2 CPU - Native GraalVM Java image"
 gcloud run deploy quotes-native \
-     --image europe-docker.pkg.dev/${PROJECT_ID}/quotes-native/quotes-native \
-     --region europe-west1 \
+     --image us-central1-docker.pkg.dev/${PROJECT_ID}/quotes-native/quotes-native \
+     --region us-central1 \
      --memory 2Gi --cpu=2 \
      --execution-environment gen2 \
      --set-env-vars=SPRING_FLYWAY_ENABLED=false \
