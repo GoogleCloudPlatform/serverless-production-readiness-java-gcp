@@ -101,3 +101,5 @@ target-native/
 .DS_Store
 .idea/
 /test-results-native/test/TEST-junit-jupiter.xml
+
+*.iprof

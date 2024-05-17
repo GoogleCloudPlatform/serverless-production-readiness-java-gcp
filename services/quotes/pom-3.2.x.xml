@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.3.0-RC1</version>
+    <version>3.2.5</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
 
@@ -34,7 +34,6 @@
   <properties>
     <java.version>21</java.version>
     <testcontainers.version>1.19.8</testcontainers.version>
-    <spring-framework.version>6.2.0-M2</spring-framework.version>
   </properties>
   <dependencies>
     <dependency>
@@ -44,27 +43,19 @@
     <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-cache</artifactId>
-    </dependency>    
-    <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-validation</artifactId>
-    </dependency>    
+    </dependency>        
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-thymeleaf</artifactId>
     </dependency>
 		<dependency>
-            <groupId>com.github.ben-manes.caffeine</groupId>
-            <artifactId>caffeine</artifactId>
+      <groupId>com.github.ben-manes.caffeine</groupId>
+      <artifactId>caffeine</artifactId>
 		</dependency>    
     <dependency>
       <groupId>org.flywaydb</groupId>
       <artifactId>flyway-core</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.flywaydb</groupId>
-      <artifactId>flyway-database-postgresql</artifactId>
-    </dependency>    
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-actuator</artifactId>
@@ -138,26 +129,6 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>process-aot</id>
-						<goals>
-							<goal>process-aot</goal>
-						</goals>
-					</execution>
-				</executions>        
-				<!-- <configuration>
-          <image>
-              <env>
-                <BP_JVM_CDS_ENABLED>true</BP_JVM_CDS_ENABLED>
-							  <BP_SPRING_AOT_ENABLED>true</BP_SPRING_AOT_ENABLED>
-            </env>
-						<buildpacks>
-							<buildpack>paketobuildpacks/java</buildpack>
-						</buildpacks>
-						<builder>paketobuildpacks/builder-jammy-buildpackless-tiny</builder>
-          </image>
-        </configuration> -->
       </plugin>
       <plugin>
         <groupId>org.graalvm.buildtools</groupId>
