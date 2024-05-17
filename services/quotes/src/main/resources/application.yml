@@ -14,7 +14,7 @@ target: dev
 
 spring:
   flyway:
-    enabled: false
+    enabled: true
 #  config:
 #    activate:
 #      on-profile: cloud-prod

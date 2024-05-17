@@ -2,7 +2,7 @@
 docker rmi quotes-native:latest
 docker rmi us-central1-docker.pkg.dev/spring-io/quotes-native/quotes-native:latest
 
-./mvnw clean spring-boot:build-image -Pnative -DskipTests -Dspring-boot.build-image.imageName=quotes-native -Dmaven.test.skip
+./mvnw -f pom-2.3.x.xml clean spring-boot:build-image -Pnative -DskipTests -Dspring-boot.build-image.imageName=quotes-native -Dmaven.test.skip
 
 # push to us-central1
 docker tag quotes-native:latest us-central1-docker.pkg.dev/spring-io/quotes-native/quotes-native:latest
