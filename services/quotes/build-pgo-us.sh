@@ -9,10 +9,10 @@
 #./mvnw -Pnative -DbuildArgs=--pgo=default.iprof native:compile -f pom-3.2.x.xml -DskipTests
 
 docker rmi quotes-pgo:latest
-docker rmi europe-docker.pkg.dev/spring-io/quotes-native/quotes-pgo:latest
+docker rmi us-central1-docker.pkg.dev/spring-io/quotes-native/quotes-pgo:latest
 
 docker build -t quotes-pgo -f Dockerfile-pgo .
 
-# push to europe
-docker tag quotes-pgo:latest europe-docker.pkg.dev/spring-io/quotes-native/quotes-pgo:latest
-docker push europe-docker.pkg.dev/spring-io/quotes-native/quotes-pgo:latest
+# push to us-central1
+docker tag quotes-pgo:latest us-central1-docker.pkg.dev/spring-io/quotes-native/quotes-pgo:latest
+docker push us-central1-docker.pkg.dev/spring-io/quotes-native/quotes-pgo:latest

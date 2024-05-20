@@ -7,7 +7,7 @@ gcloud run deploy quotes \
      --image us-central1-docker.pkg.dev/${PROJECT_ID}/quotes/quotes \
      --region us-central1 \
      --memory 1Gi --cpu=1 \
-     --execution-environment gen2 \
+     --execution-environment gen1 \
      --set-env-vars=SPRING_FLYWAY_ENABLED=true \
      --no-cpu-boost \
      --allow-unauthenticated
@@ -17,7 +17,7 @@ gcloud run deploy quotes-1-1 \
      --image us-central1-docker.pkg.dev/${PROJECT_ID}/quotes/quotes \
      --region us-central1 \
      --memory 1Gi --cpu=1 \
-     --execution-environment gen2 \
+     --execution-environment gen1 \
      --set-env-vars=SPRING_FLYWAY_ENABLED=false \
      --no-cpu-boost \
      --allow-unauthenticated
@@ -27,7 +27,7 @@ gcloud run deploy quotes-2-1 \
      --image us-central1-docker.pkg.dev/${PROJECT_ID}/quotes/quotes \
      --region us-central1 \
      --memory 2Gi --cpu=1 \
-     --execution-environment gen2 \
+     --execution-environment gen1 \
      --set-env-vars=SPRING_FLYWAY_ENABLED=false \
      --no-cpu-boost \
      --allow-unauthenticated
@@ -37,7 +37,7 @@ gcloud run deploy quotes-2-2 \
      --image us-central1-docker.pkg.dev/${PROJECT_ID}/quotes/quotes \
      --region us-central1 \
      --memory 2Gi --cpu=2 \
-     --execution-environment gen2 \
+     --execution-environment gen1 \
      --set-env-vars=SPRING_FLYWAY_ENABLED=false \
      --no-cpu-boost \
      --allow-unauthenticated     
@@ -47,7 +47,7 @@ gcloud run deploy quotes-2-2-tools \
      --image us-central1-docker.pkg.dev/${PROJECT_ID}/quotes/quotes \
      --region us-central1 \
      --memory 2Gi --cpu=2 \
-     --execution-environment gen2 \
+     --execution-environment gen1 \
      --set-env-vars=SPRING_FLYWAY_ENABLED=false \
      --set-env-vars=JAVA_TOOL_OPTIONS='-XX:+UseG1GC -XX:MaxRAMPercentage=80 -XX:ActiveProcessorCount=2 -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -Xss256k' \
      --no-cpu-boost \
@@ -59,7 +59,7 @@ gcloud run deploy quotes-2-1-boost \
      --region us-central1 \
      --memory 2Gi --cpu=1 \
      --cpu-boost \
-     --execution-environment gen2 \
+     --execution-environment gen1 \
      --set-env-vars=SPRING_FLYWAY_ENABLED=false \
      --allow-unauthenticated          
 
@@ -68,7 +68,7 @@ gcloud run deploy quotes-4-4 \
      --image us-central1-docker.pkg.dev/${PROJECT_ID}/quotes/quotes \
      --region us-central1 \
      --memory 4Gi --cpu=4 \
-     --execution-environment gen2 \
+     --execution-environment gen1 \
      --set-env-vars=SPRING_FLYWAY_ENABLED=false \
      --no-cpu-boost \
      --allow-unauthenticated     
