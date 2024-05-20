@@ -3,7 +3,7 @@ docker rmi quotes-cds:latest
 docker rmi europe-docker.pkg.dev/spring-io/quotes/quotes-cds:latest
 
 ./mvnw clean package -DskipTests
-docker build -t quotes-cds .
+docker build -t quotes-cds -f Dockerfile .
 
 # push to europe
 docker tag quotes-cds:latest europe-docker.pkg.dev/spring-io/quotes/quotes-cds:latest
