@@ -45,7 +45,9 @@
 | test-modern.sh        |   Europe   | Test Modern image|
 | test-modern-us.sh        |   US   | Test Modern image|
 | startlogs.sh        |   Europe   | Start logs|
+| startlogs-modern.sh        |   Europe   | Start logs - CDS, Native, PGO, Project Leyden|
 | startlogs-us.sh        |   US   | Start logs|
+| startlogs-us-modern.sh        |   Europe   | Start logs - CDS, Native, PGO, Project Leyden|
 
 | Local Testing              | Region | Scope |
 | :---------------- | :------ | :---- |
