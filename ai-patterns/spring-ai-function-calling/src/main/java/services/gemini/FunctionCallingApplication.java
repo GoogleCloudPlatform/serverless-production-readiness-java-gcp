@@ -72,7 +72,6 @@ public class FunctionCallingApplication {
 
 			// String prompt = "What is the status of my payment transaction 003?";
 			String prompt = """
-   							Use multi-turn chat to get the status of a list of payment transactions.
    							What is the status of my payment transactions 001, 002 and 003?
    							Please indicate the status for each transaction and return the results in JSON format
    							Please indicate how many function calls have been made
