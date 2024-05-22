@@ -19,16 +19,25 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Implments the Quote repository access
  */
 public interface QuoteRepository extends JpaRepository<Quote,Long> {
 
+    @Transactional(readOnly = true)
+    @Cacheable(value = "quoteCache", key = "randomquote")
     @Query( nativeQuery = true, value =
             "SELECT id,quote,author,book FROM quotes ORDER BY RANDOM() LIMIT 1")
     Quote findRandomQuote();
 
+    @Transactional(readOnly = true)
+    @Cacheable(value = "quoteCache", key = "id")
     Optional<Quote> findById(Long id);
+
+    @Transactional(readOnly = true)
+    @Cacheable(value = "quoteCache", key = "author")
     List<Quote> findByAuthor(String author);
 }

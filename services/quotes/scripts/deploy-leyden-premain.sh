@@ -1,10 +1,10 @@
 # deploy JIT with AppCDS to Cloud Run
 export PROJECT_ID=$(gcloud config list --format 'value(core.project)')
 echo   "Project id: $PROJECT_ID"
-echo "Deploy: 2Gi and 2 CPU with AppCDS enabled"
+echo "Deploy: 2Gi and 2 CPU with Project Leyden Premain"
 
-gcloud run deploy quotes-cds \
-     --image europe-docker.pkg.dev/${PROJECT_ID}/quotes/quotes-cds \
+gcloud run deploy quotes-leyden-premain \
+     --image europe-docker.pkg.dev/${PROJECT_ID}/quotes/quotes-leyden-premain \
      --region europe-west1 \
      --memory 2Gi --cpu=2 \
      --execution-environment gen2 \

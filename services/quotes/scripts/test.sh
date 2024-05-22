@@ -7,20 +7,16 @@ echo $services
 
 # Loop through each service
 for service in $services; do
+      if ! [[ "$service" =~ "pgo" || "$service" =~ "native" || "$service" =~ "cds" || "$service" =~ "leyden"]]; then
+        echo
+      echo "Service: $service"
 
-  echo
-  echo "Service: $service"
+      # Get the user time for the service
+      echo "Start time:"
+      date +"%T.%3N"
+
+      curl $service/start
+  fi
   # curl $service/start
-
-  # Get the user time for the service
-  echo "Start time:"
-  date +"%T.%3N"
-  
-  #   user_time=$( { time curl $service/start ; } 2>&1 | grep user | cut -f2)
-  # user_time=$( time curl $service/start )
-
-  # Print the user time
-  #   echo "User time: $user_time"
-  curl $service/start
   echo
 done
