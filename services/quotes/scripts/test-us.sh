@@ -2,12 +2,12 @@
 
 # Get the list of Cloud Run services starting with "quotes"
 services=$(gcloud run services list | grep us-central1 | awk '{print $4}')
-echo "Services"
+echo "All Services"
 echo $services
 
 # Loop through each service
 for service in $services; do
-      if ! [[ "$service" =~ "pgo" || "$service" =~ "native" || "$service" =~ "cds" || "$service" =~ "leyden"]]; then
+      if ! [[ "$service" =~ "pgo" || "$service" =~ "native" || "$service" =~ "cds" || "$service" =~ "leyden" ]]; then
         echo
       echo "Service: $service"
 

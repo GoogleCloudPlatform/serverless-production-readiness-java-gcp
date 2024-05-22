@@ -2,7 +2,7 @@
 
 # Get the list of Cloud Run services starting with "quotes"
 services=$(gcloud run services list | grep europe | awk '{print $4}')
-echo "Services"
+echo "All Services"
 echo $services
 
 # Loop through each service
