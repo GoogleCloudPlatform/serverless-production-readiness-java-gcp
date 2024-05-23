@@ -3,10 +3,10 @@
 # how to build the PGO image
 # (1) 
 # instrument
-# ./mvnw -Pnative -DbuildArgs=--pgo-instrument native:compile -f pom-3.2.x.xml 
-# (2)./targ
+# ./mvnw -Pnative -DbuildArgs=--pgo-instrument native:compile
+# (2)./target/quotes...
 # build image
-#./mvnw -Pnative -DbuildArgs=--pgo=default.iprof native:compile -f pom-3.2.x.xml -DskipTests
+#./mvnw -Pnative -DbuildArgs=--pgo=default.iprof native:compile  -DskipTests
 
 docker rmi quotes-pgo:latest
 docker rmi europe-docker.pkg.dev/spring-io/quotes-native/quotes-pgo:latest
