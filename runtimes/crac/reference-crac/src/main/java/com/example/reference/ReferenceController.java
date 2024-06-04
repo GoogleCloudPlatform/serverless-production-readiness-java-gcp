@@ -15,17 +15,19 @@
  */
 package com.example.reference;
 
- import com.example.reference.data.Metadata;
- import com.google.cloud.MetadataConfig;
- import java.text.SimpleDateFormat;
- import java.util.concurrent.TimeUnit;
- import org.slf4j.Logger;
- import org.slf4j.LoggerFactory;
- import org.springframework.beans.factory.annotation.Value;
- import org.springframework.http.HttpStatus;
- import org.springframework.http.ResponseEntity;
- import org.springframework.web.bind.annotation.GetMapping;
- import org.springframework.web.bind.annotation.RestController;
+import com.example.reference.data.Metadata;
+import com.google.cloud.MetadataConfig;
+import java.text.SimpleDateFormat;
+import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 @RestController
 public class ReferenceController {
@@ -38,7 +40,7 @@ public class ReferenceController {
   @GetMapping("start")
   String start() {
     logger.info("ReferenceApplication: ReferenceController - Executed start endpoint request " + new SimpleDateFormat("HH:mm:ss.SSS").format(new java.util.Date(System.currentTimeMillis())));
-    return "ReferenceController started";
+    return new SimpleDateFormat("HH:mm:ss.SSS").format(new Date());
   }
 
   @GetMapping("/metadata") 

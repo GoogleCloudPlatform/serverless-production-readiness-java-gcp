@@ -34,6 +34,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Controller to handle requests for Quote CRUD operations
@@ -59,7 +61,7 @@ public class QuoteController {
     @GetMapping("start")
     String start() {
         logger.info("QuotesApplication: QuotesController - Executed start endpoint request " + new SimpleDateFormat("HH:mm:ss.SSS").format(new java.util.Date(System.currentTimeMillis())));
-        return "QuoteController started";
+        return new SimpleDateFormat("HH:mm:ss.SSS").format(new Date());
     }
 
     @GetMapping("/random-quote")
