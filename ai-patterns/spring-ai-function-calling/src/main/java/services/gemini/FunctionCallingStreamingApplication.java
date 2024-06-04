@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 package services.gemini;
+
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatModel;
@@ -30,7 +30,7 @@ import org.springframework.context.annotation.Description;
 import reactor.core.publisher.Flux;
 
 @SpringBootApplication
-public class FunctionCallingApplication {
+public class FunctionCallingStreamingApplication {
 
 	record Transaction(String id) {
 	}
@@ -52,20 +52,20 @@ public class FunctionCallingApplication {
 	// are used to register the paymentStatus function with the AI Mo
 	@Bean
 		@Description("Get the status of a payment transaction")
-		public Function<Transaction, Status> paymentStatus() {
+		public Function<Transaction, Status> paymentStreamingStatus() {
 			return transaction -> DATASET.get(transaction);
 		}
 
 	@Bean
 	@Description("Get the list statuses of a list of payment transactions")
-	public Function<Transactions, Statuses> paymentStatuses() {
+	public Function<Transactions, Statuses> paymentStreamingStatuses() {
 		return transactions -> {
 			return new Statuses(transactions.transactions().stream().map(t -> DATASET.get(t)).toList());
 		};
 	}
 
 	@Bean
-	ApplicationRunner applicationRunner(
+	ApplicationRunner applicationStreamingRunner(
 			VertexAiGeminiChatModel vertexAiGemini) {
 
 		return args -> {
@@ -74,15 +74,15 @@ public class FunctionCallingApplication {
 			String prompt = """
    							What is the status of my payment transactions 001, 002 and 003?
    							Please indicate the status for each transaction and return the results in JSON format
-   							Please indicate how many function calls have been made to the AI Model to resolve this query 
+   							Please indicate how many function calls have been made
    							""";
 
 			long start = System.currentTimeMillis();
-			System.out.println("VERTEX_AI_GEMINI: " + vertexAiGemini.call(prompt));
-			System.out.println("VertexAI Gemini call took " + (System.currentTimeMillis() - start) + " ms");
+			// System.out.println("VERTEX_AI_GEMINI: " + vertexAiGemini.call(prompt));
+			// System.out.println("VertexAI Gemini call took " + (System.currentTimeMillis() - start) + " ms");
 
 			// Currently, SpringAI supports streaming Function calls only for VertexAI Gemini.
-			start = System.currentTimeMillis();
+			// start = System.currentTimeMillis();
 			Flux<ChatResponse> geminiStream = vertexAiGemini.stream(new Prompt(prompt));
 			geminiStream.collectList().block().stream().findFirst().ifPresent(resp -> {
 				System.out.println("VERTEX_AI_GEMINI (Streaming): " + resp.getResult().getOutput().getContent());
@@ -92,7 +92,7 @@ public class FunctionCallingApplication {
 	}
 
 	public static void main(String[] args) {
-		new SpringApplicationBuilder(FunctionCallingApplication.class)
+		new SpringApplicationBuilder(FunctionCallingStreamingApplication.class)
 				.web(WebApplicationType.NONE)
 				.run(args);
 	}
