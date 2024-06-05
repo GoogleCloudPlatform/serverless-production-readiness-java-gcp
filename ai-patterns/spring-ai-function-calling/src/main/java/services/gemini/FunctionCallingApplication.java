@@ -21,6 +21,7 @@ import java.util.function.Function;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatModel;
+import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatOptions;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -74,20 +75,29 @@ public class FunctionCallingApplication {
 			String prompt = """
    							What is the status of my payment transactions 001, 002 and 003?
    							Please indicate the status for each transaction and return the results in JSON format
-   							Please indicate how many function calls have been made to the AI Model to resolve this query 
    							""";
 
 			long start = System.currentTimeMillis();
-			System.out.println("VERTEX_AI_GEMINI: " + vertexAiGemini.call(prompt));
+			System.out.println("VERTEX_AI_GEMINI: " + vertexAiGemini.call(
+							new Prompt(prompt,
+									VertexAiGeminiChatOptions.builder()
+											.withTemperature(0.2f).build())
+					).getResult().getOutput().getContent());
+
 			System.out.println("VertexAI Gemini call took " + (System.currentTimeMillis() - start) + " ms");
 
 			// Currently, SpringAI supports streaming Function calls only for VertexAI Gemini.
-			start = System.currentTimeMillis();
-			Flux<ChatResponse> geminiStream = vertexAiGemini.stream(new Prompt(prompt));
-			geminiStream.collectList().block().stream().findFirst().ifPresent(resp -> {
-				System.out.println("VERTEX_AI_GEMINI (Streaming): " + resp.getResult().getOutput().getContent());
-			});
-			System.out.println("VertexAI Gemini streaming call took " + (System.currentTimeMillis() - start) + " ms");
+			// start = System.currentTimeMillis();
+			// Flux<ChatResponse> geminiStream = vertexAiGemini.stream(
+			// 		new Prompt(prompt,
+			// 				VertexAiGeminiChatOptions.builder()
+			// 						.withTemperature(0.0f).build())
+			// );
+			//
+			// geminiStream.collectList().block().stream().findFirst().ifPresent(resp -> {
+			// 	System.out.println("VERTEX_AI_GEMINI (Streaming): " + resp.getResult().getOutput().getContent());
+			// });
+			// System.out.println("VertexAI Gemini streaming call took " + (System.currentTimeMillis() - start) + " ms");
 		};
 	}
 
