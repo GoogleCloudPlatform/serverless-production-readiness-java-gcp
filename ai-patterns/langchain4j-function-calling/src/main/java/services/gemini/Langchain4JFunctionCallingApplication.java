@@ -71,7 +71,8 @@ public class Langchain4JFunctionCallingApplication {
 	ApplicationRunner applicationRunner() {
 		return args -> {
 			String userMessage = """
-   							What is the status of my payment transactions 001, 002?
+   							Please use multi-turn conversation to answer the following questions:
+   							What is the status of my payment transactions 002, 001, 003?
    							Please indicate the status for each transaction and return the results in JSON format.
    							""";
 
@@ -88,7 +89,7 @@ public class Langchain4JFunctionCallingApplication {
 
 			FunctionCallingAssistant assistant = AiServices.builder(FunctionCallingAssistant.class)
 					.chatLanguageModel(model)
-					.chatMemory(MessageWindowChatMemory.withMaxMessages(10))
+					// .chatMemory(MessageWindowChatMemory.withMaxMessages(10))
 					.tools(service)
 					.build();
 

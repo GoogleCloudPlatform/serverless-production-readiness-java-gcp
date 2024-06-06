@@ -39,11 +39,11 @@ public class FunctionCallingApplication {
 	record Status(String name) {
 	}
 
-	record Transactions(List<Transaction> transactions) {
-	}
-
-	record Statuses(List<Status> statuses) {
-	}
+	// record Transactions(List<Transaction> transactions) {
+	// }
+	//
+	// record Statuses(List<Status> statuses) {
+	// }
 	private static final Map<Transaction, Status> DATASET = Map.of(
 			new Transaction("001"), new Status("pending"),
 			new Transaction("002"), new Status("approved"),
@@ -57,13 +57,13 @@ public class FunctionCallingApplication {
 			return transaction -> DATASET.get(transaction);
 		}
 
-	@Bean
-	@Description("Get the list statuses of a list of payment transactions")
-	public Function<Transactions, Statuses> paymentStatuses() {
-		return transactions -> {
-			return new Statuses(transactions.transactions().stream().map(t -> DATASET.get(t)).toList());
-		};
-	}
+	// @Bean
+	// @Description("Get the list statuses of a list of payment transactions")
+	// public Function<Transactions, Statuses> paymentStatuses() {
+	// 	return transactions -> {
+	// 		return new Statuses(transactions.transactions().stream().map(t -> DATASET.get(t)).toList());
+	// 	};
+	// }
 
 	@Bean
 	ApplicationRunner applicationRunner(
@@ -72,8 +72,10 @@ public class FunctionCallingApplication {
 		return args -> {
 
 			// String prompt = "What is the status of my payment transaction 003?";
+			// Use multi-turn invocation to answer the following question:
 			String prompt = """
-   							What is the status of my payment transactions 001, 002 and 003?
+   							Please use multi-turn invocation to answer the following question:
+   							What is the status of my payment transactions 002, 001 and 003?
    							Please indicate the status for each transaction and return the results in JSON format
    							""";
 
