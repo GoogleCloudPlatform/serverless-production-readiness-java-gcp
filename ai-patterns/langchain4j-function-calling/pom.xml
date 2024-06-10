@@ -22,6 +22,15 @@
 	</properties>
 
 	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.google.cloud</groupId>
+				<artifactId>libraries-bom</artifactId>
+				<scope>import</scope>
+				<type>pom</type>
+				<version>26.39.0</version>
+			</dependency>
+		</dependencies>
 	</dependencyManagement>
 
 	<dependencies>
@@ -33,6 +42,10 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.cloud</groupId>
+			<artifactId>google-cloud-aiplatform</artifactId>
 		</dependency>
 
 		<!-- langchain4j dependencies -->
@@ -51,6 +64,11 @@
 			<artifactId>langchain4j</artifactId>
 			<version>${langchain4j.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>dev.langchain4j</groupId>
+			<artifactId>langchain4j-core</artifactId>
+			<version>${langchain4j.version}</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -58,6 +76,19 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+
+			<plugin>
+				<groupId>org.graalvm.buildtools</groupId>
+				<artifactId>native-maven-plugin</artifactId>
+				<configuration>
+					<buildArgs>
+						<buildArgs>--enable-url-protocols=http</buildArgs>
+						<buildArgs>--strict-image-heap -march=native -Ob</buildArgs>
+						<!-- enable for Linux builds -->
+						<!--						<buildArgs>&#45;&#45;gc=G1 &#45;&#45;strict-image-heap -march=native -O3</buildArgs>-->
+					</buildArgs>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

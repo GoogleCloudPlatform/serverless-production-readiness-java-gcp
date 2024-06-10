@@ -1,7 +1,6 @@
 # Spring AI Function Calling
 
 Note: This class has been originally started by Christian Tzolov
-
 Repo: github.com:tzolov/spring-ai-function-calling-portability
 
 Demonstrate `Function Calling` code using Gemini with Spring AI
@@ -56,8 +55,10 @@ and configure them in `application.properties`:
 # Google VertexAI Gemini
 spring.ai.vertex.ai.gemini.project-id=${VERTEX_AI_GEMINI_PROJECT_ID}
 spring.ai.vertex.ai.gemini.location=${VERTEX_AI_GEMINI_LOCATION}
-spring.ai.vertex.ai.gemini.chat.options.model=gemini-pro
-spring.ai.vertex.ai.gemini.chat.options..functions=paymentStatus
+spring.ai.vertex.ai.gemini.chat.options.model=gemini-1.5-flash-001
+spring.ai.vertex.ai.gemini.transport=grpc
+spring.ai.vertex.ai.gemini.chat.options.functions=paymentStatus
+spring.threads.virtual.enabled=true
 ```
 
 Now you can test them with the same prompt:
@@ -80,8 +81,6 @@ The output would look something like:
 VERTEX_AI_GEMINI: Your transaction has been rejected.
 ```
 
-
-
 ## Related [Spring AI](https://docs.spring.io/spring-ai/reference/0.8-SNAPSHOT/) documentation:
 * [Spring AI Google VertexAI Gemini](https://docs.spring.io/spring-ai/reference/0.8-SNAPSHOT/api/clients/vertexai-gemini-chat.html) and [Function Calling](https://docs.spring.io/spring-ai/reference/0.8-SNAPSHOT/api/clients/functions/vertexai-gemini-chat-functions.html)
 
@@ -98,7 +97,7 @@ export JAVA_HOME=/Library/Java/JavaVirtualMachines/graalvm-jdk-21.0.2+13.1/Conte
 Then build:
 
 ```
-./mvnw clean install -Pnative native:compile
+./mvnw clean package -Pnative native:compile
 ```
 
 Run the native executable:

@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.2.5</version>
+		<version>3.3.0</version>
 		<relativePath/>
 		<!-- lookup parent from repository -->
 	</parent>
@@ -55,6 +55,20 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+
+			<plugin>
+				<groupId>org.graalvm.buildtools</groupId>
+				<artifactId>native-maven-plugin</artifactId>
+				<configuration>
+					<buildArgs>
+						<buildArgs>--enable-url-protocols=http</buildArgs>
+						<buildArgs>--strict-image-heap -march=native -O3</buildArgs>
+						<!-- enable for Linux builds -->
+						<!--						<buildArgs>&#45;&#45;gc=G1 &#45;&#45;strict-image-heap -march=native -O3</buildArgs>-->
+					</buildArgs>
+				</configuration>
+			</plugin>
+
 		</plugins>
 	</build>
 

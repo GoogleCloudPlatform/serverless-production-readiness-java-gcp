@@ -89,17 +89,17 @@ public class FunctionCallingApplication {
 			System.out.println("VertexAI Gemini call took " + (System.currentTimeMillis() - start) + " ms");
 
 			// Currently, SpringAI supports streaming Function calls only for VertexAI Gemini.
-			// start = System.currentTimeMillis();
-			// Flux<ChatResponse> geminiStream = vertexAiGemini.stream(
-			// 		new Prompt(prompt,
-			// 				VertexAiGeminiChatOptions.builder()
-			// 						.withTemperature(0.0f).build())
-			// );
-			//
-			// geminiStream.collectList().block().stream().findFirst().ifPresent(resp -> {
-			// 	System.out.println("VERTEX_AI_GEMINI (Streaming): " + resp.getResult().getOutput().getContent());
-			// });
-			// System.out.println("VertexAI Gemini streaming call took " + (System.currentTimeMillis() - start) + " ms");
+			start = System.currentTimeMillis();
+			Flux<ChatResponse> geminiStream = vertexAiGemini.stream(
+					new Prompt(prompt,
+							VertexAiGeminiChatOptions.builder()
+									.withTemperature(0.0f).build())
+			);
+
+			geminiStream.collectList().block().stream().findFirst().ifPresent(resp -> {
+				System.out.println("VERTEX_AI_GEMINI (Streaming): " + resp.getResult().getOutput().getContent());
+			});
+			System.out.println("VertexAI Gemini streaming call took " + (System.currentTimeMillis() - start) + " ms");
 		};
 	}
 

@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 package services.gemini;
+import com.google.cloud.vertexai.Transport;
+import com.google.cloud.vertexai.VertexAI;
+import com.google.cloud.vertexai.api.GenerationConfig;
+import com.google.cloud.vertexai.generativeai.GenerativeModel;
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
@@ -21,19 +25,23 @@ import dev.langchain4j.model.vertexai.VertexAiGeminiChatModel;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.SystemMessage;
-import dev.langchain4j.service.spring.AiService;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.aot.hint.MemberCategory;
+import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.context.annotation.ImportRuntimeHints;
+
 
 @SpringBootApplication
+@ImportRuntimeHints(Langchain4JFunctionCallingApplication.FunctionCallingRuntimeHints.class)
+// @Configuration(proxyBeanMethods=false)
 public class Langchain4JFunctionCallingApplication {
 	@Value("${langchain4j.gemini.project-id}")
 	private String project;
@@ -45,9 +53,7 @@ public class Langchain4JFunctionCallingApplication {
 	private String chatModel;
 
 	static class FunctionCallingService {
-		private static final Logger logger = LoggerFactory.getLogger(FunctionCallingService.class);
 		record Transaction(String id) { }
-
 		record Status(String name) { }
 
 		private static final Map<Transaction, Status> DATASET = Map.of(
@@ -57,12 +63,13 @@ public class Langchain4JFunctionCallingApplication {
 
 		@Tool("Get the status of a payment transaction")
 		public Status paymentStatus(@P("The id of the payment transaction") String transaction) {
+			System.out.println();
 			return DATASET.get(new Transaction(transaction));
 		}
 	}
 
-	@AiService
-	interface FunctionCallingAssistant {
+	// @AiService
+	interface Assistant {
 		@SystemMessage("You are a helpful assistant that can answer questions about payment transactions.")
 		String chat(String userMessage);
 	}
@@ -76,28 +83,69 @@ public class Langchain4JFunctionCallingApplication {
    							Please indicate the status for each transaction and return the results in JSON format.
    							""";
 
-			long start = System.currentTimeMillis();
-			ChatLanguageModel model = VertexAiGeminiChatModel.builder()
-					.project(project)
-					.location(location)
-					.modelName(chatModel)
-					.temperature(0.2f)
-					.maxOutputTokens(1000)
-					.build();
+			// test with VertexAI Gemini using REST API
+			functionCallGeminiWithREST(userMessage);
 
-			FunctionCallingService service = new FunctionCallingService();
-
-			FunctionCallingAssistant assistant = AiServices.builder(FunctionCallingAssistant.class)
-					.chatLanguageModel(model)
-					// .chatMemory(MessageWindowChatMemory.withMaxMessages(10))
-					.tools(service)
-					.build();
-
-			System.out.println(assistant.chat(userMessage));
-			System.out.println("VertexAI Gemini call took " + (System.currentTimeMillis() - start) + " ms");
+			// test with VertexAI Gemini using gRPC
+			functionCallGeminiWithGRPC(userMessage);
 		};
 	}
 
+	private void functionCallGeminiWithGRPC(String userMessage) {
+		long start = System.currentTimeMillis();
+
+		ChatLanguageModel model = VertexAiGeminiChatModel.builder()
+				.project(project)
+				.location(location)
+				.modelName(chatModel)
+				.temperature(0.2f)
+				.maxOutputTokens(1000)
+				.build();
+
+		FunctionCallingService service = new FunctionCallingService();
+
+		Assistant assistant = AiServices.builder(Assistant.class)
+				.chatLanguageModel(model)
+				.chatMemory(MessageWindowChatMemory.withMaxMessages(10))
+				.tools(service)
+				.build();
+
+		System.out.println("User message: " + userMessage);
+		System.out.println(assistant.chat(userMessage));
+		System.out.println("VertexAI Gemini call using GRPC took " + (System.currentTimeMillis() - start) + " ms");
+	}
+
+	private void  functionCallGeminiWithREST(String userMessage) {
+			long start = System.currentTimeMillis();
+
+			VertexAI vertexAi = new VertexAI.Builder().setProjectId(project).setLocation(location).setTransport(Transport.REST).build();
+			GenerativeModel generativeModel = new GenerativeModel(chatModel, vertexAi);
+			GenerationConfig generationConfig = GenerationConfig.newBuilder().setTemperature(0.2f).setMaxOutputTokens(1000).build();
+
+			ChatLanguageModel model = new VertexAiGeminiChatModel(generativeModel, generationConfig, 1);
+
+			FunctionCallingService service = new FunctionCallingService();
+
+			Assistant assistant = AiServices.builder(Assistant.class)
+					.chatLanguageModel(model)
+					.chatMemory(MessageWindowChatMemory.withMaxMessages(10))
+					.tools(service)
+					.build();
+
+			System.out.println("User message: " + userMessage);
+			System.out.println(assistant.chat(userMessage));
+			System.out.println("VertexAI Gemini call using gRPC took " + (System.currentTimeMillis() - start) + " ms");
+	}
+
+	public static class FunctionCallingRuntimeHints implements RuntimeHintsRegistrar {
+		@Override
+		public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+			// Register method for reflection
+			var mcs = MemberCategory.values();
+			hints.reflection().registerType(Langchain4JFunctionCallingApplication.Assistant.class, mcs);
+			hints.proxies().registerJdkProxy(Langchain4JFunctionCallingApplication.Assistant.class);
+		}
+	}
 	public static void main(String[] args) {
 		new SpringApplicationBuilder(Langchain4JFunctionCallingApplication.class)
 				.web(WebApplicationType.NONE)
