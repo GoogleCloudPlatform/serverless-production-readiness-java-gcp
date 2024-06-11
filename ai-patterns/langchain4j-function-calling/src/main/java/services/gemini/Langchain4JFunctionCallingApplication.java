@@ -135,7 +135,7 @@ public class Langchain4JFunctionCallingApplication {
 
 			System.out.println("User message: " + userMessage);
 			System.out.println(assistant.chat(userMessage));
-			System.out.println("VertexAI Gemini call using gRPC took " + (System.currentTimeMillis() - start) + " ms");
+			System.out.println("VertexAI Gemini call using REST took " + (System.currentTimeMillis() - start) + " ms");
 	}
 
 	public static class FunctionCallingRuntimeHints implements RuntimeHintsRegistrar {
