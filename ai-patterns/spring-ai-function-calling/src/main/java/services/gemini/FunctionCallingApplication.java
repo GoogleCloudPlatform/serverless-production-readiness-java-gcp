@@ -70,9 +70,6 @@ public class FunctionCallingApplication {
 			VertexAiGeminiChatModel vertexAiGemini) {
 
 		return args -> {
-
-			// String prompt = "What is the status of my payment transaction 003?";
-			// Use multi-turn invocation to answer the following question:
 			String prompt = """
    							Please use multi-turn invocation to answer the following question:
    							What is the status of my payment transactions 002, 001 and 003?
