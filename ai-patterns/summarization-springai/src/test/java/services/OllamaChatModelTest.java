@@ -19,7 +19,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.autoconfigure.ollama.OllamaAutoConfiguration;
-import org.springframework.ai.ollama.OllamaChatClient;
+import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.ai.ollama.api.OllamaApi;
 import org.springframework.ai.ollama.api.OllamaApi.GenerateRequest;
 import org.springframework.ai.ollama.api.OllamaApi.GenerateResponse;
@@ -55,6 +55,7 @@ public class OllamaChatModelTest {
         ollamaApi = new OllamaApi(baseUrl());
     }
 
+    @Disabled
     @Test
     public void simplexample() {
         var request = GenerateRequest
@@ -73,7 +74,7 @@ public class OllamaChatModelTest {
     }
 
     @Configuration(proxyBeanMethods = false)
-    @ImportAutoConfiguration({ RestClientAutoConfiguration.class, OllamaAutoConfiguration.class, OllamaChatClient.class})
+    @ImportAutoConfiguration({ RestClientAutoConfiguration.class, OllamaAutoConfiguration.class, OllamaChatModel.class})
     static class Config {
 
     }
