@@ -11,9 +11,9 @@
 	</parent>
 
 	<groupId>spring.ai.demo</groupId>
-	<artifactId>function-calling</artifactId>
+	<artifactId>spring-ai-function-calling</artifactId>
 	<version>1.0.0</version>
-	<name>function-calling</name>
+	<name>spring-ai-function-calling</name>
 	<description>Demonstrates the Spring AI Function Calling</description>
 
 	<properties>

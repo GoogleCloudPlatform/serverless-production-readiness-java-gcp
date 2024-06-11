@@ -25,35 +25,3 @@ management:
     web:
       exposure:
         include: "*"
-spring:
-  main:
-    lazy-initialization: true
-  datasource:
-    url: ${DB_URL}
-    username: ${MY_USER}
-    password: ${MY_PASSWORD}
-  cloud:
-    config:
-      modelAnalysisName: ${MODEL_ANALYSIS_NAME:gemini-pro}
-      modelImageProName: ${MODEL_IMAGE_PRO_NAME:gemini-pro-vision}
-  ai:
-    vertex:
-      ai:
-        gemini:
-          project-id: ${VERTEX_AI_GEMINI_PROJECT_ID}
-          location: ${VERTEX_AI_GEMINI_LOCATION}
-          chat:
-            options:
-              model: ${MODEL:gemini-1.5-pro-preview-0409}
-  threads:
-    virtual:
-      enabled: true
-workflows:
-  summary:
-    chunk:
-      characters: ${SUMMARY_CHUNK:55000}
-prompts:
-  bookanalysis: ${PROMPT_BOOK_ANALYSIS:Extract the main ideas from the book The Jungle Book by Rudyard Kipling}
-  promptImage: ${PROMPT_IMAGE:Extract the title and author from the image, strictly in JSON format}
-  promptSubSummary: ${PROMPT_SUBSUMMARY:Taking the following context delimited by triple backquotes into consideration ```%s``` Write a concise summary of the following text delimited by triple backquotes. ```%s``` CONCISE SUB-SUMMARY:}
-  promptSummary: ${PROMPT_SUMMARY:Please give me a summary with an introduction, three one sentence bullet points, and a conclusion from the following text delimited by triple backquotes. ```Text:%s``` SUMMARY (Don't mention Project Gutenberg in summary):}

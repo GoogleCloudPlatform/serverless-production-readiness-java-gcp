@@ -6,12 +6,12 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.2.5</version>
+    <version>3.3.0</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
-  <artifactId>summarization</artifactId>
+  <artifactId>summarization-spring-ai</artifactId>
   <version>1.0.0-SNAPSHOT</version>
-  <name>summarization</name>
+  <name>summarization-spring-ai</name>
   <description>Spring App for Image Analysis</description>
   <properties>
     <java.version>21</java.version>
@@ -19,12 +19,8 @@
     <testcontainers.version>1.19.8</testcontainers.version>
     <spring-ai.version>1.0.0-SNAPSHOT</spring-ai.version>
   </properties>
-  <dependencies>
-    <dependency>
-      <groupId>org.testcontainers</groupId>
-      <artifactId>gcloud</artifactId>
-    </dependency>
 
+  <dependencies>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
@@ -46,16 +42,6 @@
       <artifactId>spring-ai-ollama-spring-boot-starter</artifactId>
     </dependency>
 
-<!--    <dependency>-->
-<!--      <groupId>com.google.cloud.functions</groupId>-->
-<!--      <artifactId>functions-framework-api</artifactId>-->
-<!--      <version>1.1.0</version>-->
-<!--      <type>jar</type>-->
-<!--    </dependency>-->
-    <dependency>
-      <groupId>com.google.cloud</groupId>
-      <artifactId>google-cloud-firestore</artifactId>
-    </dependency>
     <dependency>
       <groupId>com.google.cloud</groupId>
       <artifactId>google-cloud-vision</artifactId>
@@ -72,17 +58,7 @@
       <groupId>com.google.cloud</groupId>
       <artifactId>google-cloud-aiplatform</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.postgresql</groupId>
-      <artifactId>postgresql</artifactId>
-      <version>42.6.1</version>
-    </dependency>
 
-    <dependency>
-      <groupId>com.zaxxer</groupId>
-      <artifactId>HikariCP</artifactId>
-      <version>5.1.0</version>
-    </dependency>
     <dependency>
         <groupId>com.google.cloud</groupId>
         <artifactId>google-cloud-vertexai</artifactId>
@@ -96,6 +72,10 @@
     <dependency>
       <groupId>org.springframework.ai</groupId>
       <artifactId>spring-ai-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.ai</groupId>
+      <artifactId>spring-ai-retry</artifactId>
     </dependency>
 
     <!-- Test -->
@@ -159,51 +139,8 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
       </plugin>
-      <plugin>
-        <groupId>org.graalvm.buildtools</groupId>
-        <artifactId>native-maven-plugin</artifactId>
-      </plugin>
     </plugins>
   </build>
-
-<!--  <profiles>-->
-<!--    <profile>-->
-<!--      <id>jit</id>-->
-<!--      <build>-->
-<!--        <plugins>-->
-<!--          <plugin>-->
-<!--            <groupId>org.springframework.boot</groupId>-->
-<!--            <artifactId>spring-boot-maven-plugin</artifactId>-->
-<!--            <configuration>-->
-<!--              <image>-->
-<!--                <name>${project.artifactId}-maven-jit</name>-->
-<!--              </image>-->
-<!--            </configuration>-->
-<!--          </plugin>-->
-<!--        </plugins>-->
-<!--      </build>-->
-<!--    </profile>-->
-<!--    <profile>-->
-<!--      <id>native</id>-->
-<!--      <build>-->
-<!--        <plugins>-->
-<!--          <plugin>-->
-<!--            <groupId>org.graalvm.buildtools</groupId>-->
-<!--            <artifactId>native-maven-plugin</artifactId>-->
-<!--          </plugin>-->
-<!--          <plugin>-->
-<!--            <groupId>org.springframework.boot</groupId>-->
-<!--            <artifactId>spring-boot-maven-plugin</artifactId>-->
-<!--            <configuration>-->
-<!--              <image>-->
-<!--                <name>${project.artifactId}-maven-native</name>-->
-<!--              </image>-->
-<!--            </configuration>-->
-<!--          </plugin>-->
-<!--        </plugins>-->
-<!--      </build>-->
-<!--    </profile>-->
-<!--  </profiles>-->
 
   <pluginRepositories>
     <pluginRepository>
@@ -277,7 +214,7 @@
       <dependency>
         <groupId>com.google.cloud</groupId>
         <artifactId>libraries-bom</artifactId>
-        <version>26.37.0</version>
+        <version>26.39.0</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
