@@ -20,13 +20,14 @@ import com.google.cloud.vertexai.VertexAI;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
-import org.springframework.ai.chat.ChatResponse;
 import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 import org.springframework.ai.reader.TextReader;
-import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatClient;
+import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatModel;
+import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatModel.ChatModel;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,7 +50,7 @@ import java.util.concurrent.Executors;
 public class SummarizationTests {
 
     @Autowired
-    private VertexAiGeminiChatClient chatClient;
+    private VertexAiGeminiChatModel chatModel;
 
     @Value("classpath:/prompts/system-message.st")
     private Resource systemResource;
@@ -89,7 +90,7 @@ public class SummarizationTests {
         Message userMessage = userPromptTemplate.createMessage();
 
         long start = System.currentTimeMillis();
-        ChatResponse response = chatClient.call(new Prompt(List.of(userMessage, systemMessage),
+        ChatResponse response = chatModel.call(new Prompt(List.of(userMessage, systemMessage),
             VertexAiGeminiChatOptions.builder()
                 .withTemperature(0.4f)
                 .build()));
@@ -197,7 +198,7 @@ public class SummarizationTests {
         PromptTemplate userPromptTemplate = new PromptTemplate(summaryResource,Map.of("content", context));
         Message userMessage = userPromptTemplate.createMessage();
 
-        ChatResponse response = chatClient.call(new Prompt(List.of(userMessage, systemMessage),
+        ChatResponse response = chatModel.call(new Prompt(List.of(userMessage, systemMessage),
             VertexAiGeminiChatOptions.builder()
                 .withTemperature(0.4f)
                 .build()));
@@ -224,7 +225,7 @@ public class SummarizationTests {
         }
         Message userMessage = userPromptTemplate.createMessage();
 
-        ChatResponse response = chatClient.call(new Prompt(List.of(userMessage, systemMessage),
+        ChatResponse response = chatModel.call(new Prompt(List.of(userMessage, systemMessage),
             VertexAiGeminiChatOptions.builder()
                 .withTemperature(0.4f)
                 .build()));
