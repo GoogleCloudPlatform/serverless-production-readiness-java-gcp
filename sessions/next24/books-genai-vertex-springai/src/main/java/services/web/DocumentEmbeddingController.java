@@ -22,6 +22,7 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,9 +33,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import services.actuator.StartupCheck;
+import services.ai.VertexAIClient;
 import services.config.CloudConfig;
 import services.domain.BooksService;
 import services.domain.CloudStorageService;
+import services.utility.PromptUtility;
 import services.utility.RequestValidationUtility;
 
 /**
@@ -49,6 +52,14 @@ public class DocumentEmbeddingController {
 
   BooksService booksService;
   CloudStorageService cloudStorageService;
+
+  VertexAIClient vertexAIClient;
+
+  @Value("${prompts.promptTransformTF}")
+  private String promptTransformTF;
+
+  @Value("${spring.ai.vertex.ai.gemini.chat.options.model}")
+  private String model;
 
   public DocumentEmbeddingController(BooksService booksService,
       CloudStorageService cloudStorageService) {
@@ -90,6 +101,36 @@ public class DocumentEmbeddingController {
   public ResponseEntity<Integer> insertTable(@RequestBody Map<String, Object> body) {
     String fileName = (String) body.get("fileName");
     booksService.insertBook(fileName);
+    return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  @RequestMapping(value = "/terraform", method = RequestMethod.POST)
+  public ResponseEntity<String> receiveMessageTransform(
+          @RequestBody Map<String, Object> body, @RequestHeader Map<String, String> headers) {
+    String errorMsg = RequestValidationUtility.validateRequest(body,headers);
+    if (!errorMsg.isBlank()) {
+      return new ResponseEntity<>(errorMsg, HttpStatus.BAD_REQUEST);
+    }
+
+    // get document name and bucket
+    String fileName = (String) body.get("name");
+    String bucketName = (String) body.get("bucket");
+
+    logger.info("New script to transform:" + fileName);
+
+    // read file from Cloud Storage
+    BufferedReader br = cloudStorageService.readFile(bucketName, fileName);
+
+
+    logger.info("tf transform flow - Model: " + model);
+    long start = System.currentTimeMillis();
+    String transformScript = String.format(promptTransformTF, br.toString());
+    // submit prompt to the LLM via LLM orchestration framework
+    logger.info("TF transform: prompt LLM: " + (System.currentTimeMillis() - start) + "ms");
+    String response = vertexAIClient.promptModel(transformScript, model);
+    logger.info("TF transform flow: " + (System.currentTimeMillis() - start) + "ms");
+
+    // success
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
