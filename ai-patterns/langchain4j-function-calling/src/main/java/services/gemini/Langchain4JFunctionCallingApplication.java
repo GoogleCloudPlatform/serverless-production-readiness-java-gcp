@@ -27,6 +27,7 @@ import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.SystemMessage;
 import java.util.Map;
 
+import org.springframework.aot.hint.ExecutableMode;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.beans.factory.annotation.Value;
@@ -144,8 +145,28 @@ public class Langchain4JFunctionCallingApplication {
 			var mcs = MemberCategory.values();
 			hints.reflection().registerType(Langchain4JFunctionCallingApplication.Assistant.class, mcs);
 			hints.proxies().registerJdkProxy(Langchain4JFunctionCallingApplication.Assistant.class);
-		}
+			try {
+				// Register all the classes and methods that are used through reflection
+				// or dynamic proxy generation in LangChain4j, especially those
+				// related to function calling.
+
+				hints.reflection().registerType(FunctionCallingService.class, MemberCategory.values());
+
+				// Corrected method registration
+				hints.reflection().registerMethod(
+						FunctionCallingService.class.getMethod("paymentStatus", String.class),
+						ExecutableMode.INVOKE
+				);
+
+				// ... register other necessary classes and methods ...
+			} catch (NoSuchMethodException e) {
+				// Handle the exception appropriately (e.g., log it)
+				e.printStackTrace();
+			}
+        }
 	}
+
+
 	public static void main(String[] args) {
 		new SpringApplicationBuilder(Langchain4JFunctionCallingApplication.class)
 				.web(WebApplicationType.NONE)
