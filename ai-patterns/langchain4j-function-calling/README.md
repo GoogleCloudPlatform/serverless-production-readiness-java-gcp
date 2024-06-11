@@ -1,9 +1,6 @@
-# Spring AI Function Calling
+# Langchain4J Function Calling
 
-Note: This class has been originally started by Christian Tzolov
-Repo: github.com:tzolov/spring-ai-function-calling-portability
-
-Demonstrate `Function Calling` code using Gemini with Spring AI
+Demonstrate `Function Calling` code using Gemini with Langchain4j
 
 Use Case: Suppose we want the AI model to respond with information that it does not have.
 For example the status of your recent payment transactions.
@@ -32,7 +29,7 @@ public Function<Transaction, Status> paymentStatus() {
 ```
 
 Function is registered as `@Bean` and uses the `@Description` annotation to define function description.
-Spring AI greatly simplifies code you need to write to support function invocation.
+Langchain4j greatly simplifies code you need to write to support function invocation.
 It brokers the function invocation conversation for you.
 You simply provide your function definition as a `@Bean` and then provide the bean name of the function in your prompt options.
 
@@ -40,12 +37,24 @@ Lets add the boot starters for 4 AI Models that support function calling:
 
 ```xml
 <dependency>
-	<groupId>org.springframework.boot</groupId>
-	<artifactId>spring-boot-starter</artifactId>
+    <groupId>dev.langchain4j</groupId>
+    <artifactId>langchain4j-spring-boot-starter</artifactId>
+    <version>${langchain4j.version}</version>
 </dependency>
 <dependency>
-	<groupId>org.springframework.ai</groupId>
-	<artifactId>spring-ai-vertex-ai-gemini-spring-boot-starter</artifactId>
+    <groupId>dev.langchain4j</groupId>
+    <artifactId>langchain4j-vertex-ai-gemini</artifactId>
+    <version>${langchain4j.version}</version>
+</dependency>
+<dependency>
+    <groupId>dev.langchain4j</groupId>
+    <artifactId>langchain4j</artifactId>
+    <version>${langchain4j.version}</version>
+</dependency>
+<dependency>
+    <groupId>dev.langchain4j</groupId>
+    <artifactId>langchain4j-core</artifactId>
+    <version>${langchain4j.version}</version>
 </dependency>
 ```
 
@@ -53,12 +62,10 @@ and configure them in `application.properties`:
 
 ```
 # Google VertexAI Gemini
-spring.ai.vertex.ai.gemini.project-id=${VERTEX_AI_GEMINI_PROJECT_ID}
-spring.ai.vertex.ai.gemini.location=${VERTEX_AI_GEMINI_LOCATION}
-spring.ai.vertex.ai.gemini.chat.options.model=gemini-1.5-flash-001
-spring.ai.vertex.ai.gemini.transport=grpc
-spring.ai.vertex.ai.gemini.chat.options.functions=paymentStatus
-spring.threads.virtual.enabled=true
+langchain4j.gemini.project-id=${VERTEX_AI_GEMINI_PROJECT_ID}
+langchain4j.gemini.location=${VERTEX_AI_GEMINI_LOCATION}
+langchain4j.gemini.chat.options.model=${VERTEX_AI_GEMINI_MODEL}
+langchain4j.gemini.transport=rest
 ```
 
 Now you can test them with the same prompt:

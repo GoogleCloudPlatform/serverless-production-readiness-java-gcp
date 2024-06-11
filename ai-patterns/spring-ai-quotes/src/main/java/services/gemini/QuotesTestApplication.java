@@ -15,7 +15,9 @@
  */
 package services.gemini;
 
-import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatClient;
+import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatModel;
+import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatOptions;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -26,7 +28,7 @@ import org.springframework.context.annotation.Bean;
 public class QuotesTestApplication {
 	@Bean
 	ApplicationRunner applicationRunner(
-			VertexAiGeminiChatClient vertexAiGemini) {
+			VertexAiGeminiChatModel geminiChatModel) {
 
 		return args -> {
 			String book = "The Jungle Book";
@@ -35,7 +37,12 @@ public class QuotesTestApplication {
 			String prompt = String.format("You are an experienced literary critic. Please extract a famous quote from the book %s", book);
 
 			long start = System.currentTimeMillis();
-			System.out.println("VERTEX_AI_GEMINI: " + vertexAiGemini.call(prompt));
+			System.out.println("VERTEX_AI_GEMINI: " + geminiChatModel
+					.call(
+							new Prompt(prompt,
+									VertexAiGeminiChatOptions.builder()
+											.withTemperature(0.2f).build())
+					).getResult().getOutput().getContent());
 			System.out.println("VertexAI Gemini call took " + (System.currentTimeMillis() - start) + " ms");
 		};
 	}

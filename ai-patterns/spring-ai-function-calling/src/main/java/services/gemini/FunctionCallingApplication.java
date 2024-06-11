@@ -18,9 +18,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import org.springframework.ai.chat.ChatResponse;
+import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatClient;
+import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatModel;
+import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatOptions;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -38,11 +39,11 @@ public class FunctionCallingApplication {
 	record Status(String name) {
 	}
 
-	record Transactions(List<Transaction> transactions) {
-	}
-
-	record Statuses(List<Status> statuses) {
-	}
+	// record Transactions(List<Transaction> transactions) {
+	// }
+	//
+	// record Statuses(List<Status> statuses) {
+	// }
 	private static final Map<Transaction, Status> DATASET = Map.of(
 			new Transaction("001"), new Status("pending"),
 			new Transaction("002"), new Status("approved"),
@@ -56,34 +57,45 @@ public class FunctionCallingApplication {
 			return transaction -> DATASET.get(transaction);
 		}
 
-	@Bean
-	@Description("Get the list statuses of a list of payment transactions")
-	public Function<Transactions, Statuses> paymentStatuses() {
-		return transactions -> {
-			return new Statuses(transactions.transactions().stream().map(t -> DATASET.get(t)).toList());
-		};
-	}
+	// @Bean
+	// @Description("Get the list statuses of a list of payment transactions")
+	// public Function<Transactions, Statuses> paymentStatuses() {
+	// 	return transactions -> {
+	// 		return new Statuses(transactions.transactions().stream().map(t -> DATASET.get(t)).toList());
+	// 	};
+	// }
 
 	@Bean
 	ApplicationRunner applicationRunner(
-			VertexAiGeminiChatClient vertexAiGemini) {
+			VertexAiGeminiChatModel vertexAiGemini) {
 
 		return args -> {
 
 			// String prompt = "What is the status of my payment transaction 003?";
+			// Use multi-turn invocation to answer the following question:
 			String prompt = """
-   							What is the status of my payment transactions 001, 002 and 003?
+   							Please use multi-turn invocation to answer the following question:
+   							What is the status of my payment transactions 002, 001 and 003?
    							Please indicate the status for each transaction and return the results in JSON format
-   							Please indicate how many function calls have been made
    							""";
 
 			long start = System.currentTimeMillis();
-			System.out.println("VERTEX_AI_GEMINI: " + vertexAiGemini.call(prompt));
+			System.out.println("VERTEX_AI_GEMINI: " + vertexAiGemini.call(
+							new Prompt(prompt,
+									VertexAiGeminiChatOptions.builder()
+											.withTemperature(0.2f).build())
+					).getResult().getOutput().getContent());
+
 			System.out.println("VertexAI Gemini call took " + (System.currentTimeMillis() - start) + " ms");
 
 			// Currently, SpringAI supports streaming Function calls only for VertexAI Gemini.
 			start = System.currentTimeMillis();
-			Flux<ChatResponse> geminiStream = vertexAiGemini.stream(new Prompt(prompt));
+			Flux<ChatResponse> geminiStream = vertexAiGemini.stream(
+					new Prompt(prompt,
+							VertexAiGeminiChatOptions.builder()
+									.withTemperature(0.0f).build())
+			);
+
 			geminiStream.collectList().block().stream().findFirst().ifPresent(resp -> {
 				System.out.println("VERTEX_AI_GEMINI (Streaming): " + resp.getResult().getOutput().getContent());
 			});
