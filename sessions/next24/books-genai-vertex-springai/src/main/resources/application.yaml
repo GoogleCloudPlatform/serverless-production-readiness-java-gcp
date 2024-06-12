@@ -84,3 +84,26 @@ prompts:
        bash script. Incorporate these to improve the robustness of the code.
     * **State Management:** Briefly explain how Terraform state would be managed for this particular 
        configuration.
+    * **Example Usage:** Demonstrates the intended format for providing the bash script to be converted. 
+        ```bash
+        PROJECT_ID="my-gcp-project"
+        ZONE="us-central1-a"
+        INSTANCE_NAME="web-server-01"
+        MACHINE_TYPE="e2-medium"
+        IMAGE="debian-cloud/debian-11"
+    
+        gcloud services enable vision.googleapis.com
+        gcloud services enable cloudfunctions.googleapis.com
+  
+        gcloud compute instances create $INSTANCE_NAME \
+        --project $PROJECT_ID \
+        --zone $ZONE \
+        --machine-type $MACHINE_TYPE \
+        --image $IMAGE \
+        --boot-disk-size 20GB
+    
+        export BUCKET_PICTURES=library_next24_images
+        gsutil mb -l us-central1 gs://${BUCKET_PICTURES}
+        gsutil uniformbucketlevelaccess set on gs://${BUCKET_PICTURES}
+        gsutil iam ch allUsers:objectViewer gs://${BUCKET_PICTURES} 
+        ```
