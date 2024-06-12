@@ -67,7 +67,7 @@ public class BookAnalysisController {
 
   @CrossOrigin
   @PostMapping("")
-  public ResponseEntity<String> processUserRequest(@RequestBody BookRequest bookRequest, @RequestParam(name = "contentCharactersLimit", defaultValue = "6000") Integer contentCharactersLimit){
+  public ResponseEntity<String> bookAnalysis(@RequestBody BookRequest bookRequest, @RequestParam(name = "contentCharactersLimit", defaultValue = "6000") Integer contentCharactersLimit){
 
     long start = System.currentTimeMillis();
     logger.info("Book analysis flow : start");
