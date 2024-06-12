@@ -69,7 +69,7 @@ public class DataAccess {
         String sql = "select\n" +
                 "*\n" +
                 "from\n" +
-                "    books where title = ?";
+                "    books where UPPER(title) = UPPER(?)";
         Object[] parameters = new Object[]{title};
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, parameters);
 
