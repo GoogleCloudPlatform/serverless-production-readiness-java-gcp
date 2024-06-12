@@ -17,13 +17,13 @@ package services.ai;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.ai.chat.ChatResponse;
 import org.springframework.ai.chat.messages.Media;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.vertexai.gemini.MimeTypeDetector;
-import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatClient;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatModel;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatOptions;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -41,10 +41,10 @@ import java.util.List;
 public class VertexAIClient {
     private static final Logger logger = LoggerFactory.getLogger(VertexAIClient.class);
 
-    private VertexAiGeminiChatClient chatClient;
+    private VertexAiGeminiChatModel chatClient;
     private Environment env;
 
-    public VertexAIClient(VertexAiGeminiChatClient chatClient, Environment env){
+    public VertexAIClient(VertexAiGeminiChatModel chatClient, Environment env){
         this.chatClient = chatClient;
         this.env = env;
     }
