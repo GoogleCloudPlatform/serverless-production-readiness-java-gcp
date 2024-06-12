@@ -48,7 +48,7 @@ public class TerraformTransformationTests {
     private static final int OVERLAP_SIZE = 2000;
 
     @Test
-    public void summarizationTest(){
+    public void terraformTransformTest(){
         TextReader textReader = new TextReader(bashscript);
         String script = textReader.get().getFirst().getContent();
 
