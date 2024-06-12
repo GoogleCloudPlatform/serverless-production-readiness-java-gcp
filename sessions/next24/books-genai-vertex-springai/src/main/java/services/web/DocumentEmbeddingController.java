@@ -121,11 +121,7 @@ public class DocumentEmbeddingController {
     // read file from Cloud Storage
     BufferedReader br = cloudStorageService.readFile(bucketName, fileName);
 
-
-    logger.info("tf transform flow - Model: " + model);
-    long start = System.currentTimeMillis();
-    String transformScript = String.format(promptTransformTF, br.toString());
-    String response = tfTransformTransform(transformScript);
+    String response = tfTransformTransform(br.toString());
 
     // success
     return new ResponseEntity<>(response, HttpStatus.OK);
@@ -137,21 +133,13 @@ public class DocumentEmbeddingController {
           @RequestBody Map<String, Object> body) {
 
     String bashScript = (String) body.get("script");
-
-    logger.info("tf transform flow - Model: " + model);
-    long start = System.currentTimeMillis();
-    String transformScript = String.format(promptTransformTF, bashScript);
-    // submit prompt to the LLM via LLM orchestration framework
-    logger.info("TF transform: prompt LLM: " + (System.currentTimeMillis() - start) + "ms");
-    String response = vertexAIClient.promptModel(transformScript, model);
-    logger.info("TF transform flow: " + (System.currentTimeMillis() - start) + "ms");
+    String response = tfTransformTransform(bashScript);
 
     // success
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
   public String tfTransformTransform(String script) {
-
     logger.info("tf transform flow - Model: " + model);
     long start = System.currentTimeMillis();
     String transformScript = String.format(promptTransformTF, script);
