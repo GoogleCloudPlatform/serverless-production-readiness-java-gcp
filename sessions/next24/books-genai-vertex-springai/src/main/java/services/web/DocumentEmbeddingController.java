@@ -132,8 +132,8 @@ public class DocumentEmbeddingController {
   public ResponseEntity<String> tfTransformTransform(
           @RequestBody Map<String, Object> body) {
 
-    String bashScript = (String) body.get("script");
-    String response = tfTransformTransform(bashScript);
+    String script = (String) body.get("script");
+    String response = tfTransformTransform(script);
 
     // success
     return new ResponseEntity<>(response, HttpStatus.OK);
