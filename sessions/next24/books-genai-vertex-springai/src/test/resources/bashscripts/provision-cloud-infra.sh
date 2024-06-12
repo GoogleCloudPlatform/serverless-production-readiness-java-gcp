@@ -62,7 +62,7 @@ gcloud compute networks vpc-access connectors create alloy-connector \
 
 
 gcloud run deploy books-genai-native \
-    --set-env-vars='MY_PASSWORD=pword,MY_USER=user,DB_URL=jdbc:postgresql://172.22.0.2:5432/library,MODEL_ANALYSIS_NAME=text-bison-32k,MODEL_IMAGE_PRO_NAME=text-bison-32k' \
+    --set-env-vars='MY_PASSWORD=pword,MY_USER=user,DB_URL=jdbc:postgresql://177.10.0.5:5432/db,MODEL_ANALYSIS_NAME=text-bison-32k,MODEL_IMAGE_PRO_NAME=text-bison-32k' \
     --image us-docker.pkg.dev/next24-genai-app/books-genai-native/books-genai:latest \
     --region us-central1 \
     --memory 2Gi \
@@ -72,7 +72,7 @@ gcloud run deploy books-genai-native \
 
 
 gcloud run deploy books-genai-jit \
-    --set-env-vars='PROMPT_IMAGE=Extract the book name labels main color and author strictly in JSON format. The json output strictly have property names bookName mainColor author and labels.,MY_PASSWORD=pword,MY_USER=pword,DB_URL=jdbc:postgresql://172.22.0.2:5432/library,MODEL_ANALYSIS_NAME=text-bison-32k,MODEL_IMAGE_PRO_NAME=text-bison-32k' \
+    --set-env-vars='PROMPT_IMAGE=Extract the book name labels main color and author strictly in JSON format. The json output strictly have property names bookName mainColor author and labels.,MY_PASSWORD=pword,MY_USER=pword,DB_URL=jdbc:postgresql://182.12.0.4:5432/db,MODEL_ANALYSIS_NAME=text-bison-32k,MODEL_IMAGE_PRO_NAME=text-bison-32k' \
     --image us-docker.pkg.dev/next24-genai-app/books-genai-jit/books-genai:latest \
     --region us-central1 \
     --memory 2Gi \
