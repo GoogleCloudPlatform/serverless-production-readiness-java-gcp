@@ -62,7 +62,7 @@ gcloud compute networks vpc-access connectors create alloy-connector \
 
 
 gcloud run deploy books-genai-native \
-    --set-env-vars='MY_PASSWORD=37ni7sSyUEj5Ffb!!!!!5432111NGBIGGUYYANNI,MY_USER=postgres,DB_URL=jdbc:postgresql://172.22.0.2:5432/library,MODEL_ANALYSIS_NAME=text-bison-32k,MODEL_IMAGE_PRO_NAME=text-bison-32k' \
+    --set-env-vars='MY_PASSWORD=pword,MY_USER=user,DB_URL=jdbc:postgresql://172.22.0.2:5432/library,MODEL_ANALYSIS_NAME=text-bison-32k,MODEL_IMAGE_PRO_NAME=text-bison-32k' \
     --image us-docker.pkg.dev/next24-genai-app/books-genai-native/books-genai:latest \
     --region us-central1 \
     --memory 2Gi \
@@ -72,7 +72,7 @@ gcloud run deploy books-genai-native \
 
 
 gcloud run deploy books-genai-jit \
-    --set-env-vars='PROMPT_IMAGE=Extract the book name labels main color and author strictly in JSON format. The json output strictly have property names bookName mainColor author and labels.,MY_PASSWORD=next24-12345!,MY_USER=postgres,DB_URL=jdbc:postgresql://172.22.0.2:5432/library,MODEL_ANALYSIS_NAME=text-bison-32k,MODEL_IMAGE_PRO_NAME=text-bison-32k' \
+    --set-env-vars='PROMPT_IMAGE=Extract the book name labels main color and author strictly in JSON format. The json output strictly have property names bookName mainColor author and labels.,MY_PASSWORD=pword,MY_USER=pword,DB_URL=jdbc:postgresql://172.22.0.2:5432/library,MODEL_ANALYSIS_NAME=text-bison-32k,MODEL_IMAGE_PRO_NAME=text-bison-32k' \
     --image us-docker.pkg.dev/next24-genai-app/books-genai-jit/books-genai:latest \
     --region us-central1 \
     --memory 2Gi \
@@ -105,7 +105,7 @@ gcloud eventarc triggers create books-genai-jit-trigger-embeddings \
      --location=us-central1 \
      --event-filters="type=google.cloud.storage.object.v1.finalized" \
      --event-filters="bucket=books-${PROJECT_ID}" \
-     --service-account=48099017975-compute@developer.gserviceaccount.com
+     --service-account=${PROJECT_NUMBER}--compute@developer.gserviceaccount.com
 
 # configure triggers for public and private books, images - accessing the Native Java service image
 gcloud eventarc triggers create books-genai-native-trigger-public \
@@ -115,7 +115,7 @@ gcloud eventarc triggers create books-genai-native-trigger-public \
      --location=us-central1 \
      --event-filters="type=google.cloud.storage.object.v1.finalized" \
      --event-filters="bucket=library_next24_public" \
-     --service-account=48099017975-compute@developer.gserviceaccount.com
+     --service-account=${PROJECT_NUMBER}--compute@developer.gserviceaccount.com
 
 gcloud eventarc triggers create books-genai-native-trigger-private \
      --destination-run-service=books-genai-native \
@@ -124,7 +124,7 @@ gcloud eventarc triggers create books-genai-native-trigger-private \
      --location=us-central1 \
      --event-filters="type=google.cloud.storage.object.v1.finalized" \
      --event-filters="bucket=library_next24_private" \
-     --service-account=48099017975-compute@developer.gserviceaccount.com
+     --service-account=${PROJECT_NUMBER}--compute@developer.gserviceaccount.com
 
 gcloud eventarc triggers create books-genai-native-trigger-image \
      --destination-run-service=books-genai-native \
@@ -133,4 +133,4 @@ gcloud eventarc triggers create books-genai-native-trigger-image \
      --location=us-central1 \
      --event-filters="type=google.cloud.storage.object.v1.finalized" \
      --event-filters="bucket=library_next24_images" \
-     --service-account=48099017975-compute@developer.gserviceaccount.com
+     --service-account=${PROJECT_NUMBER}--compute@developer.gserviceaccount.com
