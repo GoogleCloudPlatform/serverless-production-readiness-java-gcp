@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 @ActiveProfiles(value = "test")
 @EnabledIfEnvironmentVariable(named = "VERTEX_AI_GEMINI_PROJECT_ID", matches = ".*")
 @EnabledIfEnvironmentVariable(named = "VERTEX_AI_GEMINI_LOCATION", matches = ".*")
-@EnabledIfEnvironmentVariable(named = "MODEL", matches = ".*")
+@EnabledIfEnvironmentVariable(named = "VERTEX_AI_GEMINI_MODEL", matches = ".*")
 public class SummarizationTests {
 
     @Autowired
@@ -240,7 +240,7 @@ public class SummarizationTests {
 
         @Bean
         public VertexAiGeminiChatModel vertexAiEmbedding(VertexAI vertexAi) {
-            String model = System.getenv("MODEL");
+            String model = System.getenv("VERTEX_AI_GEMINI_MODEL");
             return new VertexAiGeminiChatModel(vertexAi,
                 VertexAiGeminiChatOptions.builder()
                     .withModel(model)

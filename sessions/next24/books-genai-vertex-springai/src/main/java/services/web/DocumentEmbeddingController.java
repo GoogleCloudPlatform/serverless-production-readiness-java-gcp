@@ -22,7 +22,9 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.ai.reader.TextReader;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -61,10 +63,14 @@ public class DocumentEmbeddingController {
   @Value("${spring.ai.vertex.ai.gemini.chat.options.model}")
   private String model;
 
+  @Value("classpath:/bashscripts/provision-cloud-infra.sh")
+  private Resource bashscript;
+
   public DocumentEmbeddingController(BooksService booksService,
-      CloudStorageService cloudStorageService) {
+      CloudStorageService cloudStorageService, VertexAIClient vertexAIClient) {
     this.booksService = booksService;
     this.cloudStorageService = cloudStorageService;
+    this.vertexAIClient = vertexAIClient;
   }
 
   @PostConstruct
@@ -125,13 +131,43 @@ public class DocumentEmbeddingController {
     logger.info("tf transform flow - Model: " + model);
     long start = System.currentTimeMillis();
     String transformScript = String.format(promptTransformTF, br.toString());
+    String response = tfTransformTransform(transformScript);
+
+    // success
+    return new ResponseEntity<>(response, HttpStatus.OK);
+  }
+
+
+  @RequestMapping(value = "/bash/to-terraform", method = RequestMethod.POST)
+  public ResponseEntity<String> tfTransformTransform(
+          @RequestBody Map<String, Object> body) {
+
+    String bashScript = (String) body.get("script");
+
+    logger.info("tf transform flow - Model: " + model);
+    long start = System.currentTimeMillis();
+    String transformScript = String.format(promptTransformTF, bashScript);
     // submit prompt to the LLM via LLM orchestration framework
     logger.info("TF transform: prompt LLM: " + (System.currentTimeMillis() - start) + "ms");
     String response = vertexAIClient.promptModel(transformScript, model);
     logger.info("TF transform flow: " + (System.currentTimeMillis() - start) + "ms");
 
     // success
-    return new ResponseEntity<>(HttpStatus.OK);
+    return new ResponseEntity<>(response, HttpStatus.OK);
+  }
+
+  public String tfTransformTransform(String script) {
+
+    logger.info("tf transform flow - Model: " + model);
+    long start = System.currentTimeMillis();
+    String transformScript = String.format(promptTransformTF, script);
+    // submit prompt to the LLM via LLM orchestration framework
+    logger.info("TF transform: prompt LLM: " + (System.currentTimeMillis() - start) + "ms");
+    String response = vertexAIClient.promptModel(transformScript, model);
+    logger.info("TF transform flow: " + (System.currentTimeMillis() - start) + "ms");
+
+    // success
+    return response;
   }
 
   @RequestMapping(value = "/embeddings", method = RequestMethod.POST)
