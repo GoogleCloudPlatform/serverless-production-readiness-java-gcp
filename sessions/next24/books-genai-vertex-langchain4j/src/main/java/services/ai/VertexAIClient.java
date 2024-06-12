@@ -65,7 +65,7 @@ public class VertexAIClient {
         ChatLanguageModel visionModel = VertexAiGeminiChatModel.builder()
             .project(project)
             .location(location)
-            .modelName(VertexModels.GEMINI_PRO_VISION)
+            .modelName(VertexModels.GEMINI_FLASH_VISION_VERSION)
             .build();
 
         Response<AiMessage> multiModalResponse = visionModel.generate(userMessage);
@@ -88,7 +88,7 @@ public class VertexAIClient {
         ChatLanguageModel model = VertexAiGeminiChatModel.builder()
             .project(project)
             .location(location)
-            .modelName(VertexModels.GEMINI_PRO)
+            .modelName(VertexModels.GEMINI_FLASH_VISION_VERSION)
             .build();
             
         // prompt Chat model
@@ -117,7 +117,7 @@ public class VertexAIClient {
         ChatLanguageModel model = VertexAiGeminiChatModel.builder()
             .project(project)
             .location(location)
-            .modelName(VertexModels.GEMINI_PRO)
+            .modelName(VertexModels.GEMINI_FLASH_VISION_VERSION)
             .build();
 
         Assistant assistant = AiServices.builder(Assistant.class)
