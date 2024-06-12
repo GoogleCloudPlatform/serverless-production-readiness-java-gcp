@@ -135,30 +135,32 @@ Run the native executable:
 ```
 
 __Important note__: Please register runtime hints for the Native Java image
-```shell
-	public static class FunctionCallingRuntimeHints implements RuntimeHintsRegistrar {
-		@Override
-		public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
-			// Register method for the Assistant AIService class
-			var mcs = MemberCategory.values();
-			hints.reflection().registerType(Langchain4JFunctionCallingApplication.Assistant.class, mcs);
-			hints.proxies().registerJdkProxy(Langchain4JFunctionCallingApplication.Assistant.class);
-			
-			try {
-				// Register all the classes and methods that are used through reflection
-				// or dynamic proxy generation in LangChain4j, especially those
-				// related to function calling.
-				hints.reflection().registerType(FunctionCallingService.class, MemberCategory.values());
+* Register the Assistant class for reflection and dynamic proxy generation
+* Register the FunctionCallingService class for reflection
+* Register the paymentStatus() method for invocation - full reflection support is required, including the ability to invoke
+```java
+public static class FunctionCallingRuntimeHints implements RuntimeHintsRegistrar {
+  @Override
+  public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+    try {
+      // Register all the classes and methods that are used through reflection
+      // or dynamic proxy generation in LangChain4j, especially those
+      // related to function calling.
+      // Register method for reflection
+      var mcs = MemberCategory.values();
+      hints.reflection().registerType(Langchain4JFunctionCallingApplication.Assistant.class, mcs);
+      hints.proxies().registerJdkProxy(Langchain4JFunctionCallingApplication.Assistant.class);
+      hints.reflection().registerType(FunctionCallingService.class, mcs);
 
-				// Corrected method registration
-				hints.reflection().registerMethod(
-						FunctionCallingService.class.getMethod("paymentStatus", String.class),
-						ExecutableMode.INVOKE
-				);
-			} catch (NoSuchMethodException e) {
-				// Handle the exception appropriately (e.g., log it)
-				e.printStackTrace();
-			}
-        }
-	}
+      hints.reflection().registerMethod(
+          FunctionCallingService.class.getMethod("paymentStatus", String.class),
+          ExecutableMode.INVOKE
+      );
+
+      // ... register other necessary classes and methods ...
+    } catch (NoSuchMethodException e) {
+      // Handle the exception appropriately (e.g., log it)
+      e.printStackTrace();
+    }
+  }
 ```
