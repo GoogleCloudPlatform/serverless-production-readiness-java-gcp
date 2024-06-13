@@ -95,6 +95,5 @@ prompts:
     * **State Management:** Briefly explain how Terraform state would be managed for this particular 
        configuration.
     * **Example Usage:** Demonstrates how to apply Terraform script.
-    
-    Output should also consider the following document enclosed within triple back quotes for best practice:
+    * **Reference Documentation:** Output should also consider the following document enclosed within triple back quotes for best practice:
     ```%s```

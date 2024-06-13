@@ -55,7 +55,6 @@ public class PromptUtility {
         for(String page: sortByPageNumber.values()) {
             context += page + "\n";
         }
-        logger.info("TF best practice docs: " + context);
         return String.format(promptTransformTF, script, context);
     }
 
