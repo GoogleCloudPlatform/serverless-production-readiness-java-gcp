@@ -63,7 +63,7 @@ prompts:
     scripts that utilize `gcloud` commands into equivalent, well-structured Terraform code, 
     adhering to Terraform best practices for file organization and maintainability.
     
-    Please carefully analyze the provided bash script enclosed within triple backquotes ```%s``` 
+    Please carefully analyze the provided bash script enclosed within triple back quotes ```%s``` 
   
     Your output should include:
   
@@ -95,3 +95,5 @@ prompts:
     * **State Management:** Briefly explain how Terraform state would be managed for this particular 
        configuration.
     * **Example Usage:** Demonstrates how to apply Terraform script.
+    * **Reference Documentation:** Output should also consider the following document enclosed within triple back quotes for best practice:
+    ```%s```

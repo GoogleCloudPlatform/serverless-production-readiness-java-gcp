@@ -18,6 +18,7 @@ package services.utility;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -44,6 +45,34 @@ public class PromptUtility {
 
         // Use String.format to insert the joined topics into the prompt
         return String.format("Find the paragraphs mentioning keywords in the following list: {%s} in the book.", joinedTopics);
+    }
+
+    public static String formatPromptTF(List<Map<String, Object>> responseDoc, String promptTransformTF, String script) {
+        // Check for an empty topics list
+        Map<Integer, String> sortByPageNumber = getSortedPagesBasedonPageNumber(responseDoc);
+        String context="";
+        for(String page: sortByPageNumber.values()) {
+            context += page + "\n";
+        }
+        return String.format(promptTransformTF, script, context);
+    }
+
+    public static Map<Integer, String> getSortedPagesBasedonPageNumber(List<Map<String, Object>> responseDoc) {
+        // Check for an empty topics list
+        Map<Integer, String> sortByPageNumber = new TreeMap<>(); // TreeMap to automatically sort by key
+        int i =0;
+        for(Map<String, Object> page: responseDoc) {
+            sortByPageNumber.put(Integer.parseInt(page.get("page_number").toString()), (String) page.get("page"));
+            i++;
+            //Get top 5 results
+            if(i==5) break;
+        }
+
+        String context = "";
+        for(String page: sortByPageNumber.values()) {
+            context += page + "\n";
+        }
+        return sortByPageNumber;
     }
 
     public static String formatPromptBookAnalysis(BookRequest bookRequest, List<Map<String, Object>> bookPages, List<String> keywords) {

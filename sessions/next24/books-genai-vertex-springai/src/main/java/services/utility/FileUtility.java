@@ -35,8 +35,8 @@ public class FileUtility {
     public static String getPublicPrivate(String fileName) {
         String [] fileNameArray = fileName.split("-");
         String publicPrivate = fileNameArray[3];
-        if(publicPrivate.contains(".txt")){
-            publicPrivate = publicPrivate.replaceAll("\\.txt$", "");
+        if(publicPrivate.contains(".")){
+            publicPrivate = publicPrivate.replaceAll("\\.[^.]+$", "");
         }
         return publicPrivate;
     }
