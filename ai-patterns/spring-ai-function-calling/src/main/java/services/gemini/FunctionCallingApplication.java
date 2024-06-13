@@ -77,26 +77,52 @@ public class FunctionCallingApplication {
    							""";
 
 			long start = System.currentTimeMillis();
-			System.out.println("VERTEX_AI_GEMINI: " + vertexAiGemini.call(
+			System.out.println("VERTEX_AI_GEMINI multi-turn fn calling: " + vertexAiGemini.call(
 							new Prompt(prompt,
 									VertexAiGeminiChatOptions.builder()
 											.withTemperature(0.2f).build())
 					).getResult().getOutput().getContent());
 
-			System.out.println("VertexAI Gemini call took " + (System.currentTimeMillis() - start) + " ms");
+			System.out.println("VertexAI Gemini multi-turn call took " + (System.currentTimeMillis() - start) + " ms");
 
-			// Currently, SpringAI supports streaming Function calls only for VertexAI Gemini.
 			start = System.currentTimeMillis();
 			Flux<ChatResponse> geminiStream = vertexAiGemini.stream(
 					new Prompt(prompt,
 							VertexAiGeminiChatOptions.builder()
-									.withTemperature(0.0f).build())
+									.withTemperature(0.2f).build())
 			);
 
 			geminiStream.collectList().block().stream().findFirst().ifPresent(resp -> {
-				System.out.println("VERTEX_AI_GEMINI (Streaming): " + resp.getResult().getOutput().getContent());
+				System.out.println("\nVERTEX_AI_GEMINI (Streaming) multi-turn fn calling: " + resp.getResult().getOutput().getContent());
 			});
-			System.out.println("VertexAI Gemini streaming call took " + (System.currentTimeMillis() - start) + " ms");
+			System.out.println("VertexAI Gemini multi-turn streaming call took " + (System.currentTimeMillis() - start) + " ms");
+
+			String parallelizedPrompt = """
+   							What is the status of my payment transactions 002, 001 and 003?
+   							Please indicate the status for each transaction and return the results in JSON format
+   							""";
+
+			start = System.currentTimeMillis();
+			System.out.println("\nVERTEX_AI_GEMINI parallel fn calling: " + vertexAiGemini.call(
+					new Prompt(parallelizedPrompt,
+							VertexAiGeminiChatOptions.builder()
+									.withTemperature(0.2f).build())
+			).getResult().getOutput().getContent());
+
+			System.out.println("VertexAI Gemini (with parallel function calling) call took " + (System.currentTimeMillis() - start) + " ms");
+
+			start = System.currentTimeMillis();
+			geminiStream = vertexAiGemini.stream(
+					new Prompt(parallelizedPrompt,
+							VertexAiGeminiChatOptions.builder()
+									.withTemperature(0.2f).build())
+			);
+
+			geminiStream.collectList().block().stream().findFirst().ifPresent(resp -> {
+				System.out.println("\nVERTEX_AI_GEMINI (Streaming) parallel fn calling: " + resp.getResult().getOutput().getContent());
+			});
+			System.out.println("VertexAI Gemini parallel streaming call took " + (System.currentTimeMillis() - start) + " ms");
+
 		};
 	}
 
