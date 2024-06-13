@@ -19,6 +19,7 @@ import java.io.BufferedReader;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -142,13 +143,11 @@ public class DocumentEmbeddingController {
   public String tfTransformTransform(String script) {
     logger.info("tf transform flow - Model: " + model);
     long start = System.currentTimeMillis();
-    String transformScript = String.format(promptTransformTF, script);
-    // submit prompt to the LLM via LLM orchestration framework
+    List<Map<String, Object>> responseDoc = booksService.prompt("Find paragraphs mentioning Terraform best practices for general style, structure, and dependency management", 6000);
+    String transformScriptPrompt =  PromptUtility.formatPromptTF(responseDoc, promptTransformTF, script);
     logger.info("TF transform: prompt LLM: " + (System.currentTimeMillis() - start) + "ms");
-    String response = vertexAIClient.promptModel(transformScript, model);
+    String response = vertexAIClient.promptModel(transformScriptPrompt, model);
     logger.info("TF transform flow: " + (System.currentTimeMillis() - start) + "ms");
-
-    // success
     return response;
   }
 
@@ -178,7 +177,6 @@ public class DocumentEmbeddingController {
     booksService.insertPagesBook(br, bookId);
     logger.info("Embedding flow - insert book and pages: " + (System.currentTimeMillis() - start) + "ms");
 
-    // success
     return new ResponseEntity<>(HttpStatus.OK);
   }
 }

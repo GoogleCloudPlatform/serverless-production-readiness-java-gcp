@@ -46,5 +46,21 @@ class FileUtilityTest {
         String actualPublicPrivate = FileUtility.getPublicPrivate(fileName);
         assertEquals(expectedPublicPrivate, actualPublicPrivate);
     }
+
+    @Test
+    public void testGetPublicPrivateWithPDFExtension() {
+        String fileName = "book-author-year-public.pdf";
+        String expectedPublicPrivate = "public";
+        String actualPublicPrivate = FileUtility.getPublicPrivate(fileName);
+        assertEquals(expectedPublicPrivate, actualPublicPrivate);
+    }
+
+    @Test
+    public void testGetPublicPrivateWithDOCXExtension() {
+        String fileName = "book-author-year-public.DOCX";
+        String expectedPublicPrivate = "public";
+        String actualPublicPrivate = FileUtility.getPublicPrivate(fileName);
+        assertEquals(expectedPublicPrivate, actualPublicPrivate);
+    }
 }
 
