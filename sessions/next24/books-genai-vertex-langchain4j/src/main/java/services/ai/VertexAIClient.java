@@ -100,7 +100,7 @@ public class VertexAIClient {
         return output;
     }
 
-    interface Assistant {
+    public interface Assistant {
         @SystemMessage("""
             Use Multi-turn function calling.
             Answer with precision.

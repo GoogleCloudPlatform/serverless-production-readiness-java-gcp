@@ -44,8 +44,7 @@ Spring AI greatly simplifies code you need to write to support function invocati
 It brokers the function invocation conversation for you.
 You simply provide your function definition as a `@Bean` and then provide the bean name of the function in your prompt options.
 
-Lets add the boot starters for 4 AI Models that support function calling:
-
+Lets add the boot starters Gemini function calling:
 ```xml
 <dependency>
 	<groupId>org.springframework.boot</groupId>
@@ -69,19 +68,28 @@ spring.ai.vertex.ai.gemini.chat.options.functions=paymentStatus
 spring.threads.virtual.enabled=true
 ```
 
-Now you can test them with the same prompt:
-
+Now you can test with `multi-turn invocation` as well as `paralell invocation`:
 ```java
-@Bean
-ApplicationRunner applicationRunner(VertexAiGeminiChatClient vertexAiGemini) {
+    // Multi-turn invocation
+    @Bean
+    ApplicationRunner applicationRunner(VertexAiGeminiChatClient vertexAiGemini) {
+      return args -> {
+        String prompt = """
+            Please use multi-turn invocation to answer the following question:
+            What is the status of my payment transactions 002, 001 and 003?
+            Please indicate the status for each transaction and return the results in JSON format
+            """;
+    }
 
-  return args -> {
-    String prompt = """
-        Please use multi-turn invocation to answer the following question:
-        What is the status of my payment transactions 002, 001 and 003?
-        Please indicate the status for each transaction and return the results in JSON format
-        """;
-}
+    // Paralell invocation
+    @Bean
+    ApplicationRunner applicationRunner(VertexAiGeminiChatClient vertexAiGemini) {
+    return args -> {
+      String prompt = """
+          What is the status of my payment transactions 002, 001 and 003?
+          Please indicate the status for each transaction and return the results in JSON format
+          """;
+    }
 ```
 
 The output would look something like:
