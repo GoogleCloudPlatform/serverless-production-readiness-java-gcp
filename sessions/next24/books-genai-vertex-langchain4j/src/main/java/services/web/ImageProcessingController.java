@@ -25,7 +25,12 @@ import java.util.concurrent.ExecutionException;
 import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.aot.hint.ExecutableMode;
+import org.springframework.aot.hint.MemberCategory;
+import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,6 +44,7 @@ import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.WriteResult;
 import services.actuator.StartupCheck;
 import services.ai.VertexAIClient;
+import services.ai.VertexAIClient.Assistant;
 import services.config.CloudConfig;
 import services.domain.BooksService;
 import services.domain.FirestoreService;
@@ -63,6 +69,7 @@ import services.utility.RequestValidationUtility;
  */
 @RestController
 @RequestMapping("/images")
+@ImportRuntimeHints(ImageProcessingController.FunctionCallingRuntimeHints.class)
 public class ImageProcessingController {
     private static final Logger logger = LoggerFactory.getLogger(ImageProcessingController.class);
 
@@ -158,4 +165,30 @@ public class ImageProcessingController {
         }
         public record BookStoreResponse(String title, String author, String availability) {}
     }
+
+	public static class FunctionCallingRuntimeHints implements RuntimeHintsRegistrar {
+		@Override
+		public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+			try {
+				// Register all the classes and methods that are used through reflection
+				// or dynamic proxy generation in LangChain4j, especially those
+				// related to function calling.
+				// Register method for reflection
+				var mcs = MemberCategory.values();
+				hints.reflection().registerType(Assistant.class, mcs);
+				hints.proxies().registerJdkProxy(Assistant.class);
+				hints.reflection().registerType(BookStoreService.class, mcs);
+
+				hints.reflection().registerMethod(
+                    BookStoreService.class.getMethod("getBookAvailability", String.class, String.class),
+						ExecutableMode.INVOKE
+				);
+
+				// ... register other necessary classes and methods ...
+			} catch (NoSuchMethodException e) {
+				// Handle the exception appropriately (e.g., log it)
+				e.printStackTrace();
+			}
+		}
+	}    
 }

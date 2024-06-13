@@ -34,8 +34,8 @@ spring:
     password: ${MY_PASSWORD}
   cloud:
     config:
-      modelAnalysisName: ${MODEL_ANALYSIS_NAME:gemini-pro}
-      modelImageProName: ${MODEL_IMAGE_PRO_NAME:gemini-pro-vision}
+      modelAnalysisName: ${MODEL_ANALYSIS_NAME:gemini-1.5-flash-001}
+      modelImageProName: ${MODEL_IMAGE_PRO_NAME:gemini-1.5-flash-001}
   ai:
     vertex:
       ai:
