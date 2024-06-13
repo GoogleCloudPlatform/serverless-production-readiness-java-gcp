@@ -32,6 +32,7 @@ import services.ai.VertexAIClient;
 import services.config.CloudConfig;
 import services.domain.BooksService;
 import services.domain.CloudStorageService;
+import services.utility.PromptUtility;
 import services.utility.RequestValidationUtility;
 
 /**
@@ -138,15 +139,13 @@ public class DocumentEmbeddingController {
   }
 
   public String tfTransformTransform(String script) {
-    logger.info("tf transform flow");
+    logger.info("tf transform flow -");
     long start = System.currentTimeMillis();
-    String transformScript = String.format(promptTransformTF, script);
-    // submit prompt to the LLM via LLM orchestration framework
+    List<Map<String, Object>> responseDoc = booksService.prompt("Find paragraphs mentioning Terraform best practices for general style, structure, and dependency management", 6000);
+    String transformScriptPrompt =  PromptUtility.formatPromptTF(responseDoc, promptTransformTF, script);
     logger.info("TF transform: prompt LLM: " + (System.currentTimeMillis() - start) + "ms");
-    String response = vertexAIClient.promptModel(transformScript);
+    String response = vertexAIClient.promptModel(transformScriptPrompt);
     logger.info("TF transform flow: " + (System.currentTimeMillis() - start) + "ms");
-
-    // success
     return response;
   }
 
