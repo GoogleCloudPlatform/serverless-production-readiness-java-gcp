@@ -10,15 +10,11 @@ In this sample, generative models are used to summarize text, using the followin
 * Refine method with Separate Chunks method
 * Refine method with Overlapping Summary methods
 * Map-reduce method with Separate Chunks method
-* Map-reduce method with Rolling Summary method
+* Map-reduce method with Overlapping Chunks method
 
 __Environment__:
 Please set the following environment variables before running this example:
 ```shell
-export VERTEX_AI_GEMINI_PROJECT_ID=<your project id>
-export VERTEX_AI_GEMINI_LOCATION=<region, ex us-central1>
-export VERTEX_AI_GEMINI_MODEL=<the model in use, ex.gemini-1.5-flash-001>
-
 export CHUNK_SIZE=<chunk size in characters> - default of 10000 provided if not set 
 export OVERLAP_SIZE=<overlap window in characters> - default of 500 provided if not set
 ```

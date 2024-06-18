@@ -25,11 +25,11 @@ public class OllamaContainerTest {
 
     @Test
     public void downloadModelAndCommitToImage() throws IOException, InterruptedException {
-        String newImageName = "tc-ollama-gemma-2b";
+        String newImageName = "tc-ollama-gemma-7b";
         try (OllamaContainer ollama = new OllamaContainer("ollama/ollama:0.1.26")) {
             ollama.start();
             // pullModel {
-            ollama.execInContainer("ollama", "pull", "gemma:2b");
+            ollama.execInContainer("ollama", "pull", "gemma:7b");
             // }
 
             String modelName = given()

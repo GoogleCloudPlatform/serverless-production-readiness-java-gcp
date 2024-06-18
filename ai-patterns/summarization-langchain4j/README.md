@@ -10,7 +10,7 @@ In this sample, generative models are used to summarize text, using the followin
 * Refine method with Separate Chunks method
 * Refine method with Overlapping Summary methods
 * Map-reduce method with Separate Chunks method
-* Map-reduce method with Rolling Summary method
+* Map-reduce method with Overlapping Chunks method
 
 __Environment__:
 Please set the following environment variables before running this example:

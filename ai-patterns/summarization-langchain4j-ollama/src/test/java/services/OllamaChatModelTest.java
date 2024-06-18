@@ -84,7 +84,7 @@ public class OllamaChatModelTest {
     }
 
     static Path toPath(String fileName) {
-            return Paths.get("src","test","resources", fileName);
+            return Paths.get("src","test","resources/books", fileName);
     }
 
     @Test

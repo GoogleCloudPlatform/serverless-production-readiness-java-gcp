@@ -51,9 +51,6 @@ import org.testcontainers.utility.DockerImageName;
 
 @SpringBootTest
 @ActiveProfiles(value = "test")
-@EnabledIfEnvironmentVariable(named = "VERTEX_AI_GEMINI_PROJECT_ID", matches = ".*")
-@EnabledIfEnvironmentVariable(named = "VERTEX_AI_GEMINI_LOCATION", matches = ".*")
-@EnabledIfEnvironmentVariable(named = "VERTEX_AI_GEMINI_MODEL", matches = ".*")
 public class SummarizationTests {
     @Autowired
     private ChatLanguageModel chatModel;
@@ -66,7 +63,8 @@ public class SummarizationTests {
 
     @Container
     static OllamaContainer ollama = new OllamaContainer(
-        DockerImageName.parse("ghcr.io/thomasvitale/ollama-llama3:sha-23a050392a24280f642d1b826099ad18d4e0cdf5")
+        //        DockerImageName.parse("tc-ollama-gemma-7b")
+        DockerImageName.parse("ghcr.io/thomasvitale/ollama-llama3")
 					.asCompatibleSubstituteFor("ollama/ollama"));
 
     static String baseUrl() {
@@ -98,7 +96,7 @@ public class SummarizationTests {
     public interface FinalSummarizationAssistant {
         @SystemMessage("""
         You are a helpful AI assistant.
-        You are an AI assistant that helps people summarize information.
+        You are an AI assistant that helps people summarize inforzmation.
         Your name is Gemini
         You should reply to the user's request with your name and also in the style of a literary critic
         Strictly ignore Project Gutenberg & ignore copyright notice in summary output.
@@ -274,11 +272,13 @@ public class SummarizationTests {
     public static class TestConfiguration {
         @Bean
         public ChatLanguageModel ollamaChatModel() {
+            ollama.start();
+
             return OllamaChatModel.builder()
                 .baseUrl(baseUrl())
                 .modelName("llama3")
                 .temperature(0.2)
-                .timeout(ofSeconds(100))
+                .timeout(ofSeconds(200))
                 .build();
         }
     }
