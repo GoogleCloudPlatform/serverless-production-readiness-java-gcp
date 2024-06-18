@@ -9,15 +9,15 @@
     <version>3.3.0</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
-  <artifactId>summarization-spring-ai</artifactId>
+  <artifactId>summarization-langchain4j</artifactId>
   <version>1.0.0-SNAPSHOT</version>
-  <name>summarization-spring-ai</name>
-  <description>Spring App for Summarization</description>
+  <name>summarization-langchain4j</name>
+  <description>Langchain4J App for Summarization</description>
   <properties>
     <java.version>21</java.version>
     <spring-cloud.version>2023.0.1</spring-cloud.version>
     <testcontainers.version>1.19.8</testcontainers.version>
-    <spring-ai.version>1.0.0-SNAPSHOT</spring-ai.version>
+    <langchain4j.version>0.31.0</langchain4j.version>
   </properties>
 
   <dependencies>
@@ -32,14 +32,6 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-actuator</artifactId>
-    </dependency>
-		<dependency>
-			<groupId>org.springframework.ai</groupId>
-			<artifactId>spring-ai-vertex-ai-gemini-spring-boot-starter</artifactId>
-		</dependency>    
-    <dependency>
-      <groupId>org.springframework.ai</groupId>
-      <artifactId>spring-ai-ollama-spring-boot-starter</artifactId>
     </dependency>
 
     <dependency>
@@ -69,13 +61,26 @@
           </exclusion>
         </exclusions>
     </dependency>
+    <!-- langchain4j dependencies -->
     <dependency>
-      <groupId>org.springframework.ai</groupId>
-      <artifactId>spring-ai-core</artifactId>
+      <groupId>dev.langchain4j</groupId>
+      <artifactId>langchain4j-spring-boot-starter</artifactId>
+      <version>${langchain4j.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.springframework.ai</groupId>
-      <artifactId>spring-ai-retry</artifactId>
+      <groupId>dev.langchain4j</groupId>
+      <artifactId>langchain4j-vertex-ai-gemini</artifactId>
+      <version>${langchain4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>dev.langchain4j</groupId>
+      <artifactId>langchain4j</artifactId>
+      <version>${langchain4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>dev.langchain4j</groupId>
+      <artifactId>langchain4j-core</artifactId>
+      <version>${langchain4j.version}</version>
     </dependency>
 
     <!-- Test -->
@@ -89,20 +94,10 @@
       <artifactId>spring-boot-testcontainers</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.testcontainers</groupId>
-      <artifactId>ollama</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>io.rest-assured</groupId>
       <artifactId>rest-assured</artifactId>
       <version>5.4.0</version>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.ai</groupId>
-      <artifactId>spring-ai-ollama</artifactId>
-      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
@@ -116,20 +111,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.springframework.ai</groupId>
-      <artifactId>spring-ai-spring-boot-testcontainers</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
         <groupId>org.junit.jupiter</groupId>
         <artifactId>junit-jupiter-engine</artifactId>
         <version>5.9.2</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-jdbc</artifactId>
-      <version>6.1.1</version>
     </dependency>
   </dependencies>
 
@@ -218,13 +202,6 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-			<dependency>
-				<groupId>org.springframework.ai</groupId>
-				<artifactId>spring-ai-bom</artifactId>
-				<version>${spring-ai.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>      
     </dependencies>
   </dependencyManagement>
 </project>
