@@ -1,9 +1,27 @@
 # Summarization Techniques - Langchain4J, VertexAI, Gemini
 
-## This document is being updated at this time, treat it is WIP!
+__Use Case__:
+Text summarization is the process of creating a shorter version of a text document while still preserving the most important information. 
+This can be useful for a variety of purposes, such as quickly skimming a long document, getting the gist of an article, or sharing a summary with others.
 
-This lab can be executed directly in a Cloud Workstation, Cloudshell or your environment of choice. 
-[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/serverless-photosharing-workshop.git)
+__Summarization Techniques__:
+In this sample, generative models are used to summarize text, using the following patterns:
+* Prompt Stuffing method
+* Refine method with Separate Chunks method
+* Refine method with Overlapping Summary methods
+* Map-reduce method with Separate Chunks method
+* Map-reduce method with Rolling Summary method
+
+__Environment__:
+Please set the following environment variables before running this example:
+```shell
+export VERTEX_AI_GEMINI_PROJECT_ID=<your project id>
+export VERTEX_AI_GEMINI_LOCATION=<region, ex us-central1>
+export VERTEX_AI_GEMINI_MODEL=<the model in use, ex.gemini-1.5-flash-001>
+
+export CHUNK_SIZE=<chunk size in characters> - default of 10000 provided if not set 
+export OVERLAP_SIZE=<overlap window in characters> - default of 500 provided if not set
+```
 
 ## Setup Java ecosystem
 In order to build JIT or Native Java app images, please set up Java (OpenJDK or GraalVM) with the associated Java 21 distributions.
