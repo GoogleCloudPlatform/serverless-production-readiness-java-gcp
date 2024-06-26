@@ -1,4 +1,7 @@
-# Summarization Techniques - Langchain4J, VertexAI, Gemini
+# Summarization Techniques - Langchain4J, OpenAI API
+
+__Note__:
+This sample is WIP as a test of the OpenAI API. It will change shortly
 
 __Use Case__:
 Text summarization is the process of creating a shorter version of a text document while still preserving the most important information. 
@@ -15,9 +18,7 @@ In this sample, generative models are used to summarize text, using the followin
 __Environment__:
 Please set the following environment variables before running this example:
 ```shell
-export VERTEX_AI_GEMINI_PROJECT_ID=<your project id>
-export VERTEX_AI_GEMINI_LOCATION=<region, ex us-central1>
-export VERTEX_AI_GEMINI_MODEL=<the model in use, ex.gemini-1.5-flash-001>
+export OPENAI_API_KEY=<your-openai-key>
 
 export CHUNK_SIZE=<chunk size in characters> - default of 10000 provided if not set 
 export OVERLAP_SIZE=<overlap window in characters> - default of 500 provided if not set

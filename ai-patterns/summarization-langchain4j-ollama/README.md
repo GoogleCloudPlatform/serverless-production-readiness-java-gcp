@@ -1,4 +1,4 @@
-# Summarization Techniques - Langchain4J, VertexAI, Gemini
+# Summarization Techniques - Langchain4J, Ollama and LLama3
 
 __Use Case__:
 Text summarization is the process of creating a shorter version of a text document while still preserving the most important information. 
@@ -15,10 +15,6 @@ In this sample, generative models are used to summarize text, using the followin
 __Environment__:
 Please set the following environment variables before running this example:
 ```shell
-export VERTEX_AI_GEMINI_PROJECT_ID=<your project id>
-export VERTEX_AI_GEMINI_LOCATION=<region, ex us-central1>
-export VERTEX_AI_GEMINI_MODEL=<the model in use, ex.gemini-1.5-flash-001>
-
 export CHUNK_SIZE=<chunk size in characters> - default of 10000 provided if not set 
 export OVERLAP_SIZE=<overlap window in characters> - default of 500 provided if not set
 ```
@@ -34,7 +30,7 @@ sdk install java 21.0.3-graal
 ## Clone the code:
 ```shell
 git clone https://github.com/GoogleCloudPlatform/serverless-production-readiness-java-gcp.git
-cd serverless-production-readiness-java-gcp/workshops/summarization-langchain4j
+cd serverless-production-readiness-java-gcp/workshops/summarization-langchain4j-ollama
 ```
 
 ## Install the maven wrapper
