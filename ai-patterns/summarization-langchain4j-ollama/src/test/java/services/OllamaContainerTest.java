@@ -10,26 +10,36 @@ import org.testcontainers.utility.DockerImageName;
 
 public class OllamaContainerTest {
 
+    //    public static final String GEMMA_7_B = "gemma:7b";
+    public static final String MODEL = "gemma2";
+    public static final String MODEL_VALIDATION = "gemma2";
+
+    public static final String OLLAMA = "ollama/ollama:0.1.48";
+    public static final String OLLAMA_VERSION = "0.1.48";
+
+    //    public static final String MODEL_IMAGE_NAME = "tc-ollama-gemma-7b";
+    public static final String MODEL_IMAGE_NAME = "tc-ollama-gemma2";
+
     @Test
     public void withDefaultConfig() {
         try ( // container {
-            OllamaContainer ollama = new OllamaContainer("ollama/ollama:0.1.26")
+            OllamaContainer ollama = new OllamaContainer(OLLAMA)
             // }
         ) {
             ollama.start();
 
             String version = given().baseUri(ollama.getEndpoint()).get("/api/version").jsonPath().get("version");
-            assertThat(version).isEqualTo("0.1.26");
+            assertThat(version).isEqualTo(OLLAMA_VERSION);
         }
     }
 
     @Test
     public void downloadModelAndCommitToImage() throws IOException, InterruptedException {
-        String newImageName = "tc-ollama-gemma-7b";
-        try (OllamaContainer ollama = new OllamaContainer("ollama/ollama:0.1.26")) {
+        String newImageName = MODEL_IMAGE_NAME;
+        try (OllamaContainer ollama = new OllamaContainer(OLLAMA)) {
             ollama.start();
             // pullModel {
-            ollama.execInContainer("ollama", "pull", "gemma:7b");
+            ollama.execInContainer("ollama", "pull", MODEL);
             // }
 
             String modelName = given()
@@ -37,7 +47,7 @@ public class OllamaContainerTest {
                 .get("/api/tags")
                 .jsonPath()
                 .getString("models[0].name");
-            assertThat(modelName).contains("gemma");
+            assertThat(modelName).contains(MODEL_VALIDATION);
             // commitToImage {
             ollama.commitToImage(newImageName);
             // }
@@ -55,7 +65,7 @@ public class OllamaContainerTest {
                 .get("/api/tags")
                 .jsonPath()
                 .getString("models[0].name");
-            assertThat(modelName).contains("gemma");
+            assertThat(modelName).contains(MODEL_VALIDATION);
         }
     }
 }
