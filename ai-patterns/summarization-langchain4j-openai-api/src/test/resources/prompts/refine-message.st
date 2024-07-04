@@ -1,2 +1,0 @@
-"Taking the following context delimited by triple backquotes into consideration ```{context}```,
-Write a concise summary, covering the key points of the following text delimited by triple backquotes. ```${content}``` CONCISE SUMMARY:}

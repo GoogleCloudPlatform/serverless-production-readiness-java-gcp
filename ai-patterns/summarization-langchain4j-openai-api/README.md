@@ -1,11 +1,14 @@
-# Summarization Techniques - Langchain4J, OpenAI API
-
-__Note__:
-This sample is WIP as a test of the OpenAI API. It will change shortly
+# Summarization Techniques - Langchain4J, OpenAI API support
 
 __Use Case__:
 Text summarization is the process of creating a shorter version of a text document while still preserving the most important information. 
 This can be useful for a variety of purposes, such as quickly skimming a long document, getting the gist of an article, or sharing a summary with others.
+
+__Which inference platforms are supported in this example__:
+The OpenAI API is supported by multiple inference platforms.  This example explores the following, with their respective usage instructions for usage from a Langchain4J codebase:
+* Open LLM deployed in GKE and exposed by [vLLM](https://docs.vllm.ai/en/latest/index.html) with an [OpenAI Compatible Server](https://docs.vllm.ai/en/latest/serving/openai_compatible_server.html)
+* Gemini using the [OpenAI API](https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/call-gemini-using-openai-library)
+If you are not using the OpenAI API, the recommended approach is to call Gemini using the Vertex SDK for Java, as illustrated in this [example](https://github.com/GoogleCloudPlatform/serverless-production-readiness-java-gcp/tree/main/ai-patterns/summarization-langchain4j)
 
 __Summarization Techniques__:
 In this sample, generative models are used to summarize text, using the following patterns:
@@ -48,5 +51,5 @@ mvn wrapper:wrapper
 
 Run the summarization tests from the command-line with the following command:
 ```shell
-./mvnw verify
+./mvnw test
 ```
