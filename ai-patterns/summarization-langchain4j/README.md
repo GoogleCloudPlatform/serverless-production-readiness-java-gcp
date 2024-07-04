@@ -29,6 +29,8 @@ A simple installer is available from [SDKMan](https://sdkman.io/install) for bot
 
 ```shell
 sdk install java 21.0.3-graal
+or 
+sdk install java 21.0.3-tem
 ```
 
 ## Clone the code:
@@ -47,5 +49,5 @@ mvn wrapper:wrapper
 
 Run the summarization tests from the command-line with the following command:
 ```shell
-./mvnw verify
+./mvnw clean test
 ```
