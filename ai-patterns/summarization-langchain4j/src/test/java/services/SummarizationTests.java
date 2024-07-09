@@ -16,6 +16,11 @@
 package services;
 
 import static dev.langchain4j.data.document.loader.FileSystemDocumentLoader.loadDocument;
+
+import com.google.cloud.vertexai.api.CountTokensResponse;
+import com.google.cloud.vertexai.generativeai.GenerativeModel;
+import com.google.cloud.vertexai.VertexAI;
+
 import dev.langchain4j.data.document.DocumentSplitter;
 import dev.langchain4j.data.document.parser.TextDocumentParser;
 import dev.langchain4j.data.document.splitter.DocumentByParagraphSplitter;
@@ -24,6 +29,7 @@ import dev.langchain4j.model.vertexai.VertexAiGeminiChatModel;
 import dev.langchain4j.data.document.Document;
 import dev.langchain4j.service.*;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -254,6 +260,22 @@ public class SummarizationTests {
 
         outputWithIndex.put(index, content.toString());
         return outputWithIndex;
+    }
+
+    @Test
+    public void testGetTokenCount() throws IOException {
+        try (VertexAI vertexAI = new VertexAI(System.getenv("VERTEX_AI_GEMINI_PROJECT_ID"),
+                                              System.getenv("VERTEX_AI_GEMINI_LOCATION"))) {
+            GenerativeModel model = new GenerativeModel(System.getenv("VERTEX_AI_GEMINI_MODEL"), vertexAI);
+
+            // load the document
+            Document document = loadDocument(resource, new TextDocumentParser());
+
+            // count tokens using the model of choice
+            CountTokensResponse response = model.countTokens(document.text());
+            System.out.printf("\nTotal tokens in text: %d", response.getTotalTokens());
+            System.out.printf("\nTotal billable characters in text: %d", response.getTotalBillableCharacters());
+        }
     }
 
     // --- set the test configuration up ---
