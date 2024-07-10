@@ -16,6 +16,11 @@
 package services;
 
 import static dev.langchain4j.data.document.loader.FileSystemDocumentLoader.loadDocument;
+
+import com.google.cloud.vertexai.api.CountTokensResponse;
+import com.google.cloud.vertexai.generativeai.GenerativeModel;
+import com.google.cloud.vertexai.VertexAI;
+
 import dev.langchain4j.data.document.DocumentSplitter;
 import dev.langchain4j.data.document.parser.TextDocumentParser;
 import dev.langchain4j.data.document.splitter.DocumentByParagraphSplitter;
@@ -24,6 +29,7 @@ import dev.langchain4j.model.vertexai.VertexAiGeminiChatModel;
 import dev.langchain4j.data.document.Document;
 import dev.langchain4j.service.*;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,8 +61,10 @@ public class SummarizationTests {
     @Value("classpath:/books/The_Wasteland-TSEliot-public.txt")
     private Path resource;
 
-    private static final int CHUNK_SIZE = Integer.parseInt(System.getenv().getOrDefault("CHUNK_SIZE", "10000"));  // Number of words in each chunk
-    private static final int OVERLAP_SIZE = Integer.parseInt(System.getenv().getOrDefault("OVERLAP_SIZE", "500")); // Number of words between chunks
+    public static final String DEFAULT_CHUNK_SIZE = "10000";
+    private static final int CHUNK_SIZE = Integer.parseInt(System.getenv().getOrDefault("CHUNK_SIZE", DEFAULT_CHUNK_SIZE));  // Number of words in each chunk
+    public static final String DEFAULT_OVERLAP_SIZE = "500";
+    private static final int OVERLAP_SIZE = Integer.parseInt(System.getenv().getOrDefault("OVERLAP_SIZE", DEFAULT_OVERLAP_SIZE)); // Number of words between chunks
 
     /*
         AI Services for summarization helper methods
@@ -254,11 +262,27 @@ public class SummarizationTests {
         return outputWithIndex;
     }
 
+    @Test
+    public void testGetTokenCount() throws IOException {
+        try (VertexAI vertexAI = new VertexAI(System.getenv("VERTEX_AI_GEMINI_PROJECT_ID"),
+                                              System.getenv("VERTEX_AI_GEMINI_LOCATION"))) {
+            GenerativeModel model = new GenerativeModel(System.getenv("VERTEX_AI_GEMINI_MODEL"), vertexAI);
+
+            // load the document
+            Document document = loadDocument(resource, new TextDocumentParser());
+
+            // count tokens using the model of choice
+            CountTokensResponse response = model.countTokens(document.text());
+            System.out.printf("\nTotal tokens in text: %d", response.getTotalTokens());
+            System.out.printf("\nTotal billable characters in text: %d", response.getTotalBillableCharacters());
+        }
+    }
+
     // --- set the test configuration up ---
     @SpringBootConfiguration
     public static class TestConfiguration {
         @Bean
-        public VertexAiGeminiChatModel vertexAiEmbedding() {
+        public VertexAiGeminiChatModel vertexAiChatModel() {
             return VertexAiGeminiChatModel.builder()
                 .project(System.getenv("VERTEX_AI_GEMINI_PROJECT_ID"))
                 .location(System.getenv("VERTEX_AI_GEMINI_LOCATION"))

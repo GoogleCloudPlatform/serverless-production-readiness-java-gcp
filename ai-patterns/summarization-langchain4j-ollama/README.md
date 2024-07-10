@@ -1,4 +1,4 @@
-# Summarization Techniques - Langchain4J, Ollama and LLama3
+# Summarization Techniques - Local deployment - Langchain4J, Ollama
 
 __Use Case__:
 Text summarization is the process of creating a shorter version of a text document while still preserving the most important information. 

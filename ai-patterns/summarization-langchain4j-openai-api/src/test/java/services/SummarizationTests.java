@@ -16,8 +16,9 @@
 package services;
 
 import static dev.langchain4j.data.document.loader.FileSystemDocumentLoader.loadDocument;
-import static dev.langchain4j.model.openai.OpenAiChatModelName.GPT_4_O;
 
+import com.google.auth.oauth2.AccessToken;
+import com.google.auth.oauth2.GoogleCredentials;
 import dev.langchain4j.data.document.DocumentSplitter;
 import dev.langchain4j.data.document.parser.TextDocumentParser;
 import dev.langchain4j.data.document.splitter.DocumentByParagraphSplitter;
@@ -26,8 +27,11 @@ import dev.langchain4j.model.openai.OpenAiChatModel;
 import dev.langchain4j.data.document.Document;
 import dev.langchain4j.service.*;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +50,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @ActiveProfiles(value = "test")
-@EnabledIfEnvironmentVariable(named = "OPENAI_API_KEY", matches = ".*")
+// @EnabledIfEnvironmentVariable(named = "OPENAI_API_KEY", matches = ".*")
 public class SummarizationTests {
 
     @Autowired
@@ -254,19 +258,89 @@ public class SummarizationTests {
         return outputWithIndex;
     }
 
-    // --- set the test configuration up ---
+    private static String getToken(String target) throws IOException {
+        // Load credentials from the environment (default)
+        GoogleCredentials credentials = GoogleCredentials.getApplicationDefault()
+            .createScoped(Collections.singleton(target));
+
+        // Refresh the token
+        credentials.refreshIfExpired();
+
+        // Get the access token
+        AccessToken accessToken = credentials.getAccessToken();
+        String tokenValue = accessToken.getTokenValue();
+
+        // Log the token value (consider removing in production)
+        System.out.println("Access Token: " + tokenValue);
+
+        return tokenValue;
+    }
+
+    // private static String getToken(String target) throws IOException {
+    //     // Load credentials from the environment (default)
+    //     GoogleCredentials credentials = GoogleCredentials.getApplicationDefault();
+    //
+    //     // Refresh if necessary
+    //     if (credentials.getAccessToken() == null || credentials.getAccessToken().getExpirationTime().before(new Date())) {
+    //         credentials.refresh();
+    //     }
+    //
+    //     // Get the access token
+    //     AccessToken accessToken = credentials.getAccessToken();
+    //     System.out.println("Access Token: " + accessToken.getTokenValue());
+    //
+    //     return accessToken.getTokenValue();
+    // }
+    // --- set the test configuration up for accessing Gemini using the OpenAI API ---
     @SpringBootConfiguration
     public static class TestConfiguration {
         @Bean
-        public OpenAiChatModel modelEmbedding() {
+        public OpenAiChatModel modelEmbedding() throws IOException {
+            String url = "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/optimize-serverless-apps/locations/us-central1/endpoints/openapi";
+            String token = getToken(url);
+            String model = "google/gemini-1.5-flash-001";
+            Integer maxToken = 4096;
+
             return OpenAiChatModel.builder()
-                .apiKey(System.getenv("OPENAI_API_KEY"))
-                .modelName(GPT_4_O)
-                .maxTokens(4096)
+                .apiKey(token)
+                .baseUrl(url)
+                .modelName(model)
+                // .maxTokens(maxToken)
                 .temperature(0.2)
                 .logRequests(true)
                 .logResponses(true)
+                .maxRetries(1)
                 .build();
         }
     }
+
+    // --- set the test configuration up ---
+
+    // @SpringBootConfiguration
+    // public static class TestConfiguration {
+    //     @Bean
+    //     public OpenAiChatModel modelEmbedding() throws IOException {
+    //         // String url = <URL of inference service deployed in GKE>;
+    //         // String model = <your model deployed in GKE>
+    //         // String maxToken = <max tokens supported by the model in use
+    //         // ex
+    //         String url = System.getenv("LLM_ENDPOINT");
+    //         String model = System.getenv("VERTEX_AI_GEMINI_MODEL");
+    //         Integer maxToken = Integer.parseInt(System.getenv().getOrDefault("MAX_TOKENS", "1024"));
+    //         String apiKey = "EMPTY";
+    //
+    //         return OpenAiChatModel.builder()
+    //             .apiKey(apiKey)
+    //             .baseUrl(url)
+    //             .modelName(model)
+    //             .maxTokens(Integer.valueOf(maxToken))
+    //             .temperature(0.2)
+    //             .logRequests(true)
+    //             .logResponses(true)
+    //             .maxRetries(1)
+    //             .timeout(Duration.ofSeconds(180))
+    //             .build();
+    //     }
+    // }
+
 }

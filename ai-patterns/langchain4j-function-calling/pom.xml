@@ -18,7 +18,7 @@
 
 	<properties>
 		<java.version>21</java.version>
-		<langchain4j.version>0.31.0</langchain4j.version>
+		<langchain4j.version>0.32.0</langchain4j.version>
 	</properties>
 
 	<dependencyManagement>
@@ -28,7 +28,7 @@
 				<artifactId>libraries-bom</artifactId>
 				<scope>import</scope>
 				<type>pom</type>
-				<version>26.39.0</version>
+				<version>26.43.0</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

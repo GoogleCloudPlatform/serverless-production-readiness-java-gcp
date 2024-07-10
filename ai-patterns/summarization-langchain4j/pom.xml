@@ -15,9 +15,8 @@
   <description>Langchain4J App for Summarization</description>
   <properties>
     <java.version>21</java.version>
-    <spring-cloud.version>2023.0.1</spring-cloud.version>
     <testcontainers.version>1.19.8</testcontainers.version>
-    <langchain4j.version>0.31.0</langchain4j.version>
+    <langchain4j.version>0.32.0</langchain4j.version>
   </properties>
 
   <dependencies>
@@ -26,40 +25,8 @@
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.springframework.cloud</groupId>
-      <artifactId>spring-cloud-function-web</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-actuator</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>com.google.cloud</groupId>
-      <artifactId>google-cloud-vision</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.google.cloud</groupId>
-      <artifactId>google-cloud-storage</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.google.api</groupId>
-      <artifactId>gax-grpc</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.google.cloud</groupId>
-      <artifactId>google-cloud-aiplatform</artifactId>
-    </dependency>
-
-    <dependency>
-        <groupId>com.google.cloud</groupId>
-        <artifactId>google-cloud-vertexai</artifactId>
-        <exclusions>
-          <exclusion>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-          </exclusion>
-        </exclusions>
     </dependency>
     <!-- langchain4j dependencies -->
     <dependency>
@@ -70,11 +37,6 @@
     <dependency>
       <groupId>dev.langchain4j</groupId>
       <artifactId>langchain4j-vertex-ai-gemini</artifactId>
-      <version>${langchain4j.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>dev.langchain4j</groupId>
-      <artifactId>langchain4j</artifactId>
       <version>${langchain4j.version}</version>
     </dependency>
     <dependency>
@@ -182,13 +144,6 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.springframework.cloud</groupId>
-        <artifactId>spring-cloud-dependencies</artifactId>
-        <version>${spring-cloud.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
         <groupId>org.testcontainers</groupId>
         <artifactId>testcontainers-bom</artifactId>
         <version>${testcontainers.version}</version>
@@ -198,7 +153,7 @@
       <dependency>
         <groupId>com.google.cloud</groupId>
         <artifactId>libraries-bom</artifactId>
-        <version>26.39.0</version>
+        <version>26.43.0</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
