@@ -1,0 +1,171 @@
+openapi: 3.0.0
+info:
+  title: Quote API
+  description: API for managing quotes
+  version: 1.0.0 # Adjust as needed
+
+servers:
+- url: http://localhost:8080/ # Replace with the base URL of your application
+
+tags:
+- name: quote-operations
+  description: Operations related to quote management
+
+paths:
+  /start:
+    get:
+      tags:
+      - quote-operations
+      summary: Basic endpoint to check controller status
+      description: Returns a text message confirming the QuoteController is operational.
+      responses:
+        '200':
+          description: Successful response
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  /random-quote:
+    get:
+      tags:
+      - quote-operations
+      summary: Retrieves a random quote
+      description: Fetches a randomly selected quote from the data store.
+      responses:
+        '200':
+          description: Successful retrieval of a random quote
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quote'
+        '500':
+          description: Internal server error
+
+  /quotes:
+    get:
+      tags:
+      - quote-operations
+      summary: Retrieves all quotes
+      description: Returns a list of all the quotes stored in the system.
+      responses:
+        '200':
+          description: Successful retrieval of all quotes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Quote'
+        '204':
+          description: No quotes found
+        '500':
+          description: Internal server error
+
+    post:
+      tags:
+      - quote-operations
+      summary: Creates a new quote
+      description: Adds a new quote to the data store.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Quote'
+      responses:
+        '201':
+          description: Quote created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quote'
+        '500':
+          description: Internal server error
+
+  /quotes/author/{author}:
+    get:
+      tags:
+      - quote-operations
+      summary: Gets quotes by a specific author
+      description: Retrieves a list of quotes associated with the provided author's name.
+      parameters:
+      - in: path
+        name: author
+        required: true
+        schema:
+          type: string
+        description: The author name to search for
+      responses:
+        '200':
+          description: Successful retrieval of quotes by author
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Quote'
+        '404':
+          description: Author not found
+        '500':
+          description: Internal server error
+
+  /quotes/{id}:
+    put:
+      tags:
+      - quote-operations
+      summary: Updates a quote
+      description: Modifies the content of an existing quote identified by its ID.
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Quote'
+      responses:
+        '200':
+          description: Quote updated successfully
+        '404':
+          description: Quote not found
+        '500':
+          description: Internal server error
+
+    delete:
+      tags:
+      - quote-operations
+      summary: Deletes a quote
+      description: Removes a quote identified by its ID from the data store.
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '204':
+          description: Quote deleted successfully
+        '404':
+          description: Quote not found
+        '500':
+          description: Internal server error
+
+components:
+  schemas:
+    Quote:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        author:
+          type: string
+        quote:
+          type: string
