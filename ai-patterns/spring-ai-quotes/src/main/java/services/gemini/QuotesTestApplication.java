@@ -15,6 +15,8 @@
  */
 package services.gemini;
 
+import org.springframework.ai.anthropic.AnthropicChatModel;
+import org.springframework.ai.anthropic.AnthropicChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatModel;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatOptions;
@@ -28,7 +30,8 @@ import org.springframework.context.annotation.Bean;
 public class QuotesTestApplication {
 	@Bean
 	ApplicationRunner applicationRunner(
-			VertexAiGeminiChatModel geminiChatModel) {
+			VertexAiGeminiChatModel geminiChatModel,
+			AnthropicChatModel anthropicChatModel) {
 
 		return args -> {
 			String book = "The Jungle Book";
@@ -36,6 +39,7 @@ public class QuotesTestApplication {
 			// String prompt = String.format("You are an experienced literary critic. Please write a summary of the book %s", book);
 			String prompt = String.format("You are an experienced literary critic. Please extract a famous quote from the book %s", book);
 
+			// test against Gemini (Flash|Pro) 1.5
 			long start = System.currentTimeMillis();
 			System.out.println("VERTEX_AI_GEMINI: " + geminiChatModel
 					.call(
@@ -44,6 +48,18 @@ public class QuotesTestApplication {
 											.withTemperature(0.2f).build())
 					).getResult().getOutput().getContent());
 			System.out.println("VertexAI Gemini call took " + (System.currentTimeMillis() - start) + " ms");
+
+			// test against Anthropic SONNET (3.5)
+			start = System.currentTimeMillis();
+			System.out.println(System.getenv("ANTHROPIC_API_KEY"));
+			System.out.println("ANTHROPIC_SONNET: " + anthropicChatModel
+					.call(
+							new Prompt(prompt,
+									AnthropicChatOptions.builder()
+											.withTemperature(0.2f).build())
+					).getResult().getOutput().getContent());
+			System.out.println("Anthropic SONNET call took " + (System.currentTimeMillis() - start) + " ms");
+
 		};
 	}
 
