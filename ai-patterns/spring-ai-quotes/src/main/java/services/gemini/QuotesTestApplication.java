@@ -51,7 +51,6 @@ public class QuotesTestApplication {
 
 			// test against Anthropic SONNET (3.5)
 			start = System.currentTimeMillis();
-			System.out.println(System.getenv("ANTHROPIC_API_KEY"));
 			System.out.println("ANTHROPIC_SONNET: " + anthropicChatModel
 					.call(
 							new Prompt(prompt,
