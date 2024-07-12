@@ -38,8 +38,8 @@ import org.testcontainers.utility.DockerImageName;
 @Testcontainers
 @SpringBootTest
 public class OllamaChatModelTest {
-    static String MODEL_NAME = "gemma:7b";
-    static String imageName = "tc-ollama-gemma-7b";
+    static String MODEL_NAME = "gemma2";
+    static String imageName = "tc-ollama-gemma2";
 
     static OllamaApi ollamaApi;
 

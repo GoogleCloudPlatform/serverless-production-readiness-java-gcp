@@ -61,11 +61,14 @@ public class SummarizationTests {
     private static final int CHUNK_SIZE = Integer.parseInt(System.getenv().getOrDefault("CHUNK_SIZE", "10000"));  // Number of words in each chunk
     private static final int OVERLAP_SIZE = Integer.parseInt(System.getenv().getOrDefault("OVERLAP_SIZE", "500")); // Number of words between chunks
 
-    public static final String OLLAMA = "ollama/ollama:0.1.48";
+//    public static final String OLLAMA = "ollama/ollama:0.1.48";
+    public static final String OLLAMA = "ollama/ollama:0.2.1";
     public static final String MODEL_IMAGE_NAME = "tc-ollama-gemma2";
+//    public static final String MODEL_IMAGE_NAME = "tc-ollama-codegemma";
     // public static final String MODEL_IMAGE_NAME = "ghcr.io/thomasvitale/ollama-llama3";
 
     public static final String MODEL = "gemma2";
+//    public static final String MODEL = "codegemma";
 
     @Container
     static OllamaContainer ollama = new OllamaContainer(

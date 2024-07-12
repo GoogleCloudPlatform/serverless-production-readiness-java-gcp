@@ -12,13 +12,15 @@ public class OllamaContainerTest {
 
     //    public static final String GEMMA_7_B = "gemma:7b";
     public static final String MODEL = "gemma2";
+//    public static final String MODEL = "codegemma";
+//    public static final String MODEL_VALIDATION = "codegemma";
     public static final String MODEL_VALIDATION = "gemma2";
 
-    public static final String OLLAMA = "ollama/ollama:0.1.48";
-    public static final String OLLAMA_VERSION = "0.1.48";
+    public static final String OLLAMA = "ollama/ollama:0.2.1";
+    public static final String OLLAMA_VERSION = "0.2.1";
 
-    //    public static final String MODEL_IMAGE_NAME = "tc-ollama-gemma-7b";
-    public static final String MODEL_IMAGE_NAME = "tc-ollama-gemma2";
+        public static final String MODEL_IMAGE_NAME = "tc-ollama-gemma2";
+//    public static final String MODEL_IMAGE_NAME = "tc-ollama-codegemma";
 
     @Test
     public void withDefaultConfig() {

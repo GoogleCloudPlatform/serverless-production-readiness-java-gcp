@@ -29,6 +29,7 @@ import dev.langchain4j.service.*;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -56,7 +57,8 @@ public class SummarizationTests {
     @Autowired
     private OpenAiChatModel chatModel;
 
-    @Value("classpath:/books/The_Wasteland-TSEliot-public.txt")
+    // @Value("classpath:/books/The_Wasteland-TSEliot-public.txt")
+    @Value("classpath:/books/story.txt")
     private Path resource;
 
     private static final int CHUNK_SIZE = Integer.parseInt(System.getenv().getOrDefault("CHUNK_SIZE", "10000"));  // Number of words in each chunk
@@ -291,56 +293,60 @@ public class SummarizationTests {
     //
     //     return accessToken.getTokenValue();
     // }
+
     // --- set the test configuration up for accessing Gemini using the OpenAI API ---
-    @SpringBootConfiguration
-    public static class TestConfiguration {
-        @Bean
-        public OpenAiChatModel modelEmbedding() throws IOException {
-            String url = "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/optimize-serverless-apps/locations/us-central1/endpoints/openapi";
-            String token = getToken(url);
-            String model = "google/gemini-1.5-flash-001";
-            Integer maxToken = 4096;
-
-            return OpenAiChatModel.builder()
-                .apiKey(token)
-                .baseUrl(url)
-                .modelName(model)
-                // .maxTokens(maxToken)
-                .temperature(0.2)
-                .logRequests(true)
-                .logResponses(true)
-                .maxRetries(1)
-                .build();
-        }
-    }
-
-    // --- set the test configuration up ---
-
     // @SpringBootConfiguration
     // public static class TestConfiguration {
     //     @Bean
     //     public OpenAiChatModel modelEmbedding() throws IOException {
-    //         // String url = <URL of inference service deployed in GKE>;
-    //         // String model = <your model deployed in GKE>
-    //         // String maxToken = <max tokens supported by the model in use
-    //         // ex
-    //         String url = System.getenv("LLM_ENDPOINT");
-    //         String model = System.getenv("VERTEX_AI_GEMINI_MODEL");
-    //         Integer maxToken = Integer.parseInt(System.getenv().getOrDefault("MAX_TOKENS", "1024"));
-    //         String apiKey = "EMPTY";
+    //         String url = "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/optimize-serverless-apps/locations/us-central1/endpoints/openapi";
+    //         String token = getToken(url);
+    //         String model = "google/gemini-1.5-flash-001";
+    //         Integer maxToken = 4096;
     //
     //         return OpenAiChatModel.builder()
-    //             .apiKey(apiKey)
+    //             .apiKey(token)
     //             .baseUrl(url)
     //             .modelName(model)
-    //             .maxTokens(Integer.valueOf(maxToken))
+    //             // .maxTokens(maxToken)
     //             .temperature(0.2)
     //             .logRequests(true)
     //             .logResponses(true)
     //             .maxRetries(1)
-    //             .timeout(Duration.ofSeconds(180))
     //             .build();
     //     }
     // }
+
+    // --- set the test configuration up ---
+
+    @SpringBootConfiguration
+    public static class TestConfiguration {
+        @Bean
+        public OpenAiChatModel modelEmbedding() throws IOException {
+            // String url = <URL of inference service deployed in GKE>;
+            // String model = <your model deployed in GKE>
+            // String maxToken = <max tokens supported by the model in use
+            // ex
+            String url = System.getenv("LLM_ENDPOINT");
+            String model = System.getenv("VERTEX_AI_GEMINI_MODEL");
+            Integer maxToken = Integer.parseInt(System.getenv().getOrDefault("MAX_TOKENS", "1024"));
+            // String apiKey = "EMPTY";
+            // String apiKey = "ya29.a0AXooCgsEoqusUOAYf_II-k3GUZPg3gMNL_D0IkAIQRPWC2QmdpfGaAcLT6LGJUJJjIDxApBx9ZxbRP9sfhTupHB05JrbUIWg9duSUclf06pR3XkmJnPw0ktnUnAveF8ppOsteeSrq51UuHl2szD-w5Oqh4X16r-CRSRnrn4fm2C_aCgYKAX0SARISFQHGX2Mi2d4pZm4rkbYhcx2IQYV9rg0179";
+            String apiKey = System.getenv("OPENAI_API_KEY");
+
+
+            return OpenAiChatModel.builder()
+                .apiKey(apiKey)
+                .baseUrl(url)
+                .modelName(model)
+                .maxTokens(Integer.valueOf(maxToken))
+                .temperature(0.2)
+                .logRequests(true)
+                .logResponses(true)
+                .maxRetries(1)
+                .timeout(Duration.ofSeconds(180))
+                .build();
+        }
+    }
 
 }

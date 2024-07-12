@@ -18,7 +18,9 @@ import org.testcontainers.utility.DockerImageName;
 
 @Testcontainers
 public class OllamaChatModelTest {
+//    static String MODEL_NAME = "codegemma"; // try "mistral", "llama2", "codellama", "phi" or "tinyllama"
     static String MODEL_NAME = "gemma2"; // try "mistral", "llama2", "codellama", "phi" or "tinyllama"
+//    static String imageName = "tc-ollama-codegemma";
     static String imageName = "tc-ollama-gemma2";
 
     @Container
