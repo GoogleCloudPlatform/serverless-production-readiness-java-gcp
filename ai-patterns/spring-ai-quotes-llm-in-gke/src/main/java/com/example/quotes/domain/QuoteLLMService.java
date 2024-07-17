@@ -29,14 +29,14 @@ public class QuoteLLMService {
 
   public Quote findRandomQuote() {
     SystemMessage systemMessage = new SystemMessage("""
-        You are a helpful AI assistant. Your name is Gemini.
+        You are a helpful AI assistant. 
         You are an AI assistant that helps people find information.
         You should reply to the user's request with your name and also in the style of a literary professor.
         """);
     UserMessage userMessage = new UserMessage("""
-        Answer like an experienced literary professor; please provide a quote from a random book, 
-        including book, quote and author; do not repeat quotes from the same book;
-        return the answer strictly in JSON format
+        Answer precisely; please provide a quote from a random book, 
+        including only book, quote and author; do not repeat quotes from the same book
+        return only 3 values, the book, the quote and the author, strictly in JSON format, while eliminating every other text
         """);
 
     ChatResponse chatResponse = chatClient.call(new Prompt(List.of(systemMessage, userMessage),
@@ -48,7 +48,20 @@ public class QuoteLLMService {
 
     MapOutputConverter converter = new MapOutputConverter();
     Generation generation = chatResponse.getResult();
-    Map<String, Object> result = converter.convert(generation.getOutput().getContent());
+    String input = generation.getOutput().getContent();
+
+    String startDelimiter = "```json";
+    String endDelimiter = "```";
+
+    int startIndex = input.indexOf(startDelimiter);
+    startIndex += startDelimiter.length();
+    int endIndex = input.indexOf(endDelimiter, startIndex);
+
+    // MapOutputConverter converter = new MapOutputConverter();
+    // Generation generation = chatResponse.getResult();
+    // Map<String, Object> result = converter.convert(generation.getOutput().getContent());
+
+    Map<String, Object> result = converter.convert(input.substring(startIndex, endIndex).trim());
 
     Quote quote = new Quote();
     quote.setId(0l);
