@@ -17,6 +17,7 @@ package com.example.quotes.web;
 
 import com.example.quotes.actuator.StartupCheck;
 import com.example.quotes.domain.Quote;
+import com.example.quotes.domain.QuoteLLMInGKEService;
 import com.example.quotes.domain.QuoteService;
 import jakarta.annotation.PostConstruct;
 import java.text.SimpleDateFormat;
@@ -45,9 +46,11 @@ public class QuoteController {
     private static final Logger logger = LoggerFactory.getLogger(QuoteController.class);
 
     private final QuoteService quoteService;
+    private final QuoteLLMInGKEService quoteLLMInGKEService;
 
-    public QuoteController(QuoteService quoteService) {
+    public QuoteController(QuoteService quoteService, QuoteLLMInGKEService quoteLLMInGKEService) {
         this.quoteService = quoteService;
+        this.quoteLLMInGKEService = quoteLLMInGKEService;
     }
 
     @PostConstruct
@@ -67,7 +70,7 @@ public class QuoteController {
     @GetMapping("/random-quote")
     public Quote randomQuote()
     {
-        return quoteService.findRandomQuote();
+        return quoteLLMInGKEService.findRandomQuote();
     }
 
     @GetMapping("/quotes") 

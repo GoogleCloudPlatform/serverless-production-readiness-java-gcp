@@ -45,32 +45,11 @@ public class QuoteLLMInGKEService {
             .build())
     );
 
-    // MapOutputConverter converter = new MapOutputConverter();
-    // Generation generation = chatResponse.getResult();
-    // Map<String, Object> result = converter.convert(generation.getOutput().getContent());
-    MapOutputConverter converter = new MapOutputConverter();
     Generation generation = chatResponse.getResult();
     String input = generation.getOutput().getContent();
 
-    String startDelimiter = "{";
-    String endDelimiter = "}";
+    System.out.println(input);
 
-    int startIndex = input.indexOf(startDelimiter)-1;
-    startIndex += startDelimiter.length();
-    int endIndex = input.indexOf(endDelimiter+1, startIndex);
-
-    // MapOutputConverter converter = new MapOutputConverter();
-    // Generation generation = chatResponse.getResult();
-    // Map<String, Object> result = converter.convert(generation.getOutput().getContent());
-
-    Map<String, Object> result = converter.convert(input.substring(startIndex, endIndex).trim());
-
-    Quote quote = new Quote();
-    quote.setId(0l);
-    quote.setAuthor(result.get("author").toString());
-    quote.setQuote(result.get("quote").toString());
-    quote.setBook(result.get("book").toString());
-
-    return quote;
+    return Quote.parseQuoteFromJson(input);
   }
 }
