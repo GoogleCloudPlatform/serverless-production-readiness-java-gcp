@@ -2,12 +2,8 @@ package com.example.quotes;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-
-import java.util.Map;
-
 import com.example.quotes.domain.Quote;
 import org.junit.jupiter.api.Test;
-import org.springframework.ai.converter.MapOutputConverter;
 
 class QuoteTest {
 
