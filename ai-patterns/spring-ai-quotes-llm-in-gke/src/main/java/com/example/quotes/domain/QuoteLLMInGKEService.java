@@ -45,9 +45,6 @@ public class QuoteLLMInGKEService {
             .build())
     );
 
-    // MapOutputConverter converter = new MapOutputConverter();
-    // Generation generation = chatResponse.getResult();
-    // Map<String, Object> result = converter.convert(generation.getOutput().getContent());
     MapOutputConverter converter = new MapOutputConverter();
     Generation generation = chatResponse.getResult();
     String input = generation.getOutput().getContent();
