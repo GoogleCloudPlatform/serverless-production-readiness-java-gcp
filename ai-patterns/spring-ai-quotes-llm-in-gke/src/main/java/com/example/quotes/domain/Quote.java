@@ -121,15 +121,15 @@ public class Quote {
     if (matcher.find() && matcher.groupCount() > 10) {
       jsonString = matcher.group(1).trim();
     }  else {
-      int startIndex = input.indexOf('{');
+      int startIndex = input.indexOf('{') >=0 ? input.indexOf('{') : 0;
       int endIndex = input.lastIndexOf('}');
       jsonString = input.substring(startIndex, endIndex + 1);
     }
     if(!jsonString.isBlank()) {
       Map<String, Object> result = converter.convert(jsonString);
-      quote.setAuthor(result.get("author").toString());
-      quote.setQuote(result.get("quote").toString());
-      quote.setBook(result.get("book").toString());
+      quote.setAuthor(result.get("author")!=null ? result.get("author").toString():"");
+      quote.setQuote(result.get("quote")!=null ? result.get("quote").toString():"");
+      quote.setBook(result.get("book")!=null ? result.get("book").toString():"");
     }
     return quote;
   }
