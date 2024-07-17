@@ -21,6 +21,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import org.springframework.ai.converter.MapOutputConverter;
+
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -105,6 +108,30 @@ public class Quote {
 
   public void setBook(String book) {
     this.book = book;
+  }
+
+  public static Quote parseQuoteFromJson(String input) {
+    MapOutputConverter converter = new MapOutputConverter();
+    String jsonRegex = "```json(.*?)```json";
+    java.util.regex.Matcher matcher = java.util.regex.Pattern.compile(jsonRegex, java.util.regex.Pattern.DOTALL).matcher(input);
+    Quote quote = new Quote();
+    quote.setQuote(input);
+    quote.setId(0l);
+    String jsonString = "";
+    if (matcher.find() && matcher.groupCount() > 10) {
+      jsonString = matcher.group(1).trim();
+    }  else {
+      int startIndex = input.indexOf('{');
+      int endIndex = input.lastIndexOf('}');
+      jsonString = input.substring(startIndex, endIndex + 1);
+    }
+    if(!jsonString.isBlank()) {
+      Map<String, Object> result = converter.convert(jsonString);
+      quote.setAuthor(result.get("author").toString());
+      quote.setQuote(result.get("quote").toString());
+      quote.setBook(result.get("book").toString());
+    }
+    return quote;
   }
 
 }

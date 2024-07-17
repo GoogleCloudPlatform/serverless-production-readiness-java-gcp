@@ -45,30 +45,11 @@ public class QuoteLLMInGKEService {
             .build())
     );
 
-    MapOutputConverter converter = new MapOutputConverter();
     Generation generation = chatResponse.getResult();
     String input = generation.getOutput().getContent();
 
     System.out.println(input);
 
-    String jsonRegex = "```json(.*?)```json";
-    java.util.regex.Matcher matcher = java.util.regex.Pattern.compile(jsonRegex, java.util.regex.Pattern.DOTALL).matcher(input);
-    Quote quote = new Quote();
-    String jsonString = "";
-    if (matcher.find() && matcher.groupCount() > 10) {
-      jsonString = matcher.group(1).trim();
-    }  else {
-        int startIndex = input.indexOf('{');
-        int endIndex = input.lastIndexOf('}');
-        jsonString = input.substring(startIndex, endIndex + 1);
-    }
-
-    Map<String, Object> result = converter.convert(jsonString);
-
-    quote.setId(0l);
-    quote.setAuthor(result.get("author").toString());
-    quote.setQuote(result.get("quote").toString());
-    quote.setBook(result.get("book").toString());
-    return quote;
+    return Quote.parseQuoteFromJson(input);
   }
 }
