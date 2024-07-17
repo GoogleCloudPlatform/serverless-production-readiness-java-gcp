@@ -48,6 +48,8 @@ public class QuoteLLMService {
     Generation generation = chatResponse.getResult();
     String input = generation.getOutput().getContent();
 
+    System.out.printf("\nGemini Model provided response: \n%s\n", input);
+
     return Quote.parseQuoteFromJson(input);
   }
 }
