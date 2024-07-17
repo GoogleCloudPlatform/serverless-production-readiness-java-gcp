@@ -47,8 +47,8 @@ public class QuoteController {
     private static final Logger logger = LoggerFactory.getLogger(QuoteController.class);
 
     private final QuoteService quoteService;
-    private final QuoteLLMService quoteLLMService;
     private final QuoteLLMInGKEService quoteLLMInGKEService;
+    private final QuoteLLMService quoteLLMService;
 
     public QuoteController(QuoteService quoteService, QuoteLLMService quoteLLMService, QuoteLLMInGKEService quoteLLMInGKEService) {
         this.quoteService = quoteService;
@@ -73,7 +73,7 @@ public class QuoteController {
     @GetMapping("/random-quote")
     public Quote randomQuote()
     {
-        return quoteService.findRandomQuote();
+        return quoteLLMInGKEService.findRandomQuote();
     }
 
     @GetMapping("/random-quote-llm")

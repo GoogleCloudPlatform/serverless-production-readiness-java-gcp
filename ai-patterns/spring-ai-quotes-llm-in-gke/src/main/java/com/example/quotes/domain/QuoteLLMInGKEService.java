@@ -48,6 +48,7 @@ public class QuoteLLMInGKEService {
     Generation generation = chatResponse.getResult();
     String input = generation.getOutput().getContent();
 
+
     System.out.printf("\nLLM Model in GKE provided response: \n%s\n", input);
 
     return Quote.parseQuoteFromJson(input);
