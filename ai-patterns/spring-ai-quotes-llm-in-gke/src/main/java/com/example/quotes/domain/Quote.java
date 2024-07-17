@@ -110,6 +110,7 @@ public class Quote {
     this.book = book;
   }
 
+
   public static Quote parseQuoteFromJson(String input) {
     MapOutputConverter converter = new MapOutputConverter();
     String jsonRegex = "```json(.*?)```json";

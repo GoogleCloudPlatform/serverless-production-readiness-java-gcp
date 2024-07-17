@@ -34,7 +34,7 @@ export default function QuotesView() {
         <div className="flex gap-s items-baseline border border-b border-dashed border-contrast-50 p-l rounded-l">
           <Icon icon="vaadin:cloud"/>
           <Button
-              onClick={e => QuoteEndpoint.randomLLMQuote().then(q => setQuotes([q]))}> <Icon icon = "vaadin:cloud-o"/>
+              onClick={e => QuoteEndpoint.randomLLMQuote().then(q => setQuotes([q]))}>
             Get random quote from Gemini
           </Button>
           <Button
