@@ -331,7 +331,6 @@ public class SummarizationTests {
             String model = System.getenv("VERTEX_AI_GEMINI_MODEL");
             Integer maxToken = Integer.parseInt(System.getenv().getOrDefault("MAX_TOKENS", "1024"));
             // String apiKey = "EMPTY";
-            // String apiKey = "ya29.a0AXooCgsEoqusUOAYf_II-k3GUZPg3gMNL_D0IkAIQRPWC2QmdpfGaAcLT6LGJUJJjIDxApBx9ZxbRP9sfhTupHB05JrbUIWg9duSUclf06pR3XkmJnPw0ktnUnAveF8ppOsteeSrq51UuHl2szD-w5Oqh4X16r-CRSRnrn4fm2C_aCgYKAX0SARISFQHGX2Mi2d4pZm4rkbYhcx2IQYV9rg0179";
             String apiKey = System.getenv("OPENAI_API_KEY");
 
 
