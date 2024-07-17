@@ -118,7 +118,7 @@ public class Quote {
     quote.setQuote(input);
     quote.setId(0l);
     String jsonString = "";
-    if (matcher.find() && matcher.groupCount() > 10) {
+    if (matcher.find()) {
       jsonString = matcher.group(1).trim();
     }  else {
       int startIndex = input.indexOf('{') >=0 ? input.indexOf('{') : 0;
