@@ -110,8 +110,7 @@ public class Quote {
     this.book = book;
   }
 
-  // LLM respond non-deterministically
-  // provisions have to be made in each app to handle responses from the model of choice
+
   public static Quote parseQuoteFromJson(String input) {
     MapOutputConverter converter = new MapOutputConverter();
     String jsonRegex = "```json(.*?)```json";
@@ -120,7 +119,7 @@ public class Quote {
     quote.setQuote(input);
     quote.setId(0l);
     String jsonString = "";
-    if (matcher.find() && matcher.groupCount() > 10) {
+    if (matcher.find()) {
       jsonString = matcher.group(1).trim();
     }  else {
       int startIndex = input.indexOf('{') >=0 ? input.indexOf('{') : 0;
