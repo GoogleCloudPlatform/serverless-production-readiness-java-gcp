@@ -66,3 +66,4 @@ sessions/next24/books-genai-vertex/.vscode/settings.json
 # Vaadin
 src/main/frontend/generated/*
 node_modules/
+bundles/
