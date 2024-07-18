@@ -33,7 +33,7 @@
   <description>Quotes service in Spring Boot</description>
   <properties>
     <java.version>21</java.version>
-    <testcontainers.version>1.19.8</testcontainers.version>
+    <testcontainers.version>1.20.0</testcontainers.version>
     <vaadin.version>24.4.4</vaadin.version>
   </properties>
   <dependencies>
