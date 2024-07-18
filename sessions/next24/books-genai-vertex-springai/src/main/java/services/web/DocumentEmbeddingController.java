@@ -122,7 +122,7 @@ public class DocumentEmbeddingController {
     // read file from Cloud Storage
     BufferedReader br = cloudStorageService.readFile(bucketName, fileName);
 
-    String response = tfTransformTransform(br.toString());
+    String response = tfTransform(br.toString());
 
     // success
     return new ResponseEntity<>(response, HttpStatus.OK);
@@ -134,13 +134,13 @@ public class DocumentEmbeddingController {
           @RequestBody Map<String, Object> body) {
 
     String script = (String) body.get("script");
-    String response = tfTransformTransform(script);
+    String response = tfTransform(script);
 
     // success
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
-  public String tfTransformTransform(String script) {
+  public String tfTransform(String script) {
     logger.info("tf transform flow - Model: " + model);
     long start = System.currentTimeMillis();
     List<Map<String, Object>> responseDoc = booksService.prompt("Find paragraphs mentioning Terraform best practices for general style, structure, and dependency management", 6000);
