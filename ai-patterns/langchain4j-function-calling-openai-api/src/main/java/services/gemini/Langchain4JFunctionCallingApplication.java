@@ -125,9 +125,7 @@ public class Langchain4JFunctionCallingApplication {
 	public void functionCallOpenAIAPIGeminiWithGRPC(String userMessage) throws IOException {
 			long start = System.currentTimeMillis();
 
-			// String url = "https://us-central1-aiplatform.googleapis.com/v1beta1/projects/optimize-serverless-apps/locations/us-central1/endpoints/openapi";
 			String token = getToken(openAIVertexUrl);
-			// String modelName = "google/gemini-1.5-flash-001";
 
 			ChatLanguageModel model = OpenAiChatModel.builder()
 					.apiKey(token)
