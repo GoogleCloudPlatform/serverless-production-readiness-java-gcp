@@ -36,7 +36,7 @@ public class QuoteLLMService {
     UserMessage userMessage = new UserMessage("""
         Answer precisely; please provide a quote from a random book, 
         including only book, quote and author; do not repeat quotes from the same book
-        return only 3 values, the book, the quote and the author, strictly in JSON format, while eliminating every other text
+        return only 3 values, the book, the quote and the author, strictly in JSON format, wrapped in tripe backquotes ```json```, while eliminating every other text
         """);
 
     ChatResponse chatResponse = chatClient.call(new Prompt(List.of(systemMessage, userMessage),

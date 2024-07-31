@@ -33,10 +33,11 @@ public class QuoteLLMInGKEService {
         You are an AI assistant that helps people find information.
         """);
     UserMessage userMessage = new UserMessage("""
-          Answer succintly;
+          Answer succinctly;
           please provide a quote from a random book, including book, quote and author; 
           do not repeat quotes from the same book; 
-          return the answer wrapped in triple backquotes ```json```strictly in JSON format        
+          return the answer wrapped in triple backquotes ```json```strictly in JSON format  
+          return only 3 values, the book, the quote and the author, strictly in JSON format, wrapped in tripe backquotes ```json``` while eliminating every other text      
           """);
 
     ChatResponse chatResponse = chatClient.call(new Prompt(List.of(systemMessage, userMessage),
