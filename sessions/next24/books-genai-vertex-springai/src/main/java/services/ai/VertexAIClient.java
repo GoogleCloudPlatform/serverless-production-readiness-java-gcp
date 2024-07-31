@@ -17,12 +17,12 @@ package services.ai;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.ai.chat.messages.Media;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.vertexai.gemini.MimeTypeDetector;
 import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.model.Media;
+import org.springframework.ai.vertexai.gemini.MimeTypeDetector;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatModel;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatOptions;
 import org.springframework.core.env.Environment;
@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
+import org.springframework.util.MimeTypeUtils;
 
 /*
     VertexAIClient is a service class that interacts with the Vertex AI Chat Client.
@@ -60,7 +61,7 @@ public class VertexAIClient {
 
         // create User Message for AI framework
         var multiModalUserMessage = new UserMessage(prompt,
-                List.of(new Media(MimeTypeDetector.getMimeType(imageURL), imageURL)));
+                List.of(new Media(MimeTypeUtils.parseMimeType("image/*"), imageURL)));
 
         // call the model of choice
         ChatResponse multiModalResponse = chatClient.call(new Prompt(List.of(multiModalUserMessage),
