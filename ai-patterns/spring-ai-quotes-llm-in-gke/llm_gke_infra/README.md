@@ -19,8 +19,8 @@ From your console, select the Google Cloud region and project, checking that the
 ```
 export PROJECT_ID=<your-project-id>
 export REGION=us-central1
-export ZONE_1=${REGION}-a # You may want to change the zone letter based on the region you selected above
-export ZONE_2=${REGION}-b # You may want to change the zone letter based on the region you selected above
+export ZONE_1=${REGION}-a
+export ZONE_2=${REGION}-b
 export CLUSTER_NAME=vllm-serving-cluster
 export NAMESPACE=vllm
 gcloud config set project "$PROJECT_ID"
@@ -381,12 +381,12 @@ curl -X POST http://ClusterIP/v1/chat/completions  \
 
 Spin up or down node pool
 ```
-gcloud container clusters resize vllm-serving-cluster --node-pool vllm-inference-pool --num-nodes 1 --region us-central1
+gcloud container clusters resize $CLUSTER_NAME --node-pool g2-standard-24 --num-nodes 1 --region us-central1
 kubectl apply -f vllm2-deploy.yaml -n vllm
 
 
 #scale down
-gcloud container clusters resize vllm-serving-cluster --node-pool vllm-inference-pool --num-nodes 0 --region us-central1
+gcloud container clusters resize $CLUSTER_NAME --node-pool g2-standard-24 --num-nodes 0 --region us-central1
 kubectl delete deployment vllm-server -n vllm
 ```
 
