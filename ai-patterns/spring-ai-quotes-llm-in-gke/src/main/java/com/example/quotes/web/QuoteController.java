@@ -73,7 +73,7 @@ public class QuoteController {
     @GetMapping("/random-quote")
     public Quote randomQuote()
     {
-        return quoteLLMInGKEService.findRandomQuote();
+        return quoteService.findRandomQuote();
     }
 
     @GetMapping("/random-quote-llm")
