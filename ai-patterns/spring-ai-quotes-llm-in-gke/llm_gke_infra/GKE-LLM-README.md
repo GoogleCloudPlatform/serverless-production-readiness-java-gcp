@@ -5,12 +5,10 @@
 
 Access to a Google Cloud project with the L4 GPUs available and enough quota in the region you select.
 A computer terminal with kubectl and the Google Cloud SDK installed. From the GCP project console you’ll be working with, you may want to use the included Cloud Shell as it already has the required tools installed.
-Some models such as Llama2 will need Huggingface API token to download model files
+Some models such as Llama 3 will need Huggingface API token to download model files
 Meta access request: https://ai.meta.com/resources/models-and-libraries/llama-downloads/ need regisgter an email address to download
 
-Go to Hugging face, create account account with same email registered in Meta request. Then find Llama 2 model, fill out access request: https://huggingface.co/meta-llama/Llama-2-7b. Need to wait for a few hours with the approval email to be able to use Llama 2
-
-Get Hugging face access token from your huggingface account profile settings. This will be used later to create a k8 secret.
+Go to Hugging face, create account account with same email registered in Meta request. Then find Llama 3 model, fill out access request: https://huggingface.co/meta-llama/Meta-Llama-3.1-8B-Instruct .
 
 ## Setup project environments
 
