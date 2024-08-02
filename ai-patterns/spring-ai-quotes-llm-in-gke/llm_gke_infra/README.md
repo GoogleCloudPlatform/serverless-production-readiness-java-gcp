@@ -186,13 +186,15 @@ kubectl get nodes;
 kubectl describe nodes;
 ```
 
-Run the following commands to setup identity, Huggingface token and IAM roles:
+Run the following commands to setup identity, Huggingface token, Open AI token (you can set this to whatever you want) and IAM roles:
 ```
 kubectl create ns $NAMESPACE
 
 gcloud container clusters get-credentials $CLUSTER_NAME $REGION
 export HF_TOKEN=<paste-your-own-token>
 kubectl create secret generic huggingface --from-literal="HF_TOKEN=$HF_TOKEN" -n $NAMESPACE
+export OPENAPI_KEY=<paste-your-own-token>
+kubectl create secret generic openapikey --from-literal="key=$OPENAPI_KEY" -n $NAMESPACE
 
 kubectl create serviceaccount $NAMESPACE --namespace $NAMESPACE
 gcloud iam service-accounts add-iam-policy-binding $GCE_SA \
