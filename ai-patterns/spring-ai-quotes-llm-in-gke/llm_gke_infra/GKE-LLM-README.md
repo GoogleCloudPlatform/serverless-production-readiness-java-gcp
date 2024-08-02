@@ -21,6 +21,8 @@ export ZONE_1=${REGION}-a
 export ZONE_2=${REGION}-b
 export CLUSTER_NAME=vllm-serving-cluster
 export NAMESPACE=vllm
+export HF_TOKEN=<paste-your-own-token>
+export OPENAPI_KEY=<paste-your-own-token>
 gcloud config set project "$PROJECT_ID"
 gcloud config set compute/region "$REGION"
 gcloud config set compute/zone "$ZONE_1"
