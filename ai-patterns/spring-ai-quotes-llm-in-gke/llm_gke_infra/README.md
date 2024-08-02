@@ -177,13 +177,14 @@ Here's a breakdown of the parameters used in the `gcloud container node-pools cr
 13. **`--spot`**:
 - Indicates that the node pool uses Spot VMs, which are spare compute instances available at a lower cost but can be preempted by Google Cloud if needed. This is a cost-effective option for workloads that can tolerate interruptions.
 
-These parameters collectively define the configuration and behavior of the node pool, optimizing it for specific use cases like running GPU-accelerated workloads while also managing costs and ensuring security.
+*These parameters collectively define the configuration and behavior of the node pool, optimizing it for specific use cases like running GPU-accelerated workloads while also managing costs and ensuring security.
 
-Note how easy enabling GPUs in GKE is. Just adding the option --accelerator automatically bootstraps the nodes with the necessary drivers and configuration so your workloads can start using the GPUs attached to the cluster nodes. If you need to try tesla-t4, need to update  --accelerator and --machine-type parameter values, as one example:
---accelerator type=nvidia-tesla-t4,count=1,gpu-driver-version=latest
-machine-type n2d-standard-8
 
 After a few minutes, check that the node pool was created correctly:
+```
+kubectl get nodes;
+kubectl describe nodes;
+```
 
 Run the following commands to setup identity, Huggingface token and IAM roles:
 ```
