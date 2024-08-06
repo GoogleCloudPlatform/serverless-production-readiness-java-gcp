@@ -16,10 +16,7 @@
 package com.example.quotes.web;
 
 import com.example.quotes.actuator.StartupCheck;
-import com.example.quotes.domain.Quote;
-import com.example.quotes.domain.QuoteLLMInGKEService;
-import com.example.quotes.domain.QuoteLLMService;
-import com.example.quotes.domain.QuoteService;
+import com.example.quotes.domain.*;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.hilla.BrowserCallable;
 import com.vaadin.hilla.Nullable;
@@ -47,16 +44,20 @@ public class QuoteEndpoint implements CrudService<Quote, Long> {
     private final QuoteService quoteService;
     private final QuoteLLMService quoteLLMService;
     private final QuoteLLMInGKEService quoteLLMInGKEService;
+    private final QuoteLLMInVertexService quoteLLMInVertexService;
+
     private final JpaFilterConverter jpaFilterConverter;
 
     public QuoteEndpoint(QuoteService quoteService,
                          QuoteLLMService quoteLLMService,
                          QuoteLLMInGKEService quoteLLMInGKEService,
+                         QuoteLLMInVertexService quoteLLMInVertexService,
                          JpaFilterConverter jpaFilterConverter) {
         this.quoteService = quoteService;
         this.jpaFilterConverter = jpaFilterConverter;
         this.quoteLLMService = quoteLLMService;
         this.quoteLLMInGKEService = quoteLLMInGKEService;
+        this.quoteLLMInVertexService = quoteLLMInVertexService;
     }
 
     @PostConstruct
@@ -74,6 +75,8 @@ public class QuoteEndpoint implements CrudService<Quote, Long> {
     public Quote randomLLMQuote() { return quoteLLMService.findRandomQuote(); }
 
     public Quote randomLLMInGKEQuote() { return quoteLLMInGKEService.findRandomQuote(); }
+
+    public Quote randomLLMInVertexQuote() { return quoteLLMInVertexService.findRandomQuote(); }
 
     public List<Quote> allQuotes() {
         return quoteService.getAllQuotes();

@@ -75,16 +75,16 @@ docker build -f ./containerize/Dockerfile-custom -t quotes-custom .
 ```
 ### Build a JIT and Native Java Docker Image with Buildpacks
 ```
-./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=quotes
+./mvnw spring-boot:build-image -DskipTests -Pproduction -Dspring-boot.build-image.imageName=quotes-llm
 
-./mvnw spring-boot:build-image  -DskipTests -Pnative -Dspring-boot.build-image.imageName=quotes-native
+./mvnw spring-boot:build-image -DskipTests -Pproduction -Pnative -Dspring-boot.build-image.imageName=quotes-native-llm
 ```
 
 ### Test the locally built images on the local machine
 ```shell
-docker run --rm -p 8080:8083 quotes
+docker run --rm -p 8080:8083 quotes-llm
 
-docker run --rm -p 8080:8083 quotes-native
+docker run --rm -p 8080:8083 quotes-native-llm
 ```
 ### Build, test with CloudBuild in Cloud Build
 ```shell
@@ -103,8 +103,8 @@ export PROJECT_ID=$(gcloud config list --format 'value(core.project)')
 echo   $PROJECT_ID
 
 # tag and push JIT image
-docker tag quotes gcr.io/${PROJECT_ID}/quotes
-docker push gcr.io/${PROJECT_ID}/quotes
+docker tag quotes-llm gcr.io/${PROJECT_ID}/quotes-llm
+docker push gcr.io/${PROJECT_ID}/quotes-llm
 
 # tag and push Native image
 docker tag quotes-native gcr.io/${PROJECT_ID}/quotes-native
@@ -124,7 +124,7 @@ gcloud run services list
 Deploy the Quotes JIT image
 ```shell
 # note the URL of the deployed service
-gcloud run deploy quotes \
+gcloud run deploy quotes-llm \
      --image gcr.io/${PROJECT_ID}/quotes \
      --region us-central1 \
      --memory 2Gi --allow-unauthenticated
