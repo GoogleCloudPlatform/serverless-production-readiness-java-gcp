@@ -1,4 +1,5 @@
 # Quotes Service - JIT and Native Java Build & Deployment to Cloud Run
+## Connect to Google Gemini, open-model LLM in VertexAI and open-model LLM in GKE
 
 This sample is building on the materials from the [Quotes sample](../quotes/README.md) and adds a simple UI for interacting with the service.
 
@@ -6,14 +7,53 @@ The UI is built on the [Vaadin Hilla](https://hilla.dev/) framework. Hilla seaml
 
 # Before you start
 Run with the following environment variables set
-* VERTEX_AI_GEMINI_PROJECT_ID=my-project
-* VERTEX_AI_GEMINI_LOCATION=us-central1
-* VERTEX_AI_GEMINI_MODEL=gemini-1.5-pro-001
-* OPENAI_API_KEY=your  api key
+```shell
+    # LLM in VertexAI env
+    export VERTEX_AI_PROJECT_ID=<your project id>
+    export VERTEX_AI_LOCATION=us-central1
+    export VERTEX_AI_MODEL=<your model in Vertex>
+    # ex: export VERTEX_AI_MODEL=meta/llama3-405b-instruct-maas
+    
+    # LLM in GKE env
+    export OPENAI_API_KEY=<you API key for the LLM in GKE>
+    export OPENAI_API_GKE_IP=<IP for deployed model>
+    export OPENAI_API_GKE_MODEL=<your model in Vertex>
+    # ex: export OPENAI_API_GKE_MODEL=meta-llama/Meta-Llama-3.1-8B-Instruct
+    
+    # Gemini in VertexAI env
+    export VERTEX_AI_GEMINI_PROJECT_ID=<your project id>
+    export VERTEX_AI_GEMINI_LOCATION=us-central1
+    export VERTEX_AI_GEMINI_MODEL=<your Gemini model>
+    # ex: export VERTEX_AI_GEMINI_MODEL=gemini-1.5-pro-001
+```
+or set them locally in the application.properties file:
+```java
+#################################
+# Google Vertex AI Gemini
+#################################
+spring.ai.vertex.ai.gemini.project-id=${VERTEX_AI_GEMINI_PROJECT_ID}
+spring.ai.vertex.ai.gemini.location=${VERTEX_AI_GEMINI_LOCATION}
+spring.ai.vertex.ai.gemini.chat.options.model=${VERTEX_AI_GEMINI_MODEL}
+spring.ai.vertex.ai.gemini.transport=grpc
 
-or set them locally in the application.properties file
+#################################
+# OpenAI API - LLM in GKE
+#################################
+spring.ai.openai.api-key=${OPENAI_API_KEY}
+spring.ai.openai.chat.options.model=${OPENAI_API_GKE_MODEL}
+spring.ai.openai.chat.base-url=${OPENAI_API_GKE_IP}
+spring.ai.openai.chat.options.max-tokens=1024
 
-Ex.: VERTEX_AI_GEMINI_PROJECT_ID=my-project;VERTEX_AI_GEMINI_LOCATION=us-central1;VERTEX_AI_GEMINI_MODEL=gemini-1.5-flash-001;ANTHROPIC_API_KEY=abcd1234
+#################################
+# OpenAI VertexAI - manual configuration
+#################################
+spring.ai.vertex.ai.vertex.ai.gemini.project-id=${VERTEX_AI_PROJECT_ID}
+spring.ai.vertex.ai.vertex.ai.gemini.location=${VERTEX_AI_LOCATION}
+spring.ai.openai.vertex.ai.chat.options.model=${VERTEX_AI_MODEL}
+spring.ai.openai.vertex.ai.chat.base-url=https://${VERTEX_AI_LOCATION}-aiplatform.googleapis.com/v1beta1/projects/${VERTEX_AI_PROJECT_ID}/locations/${VERTEX_AI_LOCATION}/endpoints/openapi
+spring.ai.openai.vertex.ai.chat.completions-path=/chat/completions
+spring.ai.openai.vertex.ai.chat.options.max-tokens=1024
+```
 # Build
 
 ### Create a Spring Boot Application
