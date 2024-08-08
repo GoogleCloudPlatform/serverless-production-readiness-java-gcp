@@ -1,8 +1,8 @@
-# Spring AI Embeddings with VertexAI
+# Embeddings with VertexAI and Spring AI
 
 Run with the following environment variables set
-* VERTEX_AI_PROJECT_ID=<your project id>
-* VERTEX_AI_LOCATION=us-central1
+* VERTEX_AI_PROJECT_ID="your project id"
+* VERTEX_AI_LOCATION="your region"
 
 * Ex.: VERTEX_AI_PROJECT_ID=my-project;VERTEX_AI_LOCATION=us-central1
 
