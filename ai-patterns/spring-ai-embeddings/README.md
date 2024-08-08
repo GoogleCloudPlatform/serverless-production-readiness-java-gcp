@@ -10,7 +10,7 @@ Build and run:
 ```shell
 ./mvnw clean package
 
- java -jar target/spring-ai-embeddings-1.0.0.ja
+ java -jar target/spring-ai-embeddings-1.0.0.jar
 ```
 
 test with your HTTP client of choice. Sample with HHTPie:
