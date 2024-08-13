@@ -18,10 +18,6 @@ public class QuoteLLMInGKEService {
   private OpenAiChatModel chatClient;
   private Environment env;
 
-  public static final String VERTEX_AI_GEMINI_PROJECT_ID = "VERTEX_AI_GEMINI_PROJECT_ID";
-  public static final String VERTEX_AI_GEMINI_LOCATION = "VERTEX_AI_GEMINI_LOCATION";
-  public static final String VERTEX_AI_GEMINI_MODEL = "VERTEX_AI_GEMINI_MODEL";
-
   public QuoteLLMInGKEService(OpenAiChatModel chatClient, Environment env) {
     this.chatClient = chatClient;
     this.env = env;

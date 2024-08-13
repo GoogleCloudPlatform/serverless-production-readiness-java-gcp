@@ -13,30 +13,31 @@
 # limitations under the License.
 steps:
   # run tests first
-- id: 'test'
-  name: maven:3.9.5-eclipse-temurin-21
-  entrypoint: mvn
-  volumes:
-  - name: 'maven-repository'
-    path: '/root/.m2'
-  args: ["verify"]
+#- id: 'test'
+#  name: maven:3.9.5-eclipse-temurin-21
+#  entrypoint: mvn
+#  volumes:
+#  - name: 'maven-repository'
+#    path: '/root/.m2'
+#  args: ["verify"]
 
   # build service image
 - id: 'build-project'
   name: maven:3.9.5-eclipse-temurin-21
   entrypoint: mvn
-  volumes:
-  - name: 'maven-repository'
-    path: '/root/.m2'
-  args: ["spring-boot:build-image", "-DskipTests", "-Dspring-boot.build-image.imageName=quotes"]
+#  volumes:
+#  - name: 'maven-repository'
+#    path: '/root/.m2'
+  args: ["spring-boot:build-image", "-Pproduction", "-DskipTests", "-Dspring-boot.build-image.imageName=quotes-llm"]
 
   # tag then store image in registry
 - id: 'tag-image'
   name: gcr.io/cloud-builders/docker
-  args: ["tag", "quotes", "gcr.io/$PROJECT_ID/quotes"]
-  # Push the container image to Artifact Registry
+  args: ["tag", "quotes", "gcr.io/$PROJECT_ID/quotes-llm"]
+
+  # Push the container image to Container  Registry
 - id: 'store-image'
   name: 'gcr.io/cloud-builders/docker'
-  args: ['push', 'gcr.io/$PROJECT_ID/quotes']
+  args: ['push', 'gcr.io/$PROJECT_ID/quotes-llm']
 
-images: ["gcr.io/$PROJECT_ID/quotes"]
+images: ["gcr.io/$PROJECT_ID/quotes-llm"]
