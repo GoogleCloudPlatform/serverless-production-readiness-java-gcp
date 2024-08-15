@@ -21,10 +21,16 @@ In this sample, generative models are used to summarize text, using the followin
 __Environment__:
 Please set the following environment variables before running this example:
 ```shell
-export OPENAI_API_KEY=<your-openai-key>
+# Running as a Model-as-a-Service (MaaS)
+MODEL=meta/llama3-405b-instruct-maas;
+MAX_TOKENS=1024;
+BASE_URL=https://<location>-aiplatform.googleapis.com/v1beta1/projects/<project-id>/locations/<location>/endpoints/openapi
 
-export CHUNK_SIZE=<chunk size in characters> - default of 10000 provided if not set 
-export OVERLAP_SIZE=<overlap window in characters> - default of 500 provided if not set
+# Running with a hosted model in GKE
+MODEL=meta-llama/Meta-Llama-3.1-8B-Instruct;
+MAX_TOKENS=1024;
+BASE_URL=:your ip>;
+OPENAI_API_KEY=<your api key>>
 ```
 
 ## Setup Java ecosystem

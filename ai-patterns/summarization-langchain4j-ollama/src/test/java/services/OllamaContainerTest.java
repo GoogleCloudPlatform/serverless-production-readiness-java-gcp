@@ -11,17 +11,17 @@ import org.testcontainers.utility.DockerImageName;
 public class OllamaContainerTest {
 
     //    public static final String GEMMA_7_B = "gemma:7b";
-    public static final String MODEL = "gemma2";
-//    public static final String MODEL = "codegemma";
-//    public static final String MODEL_VALIDATION = "codegemma";
-    public static final String MODEL_VALIDATION = "gemma2";
+//    public static final String MODEL = "llama3.1";
+    public static final String MODEL = "gemma2:2b";
+    public static final String MODEL_VALIDATION = "gemma2:2b";
+//    public static final String MODEL_VALIDATION = "llama3.1";
 
-    public static final String OLLAMA = "ollama/ollama:0.2.1";
-    public static final String OLLAMA_VERSION = "0.2.1";
+    public static final String OLLAMA = "ollama/ollama:0.3.1";
+    public static final String OLLAMA_VERSION = "0.3.1";
 
-        public static final String MODEL_IMAGE_NAME = "tc-ollama-gemma2";
-//    public static final String MODEL_IMAGE_NAME = "tc-ollama-codegemma";
-
+//        public static final String MODEL_IMAGE_NAME = "tc-ollama-llama3.1";
+    public static final String MODEL_IMAGE_NAME = "tc-ollama-gemma2:2b";
+//
     @Test
     public void withDefaultConfig() {
         try ( // container {

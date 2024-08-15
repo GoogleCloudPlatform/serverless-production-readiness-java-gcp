@@ -18,33 +18,40 @@ export default function QuotesView() {
         <div className="flex gap-s items-baseline border border-b border-dashed border-contrast-50 p-l rounded-l">
           <Icon icon="vaadin:database"/>
           <TextField
-            value={author}
-            onChange={e => setAuthor(e.target.value)}
-            label="Book Author"
+              value={author}
+              onChange={e => setAuthor(e.target.value)}
+              label="Book Author"
           />
           <Button
-            onClick={e => QuoteEndpoint.quoteByAuthor(author).then(setQuotes)}>
-            Search DB by Author
+              onClick={e => QuoteEndpoint.quoteByAuthor(author).then(setQuotes)}>
+            Search by Author in database
           </Button>
           <Button
               onClick={e => QuoteEndpoint.randomQuote().then(q => setQuotes([q]))}>
-            Get DB random quote
+            Get random quote from database
+          </Button>
+        </div>
+        <div className="flex gap-s items-baseline border border-b border-dashed border-contrast-50 p-l rounded-l">
+          <Icon icon="vaadin:cloud"/>
+          <Button
+              onClick={e => QuoteEndpoint.randomLLMInVertexQuote().then(q => setQuotes([q]))}>
+            Get random quote from open-model LLM in VertexAI
+          </Button>
+          <Button
+              onClick={e => QuoteEndpoint.randomLLMInGKEQuote().then(q => setQuotes([q]))}>
+            Get random quote from open-model LLM in GKE
           </Button>
         </div>
         <div className="flex gap-s items-baseline border border-b border-dashed border-contrast-50 p-l rounded-l">
           <Icon icon="vaadin:cloud"/>
           <Button
               onClick={e => QuoteEndpoint.randomLLMQuote().then(q => setQuotes([q]))}>
-            Get random quote from Gemini
-          </Button>
-          <Button
-              onClick={e => QuoteEndpoint.randomLLMInGKEQuote().then(q => setQuotes([q]))}>
-            Get random quote from LLM in GKE
+            Get random quote from Gemini model in VertexAI
           </Button>
         </div>
         <div>
           <Checkbox
-              label="Manage quotes"
+              label="Manage book quotes in DB"
               checked={showCrud}
               onCheckedChanged={e => setShowCrud(e.detail.value)}/>
         </div>

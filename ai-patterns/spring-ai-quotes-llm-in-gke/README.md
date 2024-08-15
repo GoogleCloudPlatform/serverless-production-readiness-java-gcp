@@ -1,4 +1,5 @@
 # Quotes Service - JIT and Native Java Build & Deployment to Cloud Run
+## Connect to Google Gemini, open-model LLM in VertexAI and open-model LLM in GKE
 
 This sample is building on the materials from the [Quotes sample](../quotes/README.md) and adds a simple UI for interacting with the service.
 
@@ -6,14 +7,53 @@ The UI is built on the [Vaadin Hilla](https://hilla.dev/) framework. Hilla seaml
 
 # Before you start
 Run with the following environment variables set
-* VERTEX_AI_GEMINI_PROJECT_ID=my-project
-* VERTEX_AI_GEMINI_LOCATION=us-central1
-* VERTEX_AI_GEMINI_MODEL=gemini-1.5-pro-001
-* OPENAI_API_KEY=your  api key
+```shell
+    # LLM in VertexAI env
+    export VERTEX_AI_PROJECT_ID=<your project id>
+    export VERTEX_AI_LOCATION=us-central1
+    export VERTEX_AI_MODEL=<your model in Vertex>
+    # ex: export VERTEX_AI_MODEL=meta/llama3-405b-instruct-maas
+    
+    # LLM in GKE env
+    export OPENAI_API_KEY=<you API key for the LLM in GKE>
+    export OPENAI_API_GKE_IP=<IP for deployed model>
+    export OPENAI_API_GKE_MODEL=<your model in Vertex>
+    # ex: export OPENAI_API_GKE_MODEL=meta-llama/Meta-Llama-3.1-8B-Instruct
+    
+    # Gemini in VertexAI env
+    export VERTEX_AI_GEMINI_PROJECT_ID=<your project id>
+    export VERTEX_AI_GEMINI_LOCATION=us-central1
+    export VERTEX_AI_GEMINI_MODEL=<your Gemini model>
+    # ex: export VERTEX_AI_GEMINI_MODEL=gemini-1.5-pro-001
+```
+or set them locally in the application.properties file:
+```java
+#################################
+# Google Vertex AI Gemini
+#################################
+spring.ai.vertex.ai.gemini.project-id=${VERTEX_AI_GEMINI_PROJECT_ID}
+spring.ai.vertex.ai.gemini.location=${VERTEX_AI_GEMINI_LOCATION}
+spring.ai.vertex.ai.gemini.chat.options.model=${VERTEX_AI_GEMINI_MODEL}
+spring.ai.vertex.ai.gemini.transport=grpc
 
-or set them locally in the application.properties file
+#################################
+# OpenAI API - LLM in GKE
+#################################
+spring.ai.openai.api-key=${OPENAI_API_KEY}
+spring.ai.openai.chat.options.model=${OPENAI_API_GKE_MODEL}
+spring.ai.openai.chat.base-url=${OPENAI_API_GKE_IP}
+spring.ai.openai.chat.options.max-tokens=1024
 
-Ex.: VERTEX_AI_GEMINI_PROJECT_ID=my-project;VERTEX_AI_GEMINI_LOCATION=us-central1;VERTEX_AI_GEMINI_MODEL=gemini-1.5-flash-001;ANTHROPIC_API_KEY=abcd1234
+#################################
+# OpenAI VertexAI - manual configuration
+#################################
+spring.ai.vertex.ai.vertex.ai.gemini.project-id=${VERTEX_AI_PROJECT_ID}
+spring.ai.vertex.ai.vertex.ai.gemini.location=${VERTEX_AI_LOCATION}
+spring.ai.openai.vertex.ai.chat.options.model=${VERTEX_AI_MODEL}
+spring.ai.openai.vertex.ai.chat.base-url=https://${VERTEX_AI_LOCATION}-aiplatform.googleapis.com/v1beta1/projects/${VERTEX_AI_PROJECT_ID}/locations/${VERTEX_AI_LOCATION}/endpoints/openapi
+spring.ai.openai.vertex.ai.chat.completions-path=/chat/completions
+spring.ai.openai.vertex.ai.chat.options.max-tokens=1024
+```
 # Build
 
 ### Create a Spring Boot Application
@@ -75,16 +115,16 @@ docker build -f ./containerize/Dockerfile-custom -t quotes-custom .
 ```
 ### Build a JIT and Native Java Docker Image with Buildpacks
 ```
-./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=quotes
+./mvnw spring-boot:build-image -DskipTests -Pproduction -Dspring-boot.build-image.imageName=quotes-llm
 
-./mvnw spring-boot:build-image  -DskipTests -Pnative -Dspring-boot.build-image.imageName=quotes-native
+./mvnw spring-boot:build-image -DskipTests -Pproduction -Pnative -Dspring-boot.build-image.imageName=quotes-native-llm
 ```
 
 ### Test the locally built images on the local machine
 ```shell
-docker run --rm -p 8080:8083 quotes
+docker run --rm -p 8080:8083 quotes-llm
 
-docker run --rm -p 8080:8083 quotes-native
+docker run --rm -p 8080:8083 quotes-native-llm
 ```
 ### Build, test with CloudBuild in Cloud Build
 ```shell
@@ -103,8 +143,8 @@ export PROJECT_ID=$(gcloud config list --format 'value(core.project)')
 echo   $PROJECT_ID
 
 # tag and push JIT image
-docker tag quotes gcr.io/${PROJECT_ID}/quotes
-docker push gcr.io/${PROJECT_ID}/quotes
+docker tag quotes-llm gcr.io/${PROJECT_ID}/quotes-llm
+docker push gcr.io/${PROJECT_ID}/quotes-llm
 
 # tag and push Native image
 docker tag quotes-native gcr.io/${PROJECT_ID}/quotes-native
@@ -124,7 +164,7 @@ gcloud run services list
 Deploy the Quotes JIT image
 ```shell
 # note the URL of the deployed service
-gcloud run deploy quotes \
+gcloud run deploy quotes-llm \
      --image gcr.io/${PROJECT_ID}/quotes \
      --region us-central1 \
      --memory 2Gi --allow-unauthenticated

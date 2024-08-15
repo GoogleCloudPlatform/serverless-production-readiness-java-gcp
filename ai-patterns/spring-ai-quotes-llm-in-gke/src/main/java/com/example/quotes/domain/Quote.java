@@ -127,7 +127,7 @@ public class Quote {
       jsonString = input.substring(startIndex, endIndex + 1);
     }
     if(!jsonString.isBlank()) {
-      Map<String, Object> result = converter.convert(jsonString);
+      Map<String, Object> result = converter.convert(jsonString.replaceAll("\\\\n", " "));
       quote.setAuthor(result.get("author")!=null ? result.get("author").toString():"");
       quote.setQuote(result.get("quote")!=null ? result.get("quote").toString():"");
       quote.setBook(result.get("book")!=null ? result.get("book").toString():"");
