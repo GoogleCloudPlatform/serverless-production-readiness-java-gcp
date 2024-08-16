@@ -98,6 +98,35 @@ resource "null_resource" "create_firestore_index" {
         echo "Composite index already exists, skipping creation..."
       fi
     EOT
+    when = "create"
+  }
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      # Check if the specific composite index exists and delete if it does
+      INDEX_EXISTS=$(gcloud firestore indexes composite list --project=${var.project_id} --format="value(COLLECTION_GROUP)" --filter="pictures")
+      if [ -n "$INDEX_EXISTS" ]; then
+        echo "Composite index found, deleting..."
+        gcloud firestore indexes composite delete \
+          --project=${var.project_id} \
+          --collection-group=pictures \
+          --field-config field-path=thumbnail,order=descending \
+          --field-config field-path=created,order=descending
+      else
+        echo "Composite index not found, skipping deletion..."
+      fi
+
+      # Check if Firestore database exists and delete if it does
+      DB_EXISTS=$(gcloud firestore databases list --project=${var.project_id} --format="value(name)")
+      if [ -n "$DB_EXISTS" ]; then
+        echo "Firestore database found, deleting..."
+        gcloud firestore databases delete --project=${var.project_id} --location=${var.region} --quiet
+      else
+        echo "Firestore database not found, skipping deletion..."
+      fi
+    EOT
+
+    when = "destroy"
   }
 }
 
