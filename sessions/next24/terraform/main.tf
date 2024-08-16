@@ -70,7 +70,7 @@ module "cloud-nat" {
   source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
 }
 
-# The Terraform provider doesn't directly manage Firebase Realtime Database creation, so using gcloud commands within Terraform is a workaround.
+# The Terraform provider doesn't directly manage default Firebase Database creation, so using gcloud commands within Terraform is a workaround.
 resource "null_resource" "create_firestore_index" {
   depends_on = [module.project_services]
   provisioner "local-exec" {
