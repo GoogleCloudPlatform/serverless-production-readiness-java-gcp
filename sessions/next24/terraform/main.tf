@@ -70,6 +70,7 @@ module "cloud-nat" {
   source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
 }
 
+# The Terraform provider doesn't directly manage default Firebase Database creation, so using gcloud commands within Terraform is a workaround.
 resource "null_resource" "create_firestore_index" {
   depends_on = [module.project_services]
   provisioner "local-exec" {
@@ -83,7 +84,7 @@ resource "null_resource" "create_firestore_index" {
       else
         echo "Firestore database already exists, skipping creation..."
       fi
-      
+
       # Check if the specific composite index exists and create if it does not
       INDEX_EXISTS=$(gcloud firestore indexes composite list --project=${var.project_id} --format="value(COLLECTION_GROUP)" --filter="pictures")
       if [ -z "$INDEX_EXISTS" ]; then
@@ -95,7 +96,7 @@ resource "null_resource" "create_firestore_index" {
           --field-config field-path=created,order=descending
       else
         echo "Composite index already exists, skipping creation..."
-      fi    
+      fi
     EOT
   }
 }
@@ -135,7 +136,7 @@ resource "google_compute_instance" "alloydb_client" {
   name         = "alloydb-client"
   zone         = var.zone
   machine_type = "e2-medium"
-  depends_on = [null_resource.alloydb_cluster]
+  depends_on = [google_alloydb_instance.primary]
   boot_disk {
     initialize_params {
       // The latest Debian 12 image (excluding arm64)
@@ -183,37 +184,35 @@ resource "google_service_networking_connection" "private_vpc_connection" {
   reserved_peering_ranges = [google_compute_global_address.psa_range.name]
 }
 
-resource "null_resource" "alloydb_cluster" {
-  triggers = {
-    always_run = "${timestamp()}"
+resource "google_alloydb_cluster" "default" {
+  cluster_id = var.alloydb_cluster_name
+  location   = var.region
+  network_config {
+    network = google_compute_network.auto_vpc.id
+  }
+
+  initial_user {
+    user     = "postgres"
+    password = var.alloydb_password
   }
 
   depends_on = [google_service_networking_connection.private_vpc_connection]
-  provisioner "local-exec" {
-    command = <<-EOT
-      DB_CLUSTER_EXISTS=$(gcloud alloydb clusters list --filter="name=${var.alloydb_cluster_name}" --format="value(name)" --region="${var.region}")
-      if [ -z "$DB_CLUSTER_EXISTS" ]; then
-        gcloud alloydb clusters create ${var.alloydb_cluster_name} \
-          --region=${var.region} --password=${var.alloydb_password}
-        sleep 30
-      fi
-      DB_EXISTS=$(gcloud alloydb instances list --cluster=${var.alloydb_cluster_name} --filter="name=${var.alloydb_cluster_name}-pr AND cluster=${var.alloydb_cluster_name}" --format="value(name)" --region="${var.region}")
-      if [ -z "$DB_EXISTS" ]; then
-        gcloud alloydb instances create ${var.alloydb_cluster_name}-pr \
-          --instance-type=PRIMARY \
-          --cpu-count=2 \
-          --region=${var.region} \
-          --cluster=${var.alloydb_cluster_name}
-          sleep 10
-      fi
-      gcloud alloydb instances describe ${var.alloydb_cluster_name}-pr --region=${var.region} --cluster=${var.alloydb_cluster_name} --format='get(ipAddress)' > alloydb_ip.txt
-    EOT
-  }
 }
 
-data "external" "alloydb_ip" {
-  depends_on = [null_resource.alloydb_cluster]
-  program = ["bash", "-c", "echo '{\"ip_address\": \"'$(cat ${path.module}/alloydb_ip.txt)'\"}'"]
+resource "google_alloydb_instance" "primary" {
+  cluster    = google_alloydb_cluster.default.name
+  instance_id = "${var.alloydb_cluster_name}-pr"
+
+  instance_type = "PRIMARY"
+  machine_config {
+    cpu_count = 2
+  }
+
+  depends_on = [google_alloydb_cluster.default]
+}
+
+output "alloydb_ip" {
+  value = google_alloydb_instance.primary.ip_address
 }
 
 locals {
@@ -227,12 +226,12 @@ locals {
       env = "native"
     }
   }
-  alloydb_ip = data.external.alloydb_ip.result["ip_address"]
+  alloydb_ip = google_alloydb_instance.primary.ip_address
 }
 
 resource "google_artifact_registry_repository" "books_genai_repo" {
   for_each = local.cloud_run_services
-  depends_on = [null_resource.alloydb_cluster]
+  depends_on = [google_alloydb_instance.primary]
   location      = var.region
   repository_id = each.key
   description   = "Artifact registry for books-genai-jit images"
