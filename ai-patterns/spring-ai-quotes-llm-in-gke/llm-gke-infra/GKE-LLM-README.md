@@ -351,7 +351,7 @@ command: ["python3", "-m", "vllm.entrypoints.openai.api_server"]
 ## Deploy the model to GKE
 After vllm-deploy.yaml file been updated with proper settings, execute the followin command:
 ```
-kubectl apply -f vllm-deploy.yaml -n $NAMESPACE 
+kubectl apply -f vllm-deploy-llama3-1-hf.yaml -n $NAMESPACE 
 ```
 The following GKE artifacts will be created:
 a. vllm-server deployment
@@ -382,7 +382,7 @@ curl -X POST http://ClusterIP/v1/chat/completions  \
 Spin up or down node pool
 ```
 gcloud container clusters resize $CLUSTER_NAME --node-pool g2-standard-24 --num-nodes 1 --region us-central1
-kubectl apply -f vllm2-deploy.yaml -n vllm
+kubectl apply -f vllm-deploy-llama3-1-hf.yaml -n vllm
 
 
 #scale down
