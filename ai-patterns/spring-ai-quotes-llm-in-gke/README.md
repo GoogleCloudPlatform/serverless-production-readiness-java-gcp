@@ -1,7 +1,7 @@
-# Quotes Service - JIT and Native Java Build & Deployment to Cloud Run
+# Quotes Service - Build & Deploy to Cloud Run
 ## Connect to Google Gemini, open-model LLM in VertexAI and open-model LLM in GKE
 
-This sample is building on the materials from the [Quotes sample](../quotes/README.md) and adds a simple UI for interacting with the service.
+This sample is building on the materials from the [Quotes sample](https://github.com/GoogleCloudPlatform/serverless-production-readiness-java-gcp/blob/main/services/quotes/README.md) and adds a simple UI for interacting with the service.
 
 The UI is built on the [Vaadin Hilla](https://hilla.dev/) framework. Hilla seamlessly connects Spring Boot and React to accelerate application development.
 
@@ -27,7 +27,7 @@ Run with the following environment variables set
     # ex: export VERTEX_AI_GEMINI_MODEL=gemini-1.5-pro-001
 ```
 or set them locally in the application.properties file:
-```java
+```
 #################################
 # Google Vertex AI Gemini
 #################################
@@ -78,62 +78,41 @@ Java(TM) SE Runtime Environment Oracle GraalVM 21+35.1 (build 21+35-jvmci-23.1-b
 Java HotSpot(TM) 64-Bit Server VM Oracle GraalVM 21+35.1 (build 21+35-jvmci-23.1-b15, mixed mode, sharing)
 ```
 
-### Validate that the starter app is good to go
+### Build a Java application image
 ```
- ./mvnw clean package -Pproduction
+# build the app
+./mvnw clean package -Pproduction -DskipTests
+
+# start the app
+java -jar target/spring-ai-quotes-llm-in-gke-1.0.0.jar
 ```
 
-From a terminal window, test the app
+Test the application locally:
 ```
-curl localhost:8083/start
+# Access the app in a browser window
+http://localhost:8083
 
-# Output
-Hello from your local environment!
-```
-
-### Build a JIT and Native Java application image
-```
-./mvnw package -DskipTests -Pproduction
-
-./mvnw native:compile -Pnative -DskipTests -Pproduction
+# Test from a terminal
+curl localhost:8083/random-quote 
+curl localhost:8083/random-quote-llm
+curl localhost:8083/random-quote-llmgke
 ```
 
-### Start your app with AOT enabled
+### Build a Docker image with Dockerfiles
 ```shell
-java -Dspring.aot.enabled=true -jar target/quotes-1.0.0.jar
-```
-### Build a JIT Docker image with Dockerfiles
-```shell
-# build an image with jlink
-docker build . -f ./containerize/Dockerfile-jlink -t quotes-jlink
-
 # build an image with a fat JAR
 docker build -f ./containerize/Dockerfile-fatjar -t quotes-fatjar .
-
-# build an image with custom layers
-docker build -f ./containerize/Dockerfile-custom -t quotes-custom .
 ```
-### Build a JIT and Native Java Docker Image with Buildpacks
+### Build a Java Docker Image with Buildpacks
 ```
 ./mvnw spring-boot:build-image -DskipTests -Pproduction -Dspring-boot.build-image.imageName=quotes-llm
-
-./mvnw spring-boot:build-image -DskipTests -Pproduction -Pnative -Dspring-boot.build-image.imageName=quotes-native-llm
 ```
 
 ### Test the locally built images on the local machine
 ```shell
 docker run --rm -p 8080:8083 quotes-llm
-
-docker run --rm -p 8080:8083 quotes-native-llm
 ```
-### Build, test with CloudBuild in Cloud Build
-```shell
-gcloud builds submit  --machine-type E2-HIGHCPU-32
 
-gcloud builds submit --config cloudbuild-docker.yaml --machine-type E2-HIGHCPU-32
-
-gcloud builds submit  --config cloudbuild-native.yaml --machine-type E2-HIGHCPU-32 
-```
 # Deploy
 ### Tag and push images to a registry
 If you have built the image locally, tag it first and push to a container registry
@@ -142,13 +121,23 @@ If you have built the image locally, tag it first and push to a container regist
 export PROJECT_ID=$(gcloud config list --format 'value(core.project)')
 echo   $PROJECT_ID
 
-# tag and push JIT image
-docker tag quotes-llm gcr.io/${PROJECT_ID}/quotes-llm
-docker push gcr.io/${PROJECT_ID}/quotes-llm
+# set the region for the image
+export REGION=<your region>
+ex:
+export REGION=us-central1
+echo $REGION
 
-# tag and push Native image
-docker tag quotes-native gcr.io/${PROJECT_ID}/quotes-native
-docker push gcr.io/${PROJECT_ID}/quotes-native
+# tag and push image to Artifact Registry
+gcloud artifacts repositories create quotes-llm \
+      --repository-format=docker \
+      --location=us-central1 \
+      --description="Quote app images accessing LLMs" \
+      --immutable-tags \
+      --async
+gcloud auth configure-docker us-central1-docker.pkg.dev
+
+docker tag quotes-llm ${REGION}-docker.pkg.dev/${PROJECT_ID}/quotes-llm/quotes-llm
+docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/quotes-llm/quotes-llm
 ```
 
 ### Deploy Docker images to Cloud Run
@@ -165,73 +154,39 @@ Deploy the Quotes JIT image
 ```shell
 # note the URL of the deployed service
 gcloud run deploy quotes-llm \
-     --image gcr.io/${PROJECT_ID}/quotes \
+     --image ${REGION}-docker.pkg.dev/${PROJECT_ID}/quotes-llm/quotes-llm \
      --region us-central1 \
-     --memory 2Gi --allow-unauthenticated
+     --memory 2Gi --cpu=2 \
+     --execution-environment gen1 \
+     --set-env-vars=SERVER_PORT=8080 \
+     --set-env-vars=JAVA_TOOL_OPTIONS='-XX:+UseG1GC -XX:MaxRAMPercentage=80 -XX:ActiveProcessorCount=2 -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -Xss256k' \
+     --set-env-vars=VERTEX_AI_GEMINI_PROJECT_ID=${PROJECT_ID} \
+     --set-env-vars=VERTEX_AI_GEMINI_LOCATION=${REGION} \
+     --set-env-vars=VERTEX_AI_GEMINI_MODEL=gemini-1.5-pro-001 \
+     --set-env-vars=VERTEX_AI_PROJECT_ID=${PROJECT_ID} \
+     --set-env-vars=VERTEX_AI_LOCATION=${REGION} \
+     --set-env-vars=VERTEX_AI_MODEL=meta/llama3-405b-instruct-maas \
+     --set-env-vars=OPENAI_API_KEY=${OPENAI_API_KEY} \
+     --set-env-vars=OPENAI_API_GKE_IP=${OPENAI_API_GKE_IP} \
+     --set-env-vars=OPENAI_API_GKE_MODEL=meta-llama/Meta-Llama-3.1-8B-Instruct \
+     --cpu-boost \
+     --allow-unauthenticated 
+     
+# observe the URL, use it for UI or cURL access
+# example:
+...
+Service [quotes-llm] revision [quotes-llm-00008-wq5] has been deployed and is serving 100 percent of traffic.
+Service URL: https://quotes-llm-....-uc.a.run.app     
 ```
 
-Deploy the Quotes Native Java image
-```shell
-# note the URL of the deployed service
-gcloud run deploy quotes-native \
-     --image gcr.io/${PROJECT_ID}/quotes-native \
-     --region us-central1 \
-     --memory 2Gi --allow-unauthenticated
-```
+Test the application in Cloud Run:
+``````
+# Test from a terminal
+curl https://quotes-llm-6hrf...-uc.a.run.app/random-quote
+curl https://quotes-llm-6hrf...-uc.a.run.app/random-quote-llm
+curl https://quotes-llm-6hrf...-uc.a.run.app/random-quote-llmgke
+curl https://quotes-llm-6hrf...-uc.a.run.app/random-quote-llm-vertex
 
-### Test the application
-Start the containerized app locally:
-```shell
-# validate that app has started
-curl localhost:8080:/start
-
-# get quotes from the app
-curl localhost:8080/quotes
-curl localhost:8080/random-quote
-
-# add a new quote to the repository
-curl --location 'http://localhost:8080/quotes' \
---header 'Content-Type: application/json' \
---data '{
-    "author" : "Isabel Allende",
-    "quote" : "The longer I live, the more uninformed I feel. Only the young have an explanation for everything.",
-    "book" : "City of the Beasts"
-}'
-```
-
-Test the application in Cloud Run
-```shell
-# find the Quotes URL is you have not noted it
-gcloud run services list | grep quotes
-✔  quotes                    us-central1   https://quotes-...-uc.a.run.app       
-✔  quotes-native             us-central1   https://quotes-native-...-uc.a.run.app
-# validate that app passes start-up check
-curl <URL>:/start
-
-# get quotes from the app
-curl <URL>:/quotes
-curl <URL>:/random-quote
-
-# add a new quote to the repository
-curl --location '<URL>:/quotes' \
---header 'Content-Type: application/json' \
---data '{
-    "author" : "Isabel Allende",
-    "quote" : "The longer I live, the more uninformed I feel. Only the young have an explanation for everything.",
-    "book" : "City of the Beasts"
-}'
-```
-
-If you have deployed the app with security enabled, (no --allow-unauthenticated flag) you can test it with a Bearer token. You can use also an alternative [HTTP test client](https://httpie.io/) 
-```shell
-TOKEN=$(gcloud auth print-identity-token)
-
-# Get the URL of the deployed app
-# Test JIT image
-http -A bearer -a $TOKEN  https://<BASE_URL>/random-quote
-http -A bearer -a $TOKEN  https://<BASE_URL>/quotes
-
-# Test Native Java image
-http -A bearer -a $TOKEN <BASE_URL>/random-quote
-http -A bearer -a $TOKEN <BASE_URL>/quotes
+# Access the app in a browser window
+https://quotes-llm-6hr...-uc.a.run.app
 ```
