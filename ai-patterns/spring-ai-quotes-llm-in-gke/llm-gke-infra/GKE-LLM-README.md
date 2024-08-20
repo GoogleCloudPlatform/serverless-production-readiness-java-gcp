@@ -63,7 +63,7 @@ gcloud container clusters create $CLUSTER_NAME \
   --node-locations="$ZONE_1" \
   --shielded-secure-boot --shielded-integrity-monitoring \
   --workload-pool="${PROJECT_ID}.svc.id.goog" \
-  --addons GcsFuseCsiDriver, HttpLoadBalancing \
+  --addons GcsFuseCsiDriver,HttpLoadBalancing \
   --num-nodes 1 --min-nodes 1 --max-nodes 5 \
   --ephemeral-storage-local-ssd=count=2 \
   --enable-ip-alias
