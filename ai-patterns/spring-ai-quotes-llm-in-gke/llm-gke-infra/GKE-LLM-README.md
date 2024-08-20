@@ -66,7 +66,7 @@ gcloud container clusters create $CLUSTER_NAME \
   --addons GcsFuseCsiDriver,HttpLoadBalancing \
   --num-nodes 1 --min-nodes 1 --max-nodes 5 \
   --ephemeral-storage-local-ssd=count=2 \
-  --enable-ip-alias
+  --enable-ip-alias \
   --no-enable-master-authorized-networks \
   --machine-type n2d-standard-4
 ```
