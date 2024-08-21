@@ -8,7 +8,7 @@ This lab can be executed directly in a Cloud Workstation, Cloudshell or your env
 In order to build JIT or Native Java app images, please set up Java and GraalVM and the associated Java 21 distributions.
 A simple installer is available from [SDKMan](https://sdkman.io/install)
 ```shell
-sdk install java 21.0.2-graal
+sdk install java 21.0.4-graal
 ```
 
 ## Clone the code:
