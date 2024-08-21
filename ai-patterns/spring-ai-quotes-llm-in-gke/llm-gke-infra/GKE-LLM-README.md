@@ -368,13 +368,15 @@ Check that the pod has been correctly scheduled in one of the nodes in the g2-st
 
 Simplely run the following command to get the cluster ip:
 ```
-kubectl get Ingress -n $NAMESPACE
+kubectl get ingress -n "$NAMESPACE"
+export INGRESS_CLUSTER_IP=$(kubectl get ingress -n "$NAMESPACE" | awk 'NR==2 {print $4}')
+echo $INGRESS_CLUSTER_IP
 ```
 
 Then use the following curl command to test inside the Cluster(update the cluster IP first):
 ```
 curl -X POST \
-    "http://ClusterIP/v1/chat/completions" \
+    "http://$INGRESS_CLUSTER_IP/v1/chat/completions" \
     -H "Connection: keep-alive" \
     -H "Accept: application/json" \
     -H "Content-Type: application/json" \
