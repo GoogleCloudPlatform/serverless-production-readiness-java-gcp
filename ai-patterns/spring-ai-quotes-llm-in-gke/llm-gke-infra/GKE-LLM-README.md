@@ -373,10 +373,14 @@ kubectl get Ingress -n $NAMESPACE
 
 Then use the following curl command to test inside the Cluster(update the cluster IP first):
 ```
-curl -X POST http://ClusterIP/v1/chat/completions  \ 
-    -H "Connection: keep-alive"      -H "Accept: application/json" \
-    -H "Content-Type: application/json"      -H "Authorization: Bearer $OPENAPI_KEY" \
-    -d '{"messages": [{"role": "system", "content": "Answer like an experienced literary professor."}, {"role": "user", "content": "Answer like an experienced literary professor; please provide a quote from a random book, including book, quote and author; do not repeat quotes from the same book; return the answer wrapped in triple backquotesjsonstrictly in JSON format"}], "model": "meta-llama/Meta-Llama-3.1-8B-Instruct"}'
+curl -X POST \
+    "http://ClusterIP/v1/chat/completions" \
+    -H "Connection: keep-alive" \
+    -H "Accept: application/json" \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $OPENAPI_KEY" \
+    -d '{"messages": [{"role": "system", "content": "Answer like an experienced literary professor."}, {"role": "user", "content": "Answer like an experienced literary professor; please provide a quote from a random book, including book, quote and author; do not repeat quotes from the same book; return the answer wrapped in triple backquotesjsonstrictly in JSON format"}], "model": "meta-llama/Meta-Llama-3.1-8B-Instruct"}' \
+    --compressed
 ```
 
 ```
