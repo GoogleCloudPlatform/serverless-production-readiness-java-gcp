@@ -416,6 +416,7 @@ output:
 
 Spin up or down node pool
 ```
+#scale up
 gcloud container clusters resize $CLUSTER_NAME --node-pool g2-standard-24 --num-nodes 1 --region us-central1
 kubectl apply -f vllm-deploy-llama3-1-hf.yaml -n vllm
 
