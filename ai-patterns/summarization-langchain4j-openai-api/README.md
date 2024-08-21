@@ -38,7 +38,7 @@ In order to build JIT or Native Java app images, please set up Java (OpenJDK or 
 A simple installer is available from [SDKMan](https://sdkman.io/install) for both JT and Native Java.
 
 ```shell
-sdk install java 21.0.3-graal
+sdk install java 21.0.4-graal
 ```
 
 ## Clone the code:

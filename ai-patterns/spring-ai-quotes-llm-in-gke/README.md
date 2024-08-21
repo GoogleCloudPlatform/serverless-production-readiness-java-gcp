@@ -57,25 +57,31 @@ spring.ai.openai.vertex.ai.chat.options.max-tokens=1024
 # Build
 
 ### Create a Spring Boot Application
-```
+```shell
 # clone the repo
 git clone https://github.com/GoogleCloudPlatform/serverless-production-readiness-java-gcp.git
-cd ai-patterns/spring-ai-quotes-llm-in-gke
+
+# app available here
+cd serverless-production-readiness-java-gcp/ai-patterns/spring-ai-quotes-llm-in-gke
 ```
 
 ### Validate that you have Java 21 and Maven installed
 ```shell
-java -version
-```
+# install Java 21 if it is not installed in your env or cloudshell
+curl -s "https://get.sdkman.io" | bash
+source "$HOME/.sdkman/bin/sdkman-init.sh"
+sdk install java 21.0.4-graal 
 
-### Validate that GraalVM for Java is installed if building native images
-```shell
+# Select Y to set as default or use
+sdk use java 21.0.4-graal
+
+# validate our Java runtime
 java -version
 
-# should indicate this or later version
-java version "21" 2023-09-19
-Java(TM) SE Runtime Environment Oracle GraalVM 21+35.1 (build 21+35-jvmci-23.1-b15)
-Java HotSpot(TM) 64-Bit Server VM Oracle GraalVM 21+35.1 (build 21+35-jvmci-23.1-b15, mixed mode, sharing)
+# observe the output
+java version "21.0.4" 2024-07-16 LTS
+Java(TM) SE Runtime Environment Oracle GraalVM 21.0.4+8.1 (build 21.0.4+8-LTS-jvmci-23.1-b41)
+Java HotSpot(TM) 64-Bit Server VM Oracle GraalVM 21.0.4+8.1 (build 21.0.4+8-LTS-jvmci-23.1-b41, mixed mode, sharing)
 ```
 
 ### Build a Java application image
