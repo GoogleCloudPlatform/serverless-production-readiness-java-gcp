@@ -165,7 +165,8 @@
         <configuration>
           <buildArgs>
             <buildArgs>--enable-url-protocols=http</buildArgs>
-            <buildArgs>--gc=G1 --strict-image-heap -march=native -O3</buildArgs>
+<!--            <buildArgs>&#45;&#45;gc=G1 &#45;&#45;strict-image-heap -march=native -O3</buildArgs>-->
+            <buildArgs>--strict-image-heap -march=native -O3</buildArgs>
           </buildArgs>
         </configuration>
       </plugin>
