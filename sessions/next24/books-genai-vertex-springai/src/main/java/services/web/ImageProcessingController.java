@@ -160,7 +160,7 @@ public class ImageProcessingController {
             logger.info("Picture metadata saved in Firestore at " + writeResult.get().getUpdateTime());
         }
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(msg, HttpStatus.OK);
     }
 
     @Bean
@@ -188,7 +188,7 @@ public class ImageProcessingController {
 
         @Override
         public Response apply(Request request) {
-            logger.info(String.format("Called getBookAvailability(%s, %s)", request.title(), request.author()));
+            logger.info("BookStore availability request: " + request);
             return new Response(request.title(), request.author(), "The book is available for purchase in the book store in paperback format.");
         }
     }

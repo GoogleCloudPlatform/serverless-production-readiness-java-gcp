@@ -77,6 +77,9 @@ public class VertexAIClient {
         logger.info("Elapsed time ({}, with SpringAI): {} ms", model, (System.currentTimeMillis() - start));
         return response;
     }
+
+    // In the promptModel method I want to get the token count of prompt before making the chat request. Use methods from a custom repo to do this.
+
     public String promptModel(String prompt, String model) {
         long start = System.currentTimeMillis();
         logger.info("Chat model prompt: {} ...", prompt.substring(0, Math.min(500, prompt.length())));

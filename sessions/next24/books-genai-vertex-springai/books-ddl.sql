@@ -51,3 +51,18 @@ CREATE INDEX idx_books_author_id ON books (author_id);
 CREATE INDEX idx_books_book_id ON books (book_id);
 CREATE INDEX idx_pages_author_id ON authors (author_id);
 --CREATE INDEX idx_hnsw_co_pages_embedding ON pages USING hnsw (embedding vector_cosine_ops) WITH (m = 16, ef_construction = 64);
+
+select * from bookSummaries limit 100;
+delete from booksummaries where book_id =21;
+commit;
+select * from books;
+select * from pages where book_id=24 limit 100;
+select * from authors;
+
+delete from pages where book_id=20;
+
+delete from pages where page_id in (4210, 4213, 4214, 4217, 4218);
+commit;
+update booksummaries set book_id=31 where book_id=20;
+
+select * from books where UPPER(title) = UPPER('The Jungle Book');
