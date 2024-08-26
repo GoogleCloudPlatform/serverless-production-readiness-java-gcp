@@ -14,24 +14,41 @@
  * limitations under the License.
  */
 package services.gemini;
-import java.util.List;
+import com.google.auth.oauth2.AccessToken;
+import com.google.auth.oauth2.GoogleCredentials;
+import java.io.IOException;
+import java.util.Date;
 import java.util.Map;
 import java.util.function.Function;
 
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.ai.openai.api.OpenAiApi;
+import org.springframework.ai.retry.RetryUtils;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatModel;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatOptions;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Description;
+import org.springframework.web.client.ResponseErrorHandler;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 
 @SpringBootApplication
 public class FunctionCallingApplication {
+
+	@Value("${spring.ai.openai.chat.base-url}")
+	String baseURL;
+
+	@Value("${spring.ai.openai.chat.completions-path}")
+	String completionsPath;
 
 	record Transaction(String id) {
 	}
@@ -67,8 +84,10 @@ public class FunctionCallingApplication {
 
 	@Bean
 	ApplicationRunner applicationRunner(
-			VertexAiGeminiChatModel vertexAiGemini) {
+			VertexAiGeminiChatModel vertexAiGemini,
+			OpenAiChatModel openAI) {
 
+		//--- Multi-turn function calling ---
 		return args -> {
 			String prompt = """
    							Please use multi-turn invocation to answer the following question:
@@ -81,7 +100,7 @@ public class FunctionCallingApplication {
 							new Prompt(prompt,
 									VertexAiGeminiChatOptions.builder()
 											.withTemperature(0.2f).build())
-					).getResult().getOutput().getContent());
+					).getResult().getOutput().getContent().trim());
 
 			System.out.println("VertexAI Gemini multi-turn call took " + (System.currentTimeMillis() - start) + " ms");
 
@@ -93,21 +112,53 @@ public class FunctionCallingApplication {
 			);
 
 			geminiStream.collectList().block().stream().findFirst().ifPresent(resp -> {
-				System.out.println("\nVERTEX_AI_GEMINI (Streaming) multi-turn fn calling: " + resp.getResult().getOutput().getContent());
+				System.out.println("\nVERTEX_AI_GEMINI (Streaming) multi-turn fn calling: " + resp.getResult().getOutput().getContent().trim());
 			});
 			System.out.println("VertexAI Gemini multi-turn streaming call took " + (System.currentTimeMillis() - start) + " ms");
 
+			//--- Parallel function calling ---
 			String parallelizedPrompt = """
    							What is the status of my payment transactions 002, 001 and 003?
    							Please indicate the status for each transaction and return the results in JSON format
    							""";
+
+			// start = System.currentTimeMillis();
+			// System.out.println("\nOPEN_AI parallel fn calling: " + openAI.call(
+			// 		new Prompt(parallelizedPrompt,
+			// 				VertexAiGeminiChatOptions.builder()
+			// 						.withTemperature(0.2f).build())
+			// ).getResult().getOutput().getContent().trim());
+			// System.out.println("OpenAI (with parallel function calling) call took " + (System.currentTimeMillis() - start) + " ms");
+
+
+			String token = getOauth2Token(baseURL + completionsPath);
+			String model = "google/gemini-1.5-flash-001";
+			// String model = "meta/llama3-405b-instruct-maas";
+
+			OpenAiApi openAiApi = new OpenAiApi(baseURL, token, completionsPath,
+													"/v1/embeddings",
+																					RestClient.builder(),
+																					WebClient.builder(),
+																					RetryUtils.DEFAULT_RESPONSE_ERROR_HANDLER);
+
+			OpenAiChatModel openAIGemini = new OpenAiChatModel(openAiApi);
+			OpenAiChatOptions openAiChatOptions = OpenAiChatOptions.builder()
+					.withTemperature(0.2f)
+					.withModel(model)
+					.build();
+
+			start = System.currentTimeMillis();
+			System.out.println("\nOPEN_AI API (with parallel fn calling) in Vertex AI: " + openAIGemini.call(
+					new Prompt(parallelizedPrompt, openAiChatOptions))
+					.getResult().getOutput().getContent());
+			System.out.println("OpenAI API (with parallel function calling) in VertexAI call took " + (System.currentTimeMillis() - start) + " ms");
 
 			start = System.currentTimeMillis();
 			System.out.println("\nVERTEX_AI_GEMINI parallel fn calling: " + vertexAiGemini.call(
 					new Prompt(parallelizedPrompt,
 							VertexAiGeminiChatOptions.builder()
 									.withTemperature(0.2f).build())
-			).getResult().getOutput().getContent());
+			).getResult().getOutput().getContent().trim());
 
 			System.out.println("VertexAI Gemini (with parallel function calling) call took " + (System.currentTimeMillis() - start) + " ms");
 
@@ -119,11 +170,26 @@ public class FunctionCallingApplication {
 			);
 
 			geminiStream.collectList().block().stream().findFirst().ifPresent(resp -> {
-				System.out.println("\nVERTEX_AI_GEMINI (Streaming) parallel fn calling: " + resp.getResult().getOutput().getContent());
+				System.out.println("\nVERTEX_AI_GEMINI (Streaming) parallel fn calling: " + resp.getResult().getOutput().getContent().trim());
 			});
 			System.out.println("VertexAI Gemini parallel streaming call took " + (System.currentTimeMillis() - start) + " ms");
-
 		};
+	}
+
+	private static String getOauth2Token(String target) throws IOException {
+	    // Load credentials from the environment (default)
+	    GoogleCredentials credentials = GoogleCredentials.getApplicationDefault();
+
+	    // Refresh if necessary
+	    if (credentials.getAccessToken() == null || credentials.getAccessToken().getExpirationTime().before(new Date())) {
+	        credentials.refresh();
+	    }
+
+	    // Get the access token
+	    AccessToken accessToken = credentials.getAccessToken();
+	    System.out.println("Access Token: " + accessToken.getTokenValue());
+
+	    return accessToken.getTokenValue();
 	}
 
 	public static void main(String[] args) {

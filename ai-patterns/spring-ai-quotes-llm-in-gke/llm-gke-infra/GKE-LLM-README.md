@@ -63,10 +63,10 @@ gcloud container clusters create $CLUSTER_NAME \
   --node-locations="$ZONE_1" \
   --shielded-secure-boot --shielded-integrity-monitoring \
   --workload-pool="${PROJECT_ID}.svc.id.goog" \
-  --addons GcsFuseCsiDriver   \
+  --addons GcsFuseCsiDriver,HttpLoadBalancing \
   --num-nodes 1 --min-nodes 1 --max-nodes 5 \
   --ephemeral-storage-local-ssd=count=2 \
-  --enable-ip-alias
+  --enable-ip-alias \
   --no-enable-master-authorized-networks \
   --machine-type n2d-standard-4
 ```
@@ -351,7 +351,7 @@ command: ["python3", "-m", "vllm.entrypoints.openai.api_server"]
 ## Deploy the model to GKE
 After vllm-deploy.yaml file been updated with proper settings, execute the followin command:
 ```
-kubectl apply -f vllm-deploy.yaml -n $NAMESPACE 
+kubectl apply -f vllm-deploy-llama3-1-hf.yaml -n $NAMESPACE 
 ```
 The following GKE artifacts will be created:
 a. vllm-server deployment
@@ -368,21 +368,57 @@ Check that the pod has been correctly scheduled in one of the nodes in the g2-st
 
 Simplely run the following command to get the cluster ip:
 ```
-kubectl get Ingress -n $NAMESPACE
+kubectl get ingress -n "$NAMESPACE"
+export INGRESS_CLUSTER_IP=$(kubectl get ingress -n "$NAMESPACE" | awk 'NR==2 {print $4}')
+echo $INGRESS_CLUSTER_IP
 ```
 
 Then use the following curl command to test inside the Cluster(update the cluster IP first):
 ```
-curl -X POST http://ClusterIP/v1/chat/completions  \ 
-    -H "Connection: keep-alive"      -H "Accept: application/json" \
-    -H "Content-Type: application/json"      -H "Authorization: Bearer token" \
-    -d '{"messages": [{"role": "system", "content": "Answer like an experienced literary professor."}, {"role": "user", "content": "Answer like an experienced literary professor; please provide a quote from a random book, including book, quote and author; do not repeat quotes from the same book; return the answer wrapped in triple backquotesjsonstrictly in JSON format"}], "model": "meta-llama/Llama-2-7b-chat-hf"}'
+curl -X POST \
+    "http://$INGRESS_CLUSTER_IP/v1/chat/completions" \
+    -H "Connection: keep-alive" \
+    -H "Accept: application/json" \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $OPENAPI_KEY" \
+    -d '{"messages": [{"role": "system", "content": "Answer like an experienced literary professor."}, {"role": "user", "content": "Answer like an experienced literary professor; please provide a quote from a random book, including book, quote and author; do not repeat quotes from the same book; return the answer wrapped in triple backquotesjsonstrictly in JSON format"}], "model": "meta-llama/Meta-Llama-3.1-8B-Instruct"}' \
+    --compressed
+```
+
+```
+output:
+
+{
+  "id": "chat-4adf824b2645adfa9f78a996ab2b2eb8",
+  "object": "chat.completion",
+  "created": 1724268250,
+  "model": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "```json\n{\n  \"quote\": \"It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.\",\n  \"book\": \"Pride and Prejudice\",\n  \"author\": \"Jane Austen\"\n}\n```",
+        "tool_calls": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop",
+      "stop_reason": null
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 88,
+    "total_tokens": 147,
+    "completion_tokens": 59
+  }
+}
 ```
 
 Spin up or down node pool
 ```
+#scale up
 gcloud container clusters resize $CLUSTER_NAME --node-pool g2-standard-24 --num-nodes 1 --region us-central1
-kubectl apply -f vllm2-deploy.yaml -n vllm
+kubectl apply -f vllm-deploy-llama3-1-hf.yaml -n vllm
 
 
 #scale down
