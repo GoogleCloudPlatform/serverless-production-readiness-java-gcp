@@ -104,12 +104,12 @@ public class DocumentEmbeddingController {
     logger.info("Embedding flow - insert book and pages: {}ms", System.currentTimeMillis() - start);
 
     // embedding flows are executed async, latency not the same priority
-    // as in real-time request prcoessing
+    // as in real-time request processing
     // create a summary of the document
     //    long start = System.currentTimeMillis();
     //    logger.info("Book summarization flow : start");
     //    logger.info("Summarize book with title {} from Cloud Storage bucket {}", fileName, bucketName);
-    //    String summmary = booksService.createBookSummary(bucketName, fileName, true);
+    //    String summary = booksService.createBookSummary(bucketName, fileName, true);
     //    logger.info("Book summarization flow: end {}ms", System.currentTimeMillis() - start);
 
     return new ResponseEntity<>(HttpStatus.OK);

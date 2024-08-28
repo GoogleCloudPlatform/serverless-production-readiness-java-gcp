@@ -97,7 +97,7 @@ public class BooksService {
         } else {
             if(authorId==null)
                 authorId = dao.insertAuthor("famous author", author);
-            logger.info("publicPrivate:"+publicPrivate);
+            logger.info("publicPrivate:{}", publicPrivate);
             bookId = dao.insertBook( (Integer) authorId, title, year, ScopeType.fromValue(publicPrivate));
         }
 
@@ -127,7 +127,7 @@ public class BooksService {
                 try {
                     context = vertexAIClient.promptModel(promptSubSummary.formatted(context, content), model);
                 } catch (io.grpc.StatusRuntimeException statusRuntimeException) {
-                    logger.warn("vertexAIClient.promptModel(promptSubSummary.formatted(context, content)) statusRuntimeException: " + statusRuntimeException.getMessage());
+                    logger.warn("vertexAIClient.promptModel(promptSubSummary.formatted(context, content)) statusRuntimeException: {}", statusRuntimeException.getMessage());
                     continue;
                 } catch (RuntimeException e) {
                     logger.warn("Failed to interact with Vertex AI model: "+e.getMessage(), e);

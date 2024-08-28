@@ -26,6 +26,7 @@ public class SummaryController {
         this.cloudStorageService = cloudStorageService;
     }
 
+    @CrossOrigin
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<String> receiveMessage(
             @RequestBody Map<String, Object> body, @RequestHeader Map<String, String> headers) {

@@ -59,7 +59,8 @@ public class BookAnalysisController {
 
   @PostConstruct
   public void init() {
-    logger.info("BookImagesApplication: BookAnalysisController Post Construct Initializer " + new SimpleDateFormat("HH:mm:ss.SSS").format(new Date(System.currentTimeMillis())));
+    logger.info("BookImagesApplication: BookAnalysisController Post Construct Initializer {}",
+            new SimpleDateFormat("HH:mm:ss.SSS").format(new Date(System.currentTimeMillis())));
     logger.info("BookImagesApplication: BookAnalysisController Post Construct - StartupCheck can be enabled");
 
     StartupCheck.up();
@@ -67,24 +68,26 @@ public class BookAnalysisController {
 
   @CrossOrigin
   @PostMapping("")
-  public ResponseEntity<String> bookAnalysis(@RequestBody BookRequest bookRequest, @RequestParam(name = "contentCharactersLimit", defaultValue = "6000") Integer contentCharactersLimit){
+  public ResponseEntity<String> bookAnalysis(@RequestBody BookRequest bookRequest,
+                                             @RequestParam(name = "contentCharactersLimit",
+                                                     defaultValue = "6000") Integer contentCharactersLimit){
 
     long start = System.currentTimeMillis();
     logger.info("Book analysis flow : start");
 
     // Prompt AlloyDB for the embeddings for the book in the request
     List<Map<String, Object>> responseBook = booksService.prompt(bookRequest, contentCharactersLimit);
-    logger.info("Book analysis flow: retrieve embeddings from AlloyDB AI: " + (System.currentTimeMillis() - start) + "ms");
+    logger.info("Book analysis flow: retrieve embeddings from AlloyDB AI: {}ms", System.currentTimeMillis() - start);
 
     // build prompt to query LLM with the augmented context
     String promptWithContext = PromptUtility.formatPromptBookAnalysis(bookRequest, responseBook, bookRequest.keyWords());
 
-    logger.info("Book analysis flow - Model: " + model);
+    logger.info("Book analysis flow - Model: {}", model);
     start = System.currentTimeMillis();
 
     // submit prompt to the LLM via LLM orchestration framework
     String response = vertexAIClient.promptModel(promptWithContext, model);
-    logger.info("Book analysis flow: prompt LLM: " + (System.currentTimeMillis() - start) + "ms");
+    logger.info("Book analysis flow: prompt LLM: {}ms", System.currentTimeMillis() - start);
 
     // return the response to the caller
     return new ResponseEntity<>(response, HttpStatus.OK);

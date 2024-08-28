@@ -49,7 +49,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import services.actuator.StartupCheck;
 import services.ai.VertexAIClient;
-import services.config.CloudConfig;
 import services.domain.BooksService;
 import services.domain.FirestoreService;
 import services.utility.JsonUtility;
@@ -58,7 +57,6 @@ import services.utility.RequestValidationUtility;
 /**
  * ImageProcessingController is a Spring Boot REST controller that listens for Cloud Storage events
  * and processes the uploaded images.
- *
  * Controller is responsible for:
  * 1. Receiving the Cloud Storage event
  * 2. Extracting the image metadata
@@ -96,7 +94,8 @@ public class ImageProcessingController {
 
     @PostConstruct
     public void init() {
-        logger.info("BookImagesApplication: ImageProcessingController Post Construct Initializer " + new SimpleDateFormat("HH:mm:ss.SSS").format(new java.util.Date(System.currentTimeMillis())));
+        logger.info("BookImagesApplication: ImageProcessingController Post Construct Initializer {}",
+                new SimpleDateFormat("HH:mm:ss.SSS").format(new java.util.Date(System.currentTimeMillis())));
         logger.info("BookImagesApplication: ImageProcessingController Post Construct - StartupCheck can be enabled");
 
         StartupCheck.up();
@@ -104,13 +103,14 @@ public class ImageProcessingController {
 
     @GetMapping("start")
     String start(){
-        logger.info("BookImagesApplication: ImageProcessingController - Executed start endpoint request " + new SimpleDateFormat("HH:mm:ss.SSS").format(new java.util.Date(System.currentTimeMillis())));
+        logger.info("BookImagesApplication: ImageProcessingController - Executed start endpoint request {}",
+                new SimpleDateFormat("HH:mm:ss.SSS").format(new java.util.Date(System.currentTimeMillis())));
         return "ImageProcessingController started";
     }
 
     @RequestMapping(value = "", method = RequestMethod.POST)
-    public ResponseEntity<String> receiveMessage(
-        @RequestBody Map<String, Object> body, @RequestHeader Map<String, String> headers) throws IOException, InterruptedException, ExecutionException {
+    public ResponseEntity<String> receiveMessage(@RequestBody Map<String, Object> body,
+                                                 @RequestHeader Map<String, String> headers) throws IOException, InterruptedException, ExecutionException {
         String errorMsg = RequestValidationUtility.validateRequest(body,headers);
         if (!errorMsg.isBlank()) {
             return new ResponseEntity<>(errorMsg, HttpStatus.BAD_REQUEST);
@@ -119,7 +119,7 @@ public class ImageProcessingController {
         String fileName = (String)body.get("name");
         String bucketName = (String)body.get("bucket");
 
-        logger.info("New picture uploaded to Cloud Storage" + fileName);
+        logger.info("New picture uploaded to Cloud Storage{}", fileName);
 
         // multi-modal call to retrieve text from the uploaded image
         // property file ```promptImage: ${PROMPT_IMAGE:Extract the title and author from the image, strictly in JSON format}```
@@ -131,12 +131,12 @@ public class ImageProcessingController {
         // get book details
         String title = (String) jsonMap.get("title");
         String author = (String) jsonMap.get("author");
-        logger.info(String.format("Image Analysis Result: Author %s, Title %s", title, author));
+        logger.info("Image Analysis Result: Author {}, Title {}", title, author);
 
         // retrieve the book summary from the database
         String summary = booksService.getBookSummary(title);
-        logger.info("The summary of the book "+ title+ ",as retrieved from the database, is: " + summary);
-        logger.info("End of summary of the book "+ title+ ",as retrieved from the database");
+        logger.info("The summary of the book {},as retrieved from the database, is: {}", title, summary);
+        logger.info("End of summary of the book {},as retrieved from the database", title);
 
         // Function calling BookStoreService
         SystemMessage systemMessage = new SystemMessage("""
@@ -157,7 +157,7 @@ public class ImageProcessingController {
         // Saving result to Firestore
         if (bookStoreResponse != null) {
             ApiFuture<WriteResult> writeResult = eventService.storeBookInfo(fileName, title, author, summary, bookStoreResponse);
-            logger.info("Picture metadata saved in Firestore at " + writeResult.get().getUpdateTime());
+            logger.info("Picture metadata saved in Firestore at {}", writeResult.get().getUpdateTime());
         }
 
         return new ResponseEntity<>(HttpStatus.OK);
@@ -188,7 +188,7 @@ public class ImageProcessingController {
 
         @Override
         public Response apply(Request request) {
-            logger.info(String.format("Called getBookAvailability(%s, %s)", request.title(), request.author()));
+            logger.info("Called getBookAvailability({}, {})", request.title(), request.author());
             return new Response(request.title(), request.author(), "The book is available for purchase in the book store in paperback format.");
         }
     }

@@ -88,7 +88,7 @@ public class DataAccess {
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, parameters);
 
         for (Map<String, Object> row : rows) {
-            logger.info(row.get("name")+"");
+            logger.info("{}", row.get("name"));
         }
         return rows.size()==0 ? new HashMap<>() : rows.get(0);
     }
@@ -113,7 +113,7 @@ public class DataAccess {
         Object[] parameters = new Object[]{bookId};
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, parameters);
 
-        logger.info("number of rows: " + rows.size());
+        logger.info("number of rows: {}", rows.size());
         return rows;
     }
 

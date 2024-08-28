@@ -35,13 +35,20 @@ public class CloudStorageService {
         // Get the blob.
         Blob blob = storage.get(BlobId.of(bucket, fileName));
 
-        String bookContent = new String(blob.getContent(), StandardCharsets.UTF_8);
-        System.out.println(bookContent);
-
         ReadableByteChannel channel = blob.reader();
         InputStreamReader isr = new InputStreamReader(Channels.newInputStream(channel));
         BufferedReader br = new BufferedReader(isr);
         return br;
+    }
+
+    public String readFileAsString(String bucket, String fileName) {
+        // Create a Storage client.
+        Storage storage = StorageOptions.getDefaultInstance().getService();
+
+        // Get the blob.
+        Blob blob = storage.get(BlobId.of(bucket, fileName));
+
+        return new String(blob.getContent(), StandardCharsets.UTF_8);
     }
 
     public byte[]  readFileAsByteString(String bucket, String fileName) throws IOException {
