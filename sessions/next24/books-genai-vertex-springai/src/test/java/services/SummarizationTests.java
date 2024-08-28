@@ -3,13 +3,14 @@ package services;
 import com.google.cloud.vertexai.Transport;
 import com.google.cloud.vertexai.VertexAI;
 
+import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
-import org.springframework.ai.document.Document;
 import org.springframework.ai.reader.TextReader;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatModel;
@@ -26,7 +27,6 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 @SpringBootTest
 @ActiveProfiles(value = "test")
