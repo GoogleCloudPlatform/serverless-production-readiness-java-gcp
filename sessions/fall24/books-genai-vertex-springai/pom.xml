@@ -144,8 +144,8 @@
         <configuration>
           <buildArgs>
             <buildArgs>--enable-url-protocols=http</buildArgs>
-            <!--            <buildArgs>&#45;&#45;gc=G1 &#45;&#45;strict-image-heap -march=native -O3</buildArgs>-->
-            <buildArgs>-march=native -O3</buildArgs>
+<!--                        <buildArgs>&#45;&#45;gc=G1 &#45;&#45;strict-image-heap -march=native -O3</buildArgs>-->
+            <buildArgs>-march=native --gc=G1 -Ob</buildArgs>
           </buildArgs>
         </configuration>
       </plugin>
