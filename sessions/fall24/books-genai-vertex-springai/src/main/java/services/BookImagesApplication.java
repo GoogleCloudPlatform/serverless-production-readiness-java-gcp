@@ -39,8 +39,8 @@ public class BookImagesApplication {
 			new SimpleDateFormat("HH:mm:ss.SSS").format(new java.util.Date(System.currentTimeMillis())));
 	}
 
-	@PreDestroy
-	public void shutDown(){
-		logger.info(BookImagesApplication.class.getSimpleName() + ": received SIGTERM ==> Shutting down resources !");
-	}	
+//	@PreDestroy
+//	public void shutDown(){
+//		logger.info(BookImagesApplication.class.getSimpleName() + ": received SIGTERM ==> Shutting down resources !");
+//	}
 }

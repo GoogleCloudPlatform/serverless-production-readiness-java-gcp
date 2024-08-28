@@ -39,20 +39,20 @@ public class SummaryController {
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<String> receiveMessage(
             @RequestBody Map<String, Object> body, @RequestHeader Map<String, String> headers) {
-        String errorMsg = RequestValidationUtility.validateRequest(body,headers);
-        if (!errorMsg.isBlank()) {
-            return new ResponseEntity<>(errorMsg, HttpStatus.BAD_REQUEST);
-        }
+//        String errorMsg = RequestValidationUtility.validateRequest(body,headers);
+//        if (!errorMsg.isBlank()) {
+//            return new ResponseEntity<>(errorMsg, HttpStatus.BAD_REQUEST);
+//        }
 
         // get document name and bucket
         String fileName = (String) body.get("name");
         String bucketName = (String) body.get("bucket");
         BufferedReader br = cloudStorageService.readFile(bucketName, fileName);
+
         long start = System.currentTimeMillis();
         logger.info("Book summarization flow : start");
-
+        logger.info("Summarize book with title {} from Cloud Storage bucket {}", fileName, bucketName);
         String summmary = booksService.createBookSummary(br, fileName);
-
         logger.info("Book summarization flow: end " + (System.currentTimeMillis() - start) + "ms");
 
         // return the response to the caller

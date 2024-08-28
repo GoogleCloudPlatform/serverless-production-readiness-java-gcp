@@ -137,15 +137,18 @@ public class BooksService {
                 page++;
             }
             reader.close();
-            logger.info("The book "+bookTitle +" has pages: " +page);
-            logger.info("The summary for book "+bookTitle +" is: " +summary);
-            logger.info("The prompt summary: " +promptSummary.formatted(summary));
+            logger.info("The book {} has pages: {}", bookTitle, page);
+            logger.info("The summary for book {} is: {}", bookTitle, summary);
+            logger.info("The prompt summary: {}", promptSummary.formatted(summary));
+
             summary = vertexAIClient.promptModel(promptSummary.formatted(summary), model);
+
+            // insert summary in table
             dao.insertSummaries(bookId, summary);
         } catch (FileNotFoundException e) {
-            logger.error("File %s not found. Failed with exception %s", fileName, e.getMessage());
+            logger.error("File {} not found. Failed with exception {}", fileName, e.getMessage());
         } catch (IOException e) {
-            logger.error("Reading from file %s failure. Failed with exception %s", fileName, e.getMessage());
+            logger.error("Reading from file %s failure. Failed with exception {}", fileName, e.getMessage());
         }
         return summary;
     }
