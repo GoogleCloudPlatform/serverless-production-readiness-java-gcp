@@ -47,4 +47,20 @@ public class RequestValidationUtility {
         }
         return "";
     }
+
+    public static String validateRequest(Map<String, Object> body) {
+        String errorMsg="";
+        logger.info("Body elements");
+        for (String bodyField : body.keySet()) {
+            logger.info(bodyField + " : " + body.get(bodyField));
+        }
+
+        String fileName = (String)body.get("name");
+        if(fileName == null){
+            errorMsg = "Missing expected body element: file name";
+            logger.error(errorMsg);
+            return errorMsg;
+        }
+        return "";
+    }
 }

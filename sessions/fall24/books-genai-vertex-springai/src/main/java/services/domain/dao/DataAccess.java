@@ -74,7 +74,7 @@ public class DataAccess {
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, parameters);
 
         for (Map<String, Object> row : rows) {
-            logger.info(row.get("title")+"");
+            logger.info("Found book with title {}", row.get("title"));
         }
         return rows.size()==0 ? new HashMap<>() : rows.get(0);
     }
@@ -94,10 +94,9 @@ public class DataAccess {
     }
 
     public Map<String, Object> findSummaries(Integer bookId) {
-        String sql = "select\n" +
-                "*\n" +
-                "from\n" +
-                "    bookSummaries where book_id = ? limit 10";
+        String sql = """
+                select * from bookSummaries where book_id = ? limit 10
+                """;
         Object[] parameters = new Object[]{bookId};
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, parameters);
 

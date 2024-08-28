@@ -24,6 +24,8 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.charset.StandardCharsets;
+
 @Service
 public class CloudStorageService {
     public BufferedReader readFile(String bucket, String fileName) {
@@ -32,6 +34,9 @@ public class CloudStorageService {
 
         // Get the blob.
         Blob blob = storage.get(BlobId.of(bucket, fileName));
+
+        String bookContent = new String(blob.getContent(), StandardCharsets.UTF_8);
+        System.out.println(bookContent);
 
         ReadableByteChannel channel = blob.reader();
         InputStreamReader isr = new InputStreamReader(Channels.newInputStream(channel));

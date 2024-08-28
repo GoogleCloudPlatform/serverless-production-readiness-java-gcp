@@ -38,9 +38,9 @@ import services.utility.RequestValidationUtility;
 @RequestMapping("/document")
 public class DocumentEmbeddingController {
 
-  public static final String BUCKET = "bucket";
   private static final Logger logger = LoggerFactory.getLogger(DocumentEmbeddingController.class);
   public static final String NAME = "name";
+  public static final String BUCKET = "bucket";
 
   private BooksService booksService;
   private CloudStorageService cloudStorageService;
@@ -99,8 +99,18 @@ public class DocumentEmbeddingController {
     // persist book pages as embeddings in AlloyDB
     start = System.currentTimeMillis();
     Integer bookId = booksService.insertBook(fileName);
+
     booksService.insertPagesBook(br, bookId);
     logger.info("Embedding flow - insert book and pages: {}ms", System.currentTimeMillis() - start);
+
+    // embedding flows are executed async, latency not the same priority
+    // as in real-time request prcoessing
+    // create a summary of the document
+    //    long start = System.currentTimeMillis();
+    //    logger.info("Book summarization flow : start");
+    //    logger.info("Summarize book with title {} from Cloud Storage bucket {}", fileName, bucketName);
+    //    String summmary = booksService.createBookSummary(bucketName, fileName, true);
+    //    logger.info("Book summarization flow: end {}ms", System.currentTimeMillis() - start);
 
     return new ResponseEntity<>(HttpStatus.OK);
   }

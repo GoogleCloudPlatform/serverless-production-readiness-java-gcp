@@ -15,14 +15,20 @@
  */
 package services.domain;
 
+import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import services.ai.VertexAIClient;
-import services.ai.VertexModels;
 import services.domain.dao.DataAccess;
 import services.domain.util.ScopeType;
 import services.utility.FileUtility;
@@ -38,8 +44,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static io.grpc.Status.Code.FAILED_PRECONDITION;
 
 @Service
 public class BooksService {
@@ -64,8 +68,6 @@ public class BooksService {
 
     private static final Logger logger = LoggerFactory.getLogger(BooksService.class);
 
-    @Autowired
-    CloudStorageService cloudStorageService;
     public List<Map<String, Object>>  prompt(String prompt) {
         return dao.promptForBooks(prompt, 0);
     }
@@ -153,8 +155,66 @@ public class BooksService {
         return summary;
     }
 
-    public String getBookSummary(String bookTitle) {
+    public String createBookSummary(String bucketName, String fileName, boolean overwriteIfSummaryExists) {
+        String summary = "";
+        // Create a Storage client.
+        Storage storage = StorageOptions.getDefaultInstance().getService();
+
+        // Get the blob.
+        Blob blob = storage.get(BlobId.of(bucketName, fileName));
+
+        // read the book content
+        String bookText = new String(blob.getContent(), StandardCharsets.UTF_8);
+
+        // extract the book title
+        String bookTitle = FileUtility.getTitle(fileName);
+        bookTitle = SqlUtility.replaceUnderscoresWithSpaces(bookTitle);
+
+        // lookup book summary in the database
+        summary = getBookSummary(bookTitle);
+        if (!summary.isEmpty() && !overwriteIfSummaryExists)
+            return summary;
+
+        // find the book in the book table
+        // extract the book id
         Map<String, Object> book = dao.findBook(bookTitle);
+        Integer bookId = (Integer) book.get("book_id");
+
+        // create a SystemMessage
+        SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate("""
+            You are a helpful AI assistant.
+            You are an AI assistant that helps people summarize information.
+            Your name is {name}
+            You should reply to the user's request with your name and also in the style of a {voice}.
+            Strictly ignore Project Gutenberg & ignore copyright notice in summary output.
+            """
+        );
+        Message systemMessage = systemPromptTemplate.createMessage(
+                Map.of("name", "Gemini", "voice", "literary critic"));
+
+        // create a UserMessage
+        PromptTemplate userPromptTemplate = new PromptTemplate("""
+            "Please provide a concise summary covering the key points of the following text.
+                              TEXT: {content}
+                              SUMMARY:
+            """, Map.of("content", bookText));
+        Message userMessage = userPromptTemplate.createMessage();
+
+        summary = vertexAIClient.promptModel(systemMessage, userMessage, model);
+
+        logger.info("The summary for book {} is: {}", bookTitle, summary);
+        logger.info("The prompt summary: {}", promptSummary.formatted(summary));
+
+        // insert summary in table
+        dao.insertSummaries(bookId, summary);
+
+        return summary;
+    }
+
+    public String getBookSummary(String bookTitle) {
+        // find the book in the database by table name
+        Map<String, Object> book = dao.findBook(bookTitle);
+
         Map<String, Object> summary = new HashMap<>();
         if(!book.isEmpty()){
             Integer bookId = (Integer) book.get("book_id");

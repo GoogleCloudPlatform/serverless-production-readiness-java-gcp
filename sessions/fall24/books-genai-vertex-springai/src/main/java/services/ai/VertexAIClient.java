@@ -17,6 +17,7 @@ package services.ai;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.Prompt;
@@ -115,6 +116,25 @@ public class VertexAIClient {
             output = chatResponse.getResult().getOutput().getContent();
         }
 
+        logger.info("Chat model output: {} ...", output.substring(0, Math.min(1000, output.length())));
+        return output;
+    }
+
+    public String promptModel(Message systemMessage,
+                              Message userMessage,
+                              String model) {
+        long start = System.currentTimeMillis();
+        ChatResponse chatResponse = chatClient.call(new Prompt(List.of(systemMessage, userMessage),
+                VertexAiGeminiChatOptions.builder()
+                        .withTemperature(0.4f)
+                        .withModel(model)
+                        .build()));
+        logger.info("Elapsed time ( {}, with SpringAI): {} ms", model, (System.currentTimeMillis() - start));
+
+        String output = "No response from model";
+        if (chatResponse != null && chatResponse.getResult() != null) {  // Ensure chatResponse is not null
+            output = chatResponse.getResult().getOutput().getContent();
+        }
         logger.info("Chat model output: {} ...", output.substring(0, Math.min(1000, output.length())));
         return output;
     }
