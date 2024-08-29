@@ -54,6 +54,8 @@ public class VertexAIClient {
     public record ImageDetails(String title, String author){
     }
 
+    // Multimedia prompt to retrieve infor from an image
+    // use entities to map responses to Objects
     public ImageDetails promptOnImage(String prompt,
                                       String imageURL,
                                       String model) {
@@ -73,48 +75,9 @@ public class VertexAIClient {
         logger.info("Elapsed time ({}, with SpringAI): {} ms", model, (System.currentTimeMillis() - start));
         return imageData;
     }
-    public String promptModel(String prompt, String model) {
-        long start = System.currentTimeMillis();
-        logger.info("Chat model prompt: {} ...", prompt.substring(0, Math.min(500, prompt.length())));
 
-        int maxRetries = 3;  // Set the maximum number of retry attempts
-        int retryCount = 0;
-        ChatResponse chatResponse = null;
-
-        while (retryCount < maxRetries) {
-            try {
-                chatResponse = chatClient.call(new Prompt(prompt,
-                        VertexAiGeminiChatOptions.builder()
-                                .withTemperature(0.4f)
-                                .withModel(model)
-                                .build())
-                );
-
-                // Check if the response is valid before exiting the loop
-                if (chatResponse.getResult() != null) {
-                    break; // Exit the loop if we have a valid response
-                } else {
-                    logger.warn("Received invalid response from model. Retrying...");
-                }
-
-            } catch (Exception exception) {
-                logger.error("Error calling chat model: ", exception);
-            }
-
-            retryCount++;
-        }
-
-        logger.info("Elapsed time ( {}, with SpringAI): {} ms", model, (System.currentTimeMillis() - start));
-
-        String output = VertexModels.RETRY_MSG;
-        if (chatResponse != null && chatResponse.getResult() != null) {  // Ensure chatResponse is not null
-            output = chatResponse.getResult().getOutput().getContent();
-        }
-
-        logger.info("Chat model output: {} ...", output.substring(0, Math.min(1000, output.length())));
-        return output;
-    }
-
+    // prompt model with System and User Messages
+    // return response as String
     public String promptModel(Message systemMessage,
                               Message userMessage,
                               String model) {
@@ -134,6 +97,7 @@ public class VertexAIClient {
         return output;
     }
 
+    // prompt model with Tool support
     public String promptModelWithFunctionCalls(Message systemMessage,
                                                Message userMessage,
                                                String functionName,
@@ -163,6 +127,7 @@ public class VertexAIClient {
             logger.info("User text: \n{}", request.userText());
             logger.info("User params:{}", request.userParams());
             logger.info("Function names: {}", request.functionNames());
+            logger.info("Messages {}", request.messages());
 
             logger.info("Options: {}", request.chatOptions().toString());
 

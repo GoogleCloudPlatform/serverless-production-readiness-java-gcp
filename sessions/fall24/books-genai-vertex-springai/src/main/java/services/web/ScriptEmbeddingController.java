@@ -17,6 +17,9 @@ package services.web;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -123,9 +126,17 @@ public class ScriptEmbeddingController {
     logger.info("tf transform flow - Model: {}", model);
     long start = System.currentTimeMillis();
     List<Map<String, Object>> responseDoc = booksDataService.prompt("Find paragraphs mentioning Terraform best practices for general style, structure, and dependency management", 6000);
-    String transformScriptPrompt =  PromptUtility.formatPromptTF(responseDoc, promptTransformTF, script);
+
+    // create a SystemMessage
+    SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate("""
+            You are an expert in Google Cloud Platform (GCP), fluent in `gcloud` commands,
+            deeply familiar with Terraform modules for GCP."""
+    );
+    Message systemMessage = systemPromptTemplate.createMessage();
+
+    Message userMessage =  new UserMessage(PromptUtility.formatPromptTF(responseDoc, promptTransformTF, script));
     logger.info("TF transform: prompt LLM: {}ms", System.currentTimeMillis() - start);
-    String response = vertexAIClient.promptModel(transformScriptPrompt, model);
+    String response = vertexAIClient.promptModel(systemMessage, userMessage, model);
     logger.info("TF transform flow: {}ms", System.currentTimeMillis() - start);
     return response;
   }
