@@ -5,13 +5,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import services.ai.VertexAIClient;
-import services.domain.BooksService;
-import services.domain.CloudStorageService;
+import services.actuator.StartupCheck;
+import services.client.BooksService;
 import services.utility.RequestValidationUtility;
 
+import javax.annotation.PostConstruct;
+import java.text.SimpleDateFormat;
 import java.util.Map;
 
+/*
+    Controller for creating summaries for documents stored in Google Cloud Storage
+
+    Note: Current summarization pattern in use - prompt stuffing
+    Alternatives - Map-reduce or prompt refining
+ */
 @RestController
 @RequestMapping("/summary")
 public class SummaryController {
@@ -19,11 +26,20 @@ public class SummaryController {
     private static final Logger logger = LoggerFactory.getLogger(SummaryController.class);
 
     private final BooksService booksService;
-    CloudStorageService cloudStorageService;
 
-    public SummaryController(BooksService booksService, CloudStorageService cloudStorageService) {
+    public SummaryController(BooksService booksService) {
         this.booksService = booksService;
-        this.cloudStorageService = cloudStorageService;
+    }
+
+    @PostConstruct
+    public void init() {
+        logger.info("BookImagesApplication: SummaryController Post Construct Initializer {}",
+                new SimpleDateFormat("HH:mm:ss.SSS").format(
+                        new java.util.Date(System.currentTimeMillis())));
+        logger.info(
+                "BookImagesApplication: SummaryController Post Construct - StartupCheck can be enabled");
+
+        StartupCheck.up();
     }
 
     @CrossOrigin

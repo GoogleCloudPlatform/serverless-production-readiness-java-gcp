@@ -24,7 +24,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import services.actuator.StartupCheck;
 import services.ai.VertexAIClient;
-import services.domain.BooksService;
+import services.domain.BooksDataService;
 import services.domain.CloudStorageService;
 import services.utility.PromptUtility;
 import services.utility.RequestValidationUtility;
@@ -44,7 +44,7 @@ public class ScriptEmbeddingController {
 
   private static final Logger logger = LoggerFactory.getLogger(ScriptEmbeddingController.class);
 
-  BooksService booksService;
+  BooksDataService booksDataService;
   CloudStorageService cloudStorageService;
 
   VertexAIClient vertexAIClient;
@@ -58,9 +58,9 @@ public class ScriptEmbeddingController {
   @Value("classpath:/bashscripts/provision-cloud-infra.sh")
   private Resource bashscript;
 
-  public ScriptEmbeddingController(BooksService booksService,
+  public ScriptEmbeddingController(BooksDataService booksDataService,
                                    CloudStorageService cloudStorageService, VertexAIClient vertexAIClient) {
-    this.booksService = booksService;
+    this.booksDataService = booksDataService;
     this.cloudStorageService = cloudStorageService;
     this.vertexAIClient = vertexAIClient;
   }
@@ -122,7 +122,7 @@ public class ScriptEmbeddingController {
   public String tfTransform(String script) {
     logger.info("tf transform flow - Model: {}", model);
     long start = System.currentTimeMillis();
-    List<Map<String, Object>> responseDoc = booksService.prompt("Find paragraphs mentioning Terraform best practices for general style, structure, and dependency management", 6000);
+    List<Map<String, Object>> responseDoc = booksDataService.prompt("Find paragraphs mentioning Terraform best practices for general style, structure, and dependency management", 6000);
     String transformScriptPrompt =  PromptUtility.formatPromptTF(responseDoc, promptTransformTF, script);
     logger.info("TF transform: prompt LLM: {}ms", System.currentTimeMillis() - start);
     String response = vertexAIClient.promptModel(transformScriptPrompt, model);

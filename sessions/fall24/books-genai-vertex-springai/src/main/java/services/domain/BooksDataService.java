@@ -17,14 +17,10 @@ package services.domain;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.ai.chat.messages.Message;
-import org.springframework.ai.chat.prompt.PromptTemplate;
-import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import services.ai.VertexAIClient;
 import services.domain.dao.DataAccess;
 import services.domain.util.ScopeType;
 import services.utility.FileUtility;
@@ -37,31 +33,17 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class BooksService {
-    private static final Logger logger = LoggerFactory.getLogger(BooksService.class);
+public class BooksDataService {
+    private static final Logger logger = LoggerFactory.getLogger(BooksDataService.class);
 
-    final DataAccess dao;
-
-    final VertexAIClient vertexAIClient;
-
-    final CloudStorageService cloudStorageService;
-
-    @Value("${prompts.promptSubSummary}")
-    private String promptSubSummary;
-
-
-    @Value("${prompts.promptSummary}")
-    private String promptSummary;
-
-    @Value("${workflows.summary.chunk.characters}")
-    private Integer summaryChunkCharacters;
+    private final DataAccess dao;
+    private final CloudStorageService cloudStorageService;
 
     @Value("${spring.ai.vertex.ai.gemini.chat.options.model}")
     String model;
 
-    public BooksService(DataAccess dao, VertexAIClient vertexAIClient, CloudStorageService cloudStorageService) {
+    public BooksDataService(DataAccess dao, CloudStorageService cloudStorageService) {
         this.dao = dao;
-        this.vertexAIClient = vertexAIClient;
         this.cloudStorageService = cloudStorageService;
     }
 
@@ -130,58 +112,6 @@ public class BooksService {
         return bookId;
     }
 
-    // Create book summary and persist in the database
-    public String createBookSummary(String bucketName, String fileName, boolean overwriteIfSummaryExists) {
-        String summary = "";
-
-        // read the book content from Cloud Storage
-        String bookText = cloudStorageService.readFileAsString(bucketName, fileName);
-
-        // extract the book title
-        String bookTitle = FileUtility.getTitle(fileName);
-        bookTitle = SqlUtility.replaceUnderscoresWithSpaces(bookTitle);
-
-        // lookup book summary in the database
-        summary = getBookSummary(bookTitle);
-        if (!summary.isEmpty() && !overwriteIfSummaryExists)
-            return summary;
-
-        // find the book in the book table
-        // extract the book id
-        Map<String, Object> book = dao.findBook(bookTitle);
-        Integer bookId = (Integer) book.get("book_id");
-
-        // create a SystemMessage
-        SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate("""
-            You are a helpful AI assistant.
-            You are an AI assistant that helps people summarize information.
-            Your name is {name}
-            You should reply to the user's request with your name and also in the style of a {voice}.
-            Strictly ignore Project Gutenberg & ignore copyright notice in summary output.
-            """
-        );
-        Message systemMessage = systemPromptTemplate.createMessage(
-                Map.of("name", "Gemini", "voice", "literary critic"));
-
-        // create a UserMessage
-        PromptTemplate userPromptTemplate = new PromptTemplate("""
-            "Please provide a concise summary covering the key points of the following text.
-                              TEXT: {content}
-                              SUMMARY:
-            """, Map.of("content", bookText));
-        Message userMessage = userPromptTemplate.createMessage();
-
-        summary = vertexAIClient.promptModel(systemMessage, userMessage, model);
-
-        logger.info("The summary for book {} is: {}", bookTitle, summary);
-        logger.info("The prompt summary: {}", promptSummary.formatted(summary));
-
-        // insert summary in table
-        dao.insertSummaries(bookId, summary);
-
-        return summary;
-    }
-
     // Retrieve book summary from booksummaries table, if it exists
     public String getBookSummary(String bookTitle) {
         // find the book in the database by table name
@@ -208,5 +138,14 @@ public class BooksService {
         }
 
         return true;
+    }
+
+    public Integer findBookByTitle(String bookTitle) {
+        Map<String, Object> book = dao.findBook(bookTitle);
+        return  (Integer) book.get("book_id");
+    }
+
+    public Integer insertBookSummary(Integer bookId, String summary) {
+        return dao.insertSummaries(bookId, summary);
     }
 }

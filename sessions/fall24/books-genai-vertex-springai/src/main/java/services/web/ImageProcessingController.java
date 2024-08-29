@@ -49,7 +49,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import services.actuator.StartupCheck;
 import services.ai.VertexAIClient;
-import services.domain.BooksService;
+import services.domain.BooksDataService;
 import services.domain.FirestoreService;
 import services.utility.JsonUtility;
 import services.utility.RequestValidationUtility;
@@ -76,7 +76,7 @@ public class ImageProcessingController {
     private static final Logger logger = LoggerFactory.getLogger(ImageProcessingController.class);
 
     private final FirestoreService eventService;
-    private final BooksService booksService;
+    private final BooksDataService booksDataService;
 
     @Value("${prompts.promptImage}")
     private String promptImage;
@@ -84,9 +84,9 @@ public class ImageProcessingController {
     @Value("${spring.ai.vertex.ai.gemini.chat.options.model}")    
     private String model;
 
-    public ImageProcessingController(FirestoreService eventService, BooksService booksService, VertexAIClient vertexAIClient) {
+    public ImageProcessingController(FirestoreService eventService, BooksDataService booksDataService, VertexAIClient vertexAIClient) {
         this.eventService = eventService;
-        this.booksService = booksService;
+        this.booksDataService = booksDataService;
         this.vertexAIClient = vertexAIClient;
     }
 
@@ -134,7 +134,7 @@ public class ImageProcessingController {
         logger.info("Image Analysis Result: Author {}, Title {}", title, author);
 
         // retrieve the book summary from the database
-        String summary = booksService.getBookSummary(title);
+        String summary = booksDataService.getBookSummary(title);
         logger.info("The summary of the book {},as retrieved from the database, is: {}", title, summary);
         logger.info("End of summary of the book {},as retrieved from the database", title);
 

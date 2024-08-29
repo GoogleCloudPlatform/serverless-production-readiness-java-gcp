@@ -25,7 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import services.actuator.StartupCheck;
-import services.domain.BooksService;
+import services.domain.BooksDataService;
 import services.utility.RequestValidationUtility;
 
 /**
@@ -40,10 +40,10 @@ public class DocumentEmbeddingController {
   public static final String NAME = "name";
   public static final String BUCKET = "bucket";
 
-  private BooksService booksService;
+  private BooksDataService booksDataService;
 
-  public DocumentEmbeddingController(BooksService booksService) {
-    this.booksService = booksService;
+  public DocumentEmbeddingController(BooksDataService booksDataService) {
+    this.booksDataService = booksDataService;
   }
 
   @PostConstruct
@@ -88,7 +88,7 @@ public class DocumentEmbeddingController {
     // persist book info to AlloyDB
     // persist book pages as embeddings in AlloyDB
     long start = System.currentTimeMillis();
-    String status = booksService.insertBookAndAuthorData(bucketName, fileName, true);
+    String status = booksDataService.insertBookAndAuthorData(bucketName, fileName, true);
     logger.info("Embedding status completed with status: {}", status);
     logger.info("Embedding flow - insert book and pages: {}ms", System.currentTimeMillis() - start);
 
@@ -114,7 +114,7 @@ public class DocumentEmbeddingController {
           @RequestParam(name = "prompt") String prompt,
           @RequestParam(name = "contentCharactersLimit", defaultValue = "2000") String contentCharactersLimit) {
     return new ResponseEntity<>(
-            booksService.prompt(prompt, Integer.parseInt(contentCharactersLimit)), HttpStatus.OK);
+            booksDataService.prompt(prompt, Integer.parseInt(contentCharactersLimit)), HttpStatus.OK);
   }
 
   // used for testing
@@ -122,7 +122,7 @@ public class DocumentEmbeddingController {
   @RequestMapping(value = "/category/books", method = RequestMethod.POST)
   public ResponseEntity<Integer> insertTable(@RequestBody Map<String, Object> body) {
     String fileName = (String) body.get("fileName");
-    booksService.insertBookAndAuthorData(fileName);
+    booksDataService.insertBookAndAuthorData(fileName);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 }

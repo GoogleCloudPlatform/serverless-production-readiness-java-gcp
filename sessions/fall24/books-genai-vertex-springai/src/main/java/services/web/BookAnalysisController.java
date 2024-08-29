@@ -31,7 +31,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import services.actuator.StartupCheck;
 import services.ai.VertexAIClient;
-import services.domain.BooksService;
+import services.domain.BooksDataService;
 import services.utility.PromptUtility;
 import services.web.data.BookRequest;
 
@@ -47,10 +47,10 @@ import services.web.data.BookRequest;
 public class BookAnalysisController {
   private static final Logger logger = LoggerFactory.getLogger(BookAnalysisController.class);
 
-  private final BooksService booksService;
+  private final BooksDataService booksDataService;
   private final VertexAIClient vertexAIClient;
-  public BookAnalysisController(BooksService booksService, VertexAIClient vertexAIClient) {
-    this.booksService = booksService;
+  public BookAnalysisController(BooksDataService booksDataService, VertexAIClient vertexAIClient) {
+    this.booksDataService = booksDataService;
     this.vertexAIClient = vertexAIClient;
   }
 
@@ -75,8 +75,8 @@ public class BookAnalysisController {
     long start = System.currentTimeMillis();
     logger.info("Book analysis flow : start");
 
-    // Prompt AlloyDB for the embeddings for the book in the request
-    List<Map<String, Object>> responseBook = booksService.prompt(bookRequest, contentCharactersLimit);
+    // Prompt AlloyDB for embeddings for the book in the request
+    List<Map<String, Object>> responseBook = booksDataService.prompt(bookRequest, contentCharactersLimit);
     logger.info("Book analysis flow: retrieve embeddings from AlloyDB AI: {}ms", System.currentTimeMillis() - start);
 
     // build prompt to query LLM with the augmented context
@@ -88,6 +88,7 @@ public class BookAnalysisController {
     // submit prompt to the LLM via LLM orchestration framework
     String response = vertexAIClient.promptModel(promptWithContext, model);
     logger.info("Book analysis flow: prompt LLM: {}ms", System.currentTimeMillis() - start);
+    logger.info("Book analysys flow: done");
 
     // return the response to the caller
     return new ResponseEntity<>(response, HttpStatus.OK);
