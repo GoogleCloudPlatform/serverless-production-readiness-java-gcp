@@ -20,8 +20,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
-import com.google.api.core.ApiFuture;
-import com.google.cloud.firestore.WriteResult;
+
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Map;
@@ -30,12 +29,9 @@ import java.util.function.Function;
 import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.ai.chat.messages.SystemMessage;
-import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Description;
 import org.springframework.context.annotation.ImportRuntimeHints;
@@ -49,9 +45,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import services.actuator.StartupCheck;
 import services.ai.VertexAIClient;
-import services.domain.BooksDataService;
-import services.domain.FirestoreService;
-import services.utility.JsonUtility;
+import services.client.BooksService;
 import services.utility.RequestValidationUtility;
 
 /**
@@ -75,22 +69,11 @@ import services.utility.RequestValidationUtility;
 public class ImageProcessingController {
     private static final Logger logger = LoggerFactory.getLogger(ImageProcessingController.class);
 
-    private final FirestoreService eventService;
-    private final BooksDataService booksDataService;
+    private final BooksService booksService;
 
-    @Value("${prompts.promptImage}")
-    private String promptImage;
-
-    @Value("${spring.ai.vertex.ai.gemini.chat.options.model}")    
-    private String model;
-
-    public ImageProcessingController(FirestoreService eventService, BooksDataService booksDataService, VertexAIClient vertexAIClient) {
-        this.eventService = eventService;
-        this.booksDataService = booksDataService;
-        this.vertexAIClient = vertexAIClient;
+    public ImageProcessingController(BooksService booksService) {
+        this.booksService = booksService;
     }
-
-    VertexAIClient vertexAIClient;
 
     @PostConstruct
     public void init() {
@@ -116,49 +99,13 @@ public class ImageProcessingController {
             return new ResponseEntity<>(errorMsg, HttpStatus.BAD_REQUEST);
         }
 
+        // get the file info
         String fileName = (String)body.get("name");
         String bucketName = (String)body.get("bucket");
+        logger.info("New picture uploaded to Cloud Storage {} in bucket {}", fileName, bucketName);
 
-        logger.info("New picture uploaded to Cloud Storage{}", fileName);
-
-        // multi-modal call to retrieve text from the uploaded image
-        // property file ```promptImage: ${PROMPT_IMAGE:Extract the title and author from the image, strictly in JSON format}```
-        String response = vertexAIClient.promptOnImage(promptImage, bucketName, fileName, model);
-
-        // parse the response and extract the data
-        Map<String, Object> jsonMap = JsonUtility.parseJsonToMap(response);
-
-        // get book details
-        String title = (String) jsonMap.get("title");
-        String author = (String) jsonMap.get("author");
-        logger.info("Image Analysis Result: Author {}, Title {}", title, author);
-
-        // retrieve the book summary from the database
-        String summary = booksDataService.getBookSummary(title);
-        logger.info("The summary of the book {},as retrieved from the database, is: {}", title, summary);
-        logger.info("End of summary of the book {},as retrieved from the database", title);
-
-        // Function calling BookStoreService
-        SystemMessage systemMessage = new SystemMessage("""
-                Use Multi-turn function calling.
-                Answer with precision.
-                If the information was not fetched call the function again. Repeat at most 3 times.
-                """);
-
-        UserMessage userMessage = new UserMessage(
-            String.format("Write a nice note including book author, book title and availability. Find out if the book with the title %s by author %s is available in the University bookstore.Please add also this book summary to the response, with the text available after the column, prefix it with My Book Summary:  %s",
-            title, author, summary));
-
-        String bookStoreResponse = vertexAIClient.promptModelwithFunctionCalls(systemMessage, 
-                                                                               userMessage, 
-                                                                               "bookStoreAvailability",
-                                                                               model);
-
-        // Saving result to Firestore
-        if (bookStoreResponse != null) {
-            ApiFuture<WriteResult> writeResult = eventService.storeBookInfo(fileName, title, author, summary, bookStoreResponse);
-            logger.info("Picture metadata saved in Firestore at {}", writeResult.get().getUpdateTime());
-        }
+        // analyze the image in the CLoud Storage bucket
+        booksService.analyzeImage(bucketName, fileName);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -201,6 +148,5 @@ public class ImageProcessingController {
             hints.reflection().registerType(BookStoreService.Request.class, mcs);
             hints.reflection().registerType(BookStoreService.Response.class, mcs);
         }
-
     }
 }

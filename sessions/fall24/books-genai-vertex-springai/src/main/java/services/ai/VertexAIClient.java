@@ -17,20 +17,22 @@ package services.ai;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.ai.chat.client.AdvisedRequest;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.RequestResponseAdvisor;
 import org.springframework.ai.chat.messages.Message;
-import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.model.Media;
-import org.springframework.ai.vertexai.gemini.MimeTypeDetector;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatModel;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatOptions;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+
 import org.springframework.util.MimeTypeUtils;
 
 /*
@@ -43,40 +45,33 @@ import org.springframework.util.MimeTypeUtils;
 public class VertexAIClient {
     private static final Logger logger = LoggerFactory.getLogger(VertexAIClient.class);
 
-    private VertexAiGeminiChatModel chatClient;
-    private Environment env;
+    private final VertexAiGeminiChatModel chatClient;
 
-    public VertexAIClient(VertexAiGeminiChatModel chatClient, Environment env){
+    public VertexAIClient(VertexAiGeminiChatModel chatClient){
         this.chatClient = chatClient;
-        this.env = env;
     }
 
-    public String promptOnImage(String prompt,
-                                String bucketName,
-                                String fileName,
-                                String model) throws IOException {
-        long start = System.currentTimeMillis();
+    public record ImageDetails(String title, String author){
+    }
 
-        // bucket where image has been uploaded
-        String imageURL = String.format("gs://%s/%s",bucketName, fileName);
+    public ImageDetails promptOnImage(String prompt,
+                                      String imageURL,
+                                      String model) {
+        long start = System.currentTimeMillis();
 
         // create User Message for AI framework
         var multiModalUserMessage = new UserMessage(prompt,
                 List.of(new Media(MimeTypeUtils.parseMimeType("image/*"), imageURL)));
 
-        // call the model of choice
-        ChatResponse multiModalResponse = chatClient.call(new Prompt(List.of(multiModalUserMessage),
-                VertexAiGeminiChatOptions.builder()
-                        .withModel(model)
-                        .build()));
-        String response = multiModalResponse.getResult().getOutput().getContent();
-        logger.info("Multi-modal response: " + response);
-
-        // response from Vertex is in Markdown, remove annotations
-        response = response.replaceAll("```json", "").replaceAll("```", "").replace("'", "\"");
-
+        ChatClient client = ChatClient.create(chatClient);
+        ImageDetails imageData = client.prompt()
+                .advisors(new LoggingAdvisor())
+                .messages(multiModalUserMessage)
+                .call()
+                .entity(ImageDetails.class);
+        logger.info("Multi-modal response: {}, {}", imageData.author, imageData.title);
         logger.info("Elapsed time ({}, with SpringAI): {} ms", model, (System.currentTimeMillis() - start));
-        return response;
+        return imageData;
     }
     public String promptModel(String prompt, String model) {
         long start = System.currentTimeMillis();
@@ -139,9 +134,9 @@ public class VertexAIClient {
         return output;
     }
 
-    public String promptModelwithFunctionCalls(SystemMessage systemMessage,
-                                               UserMessage userMessage,
-                                               String functionName, 
+    public String promptModelWithFunctionCalls(Message systemMessage,
+                                               Message userMessage,
+                                               String functionName,
                                                String model) {
         long start = System.currentTimeMillis();
 
@@ -154,8 +149,30 @@ public class VertexAIClient {
         logger.info("Elapsed time ({}, with SpringAI): {} ms", model, (System.currentTimeMillis() - start));
 
         String output = chatResponse.getResult().getOutput().getContent();
-        logger.info("Chat Model output with Function Call: " + output);
+        logger.info("Chat Model output with Function Call: {}", output);
         return output;
     }
 
+    private static class LoggingAdvisor implements RequestResponseAdvisor {
+        private final Logger logger = LoggerFactory.getLogger(LoggingAdvisor.class);
+
+        @Override
+        public AdvisedRequest adviseRequest(AdvisedRequest request, Map<String, Object> context) {
+            logger.info("System text: \n{}", request.systemText());
+            logger.info("System params: {}", request.systemParams());
+            logger.info("User text: \n{}", request.userText());
+            logger.info("User params:{}", request.userParams());
+            logger.info("Function names: {}", request.functionNames());
+
+            logger.info("Options: {}", request.chatOptions().toString());
+
+            return request;
+        }
+
+        @Override
+        public ChatResponse adviseResponse(ChatResponse response, Map<String, Object> context) {
+            logger.info("Response: {}", response);
+            return response;
+        }
+    }
 }
