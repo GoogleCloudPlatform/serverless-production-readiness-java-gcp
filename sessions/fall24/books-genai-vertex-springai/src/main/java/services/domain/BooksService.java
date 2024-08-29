@@ -15,18 +15,15 @@
  */
 package services.domain;
 
-import com.google.cloud.storage.Blob;
-import com.google.cloud.storage.BlobId;
-import com.google.cloud.storage.Storage;
-import com.google.cloud.storage.StorageOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
+import org.springframework.ai.document.Document;
+import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import services.ai.VertexAIClient;
 import services.domain.dao.DataAccess;
@@ -35,23 +32,23 @@ import services.utility.FileUtility;
 import services.utility.PromptUtility;
 import services.utility.SqlUtility;
 import services.web.data.BookRequest;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Service
 public class BooksService {
+    private static final Logger logger = LoggerFactory.getLogger(BooksService.class);
+
     @Autowired
     DataAccess dao;
 
     @Autowired
     VertexAIClient vertexAIClient;
+
+    @Autowired
+    CloudStorageService cloudStorageService;
 
     @Value("${prompts.promptSubSummary}")
     private String promptSubSummary;
@@ -66,8 +63,6 @@ public class BooksService {
     @Value("${spring.ai.vertex.ai.gemini.chat.options.model}")
     String model;
 
-    private static final Logger logger = LoggerFactory.getLogger(BooksService.class);
-
     public List<Map<String, Object>>  prompt(String prompt) {
         return dao.promptForBooks(prompt, 0);
     }
@@ -79,6 +74,28 @@ public class BooksService {
     public List<Map<String, Object>>  prompt(BookRequest bookRequest, Integer characterLimit) {
         String prompt = PromptUtility.formatPromptBookKeywords(bookRequest.keyWords());
         return dao.promptForBooks(prompt, bookRequest.book(), bookRequest.author(), characterLimit);
+    }
+
+    public String insertBook(String bucketName, String fileName, boolean overwriteIfBookExists){
+        String message;
+        // insert book data in the book data
+        // insert author info in the authors table
+        Integer bookId = insertBook(fileName);
+
+        // read the document from Cloud Storage
+        List<Document> bookContent = cloudStorageService.readFileAsDocument(bucketName, fileName);
+
+        // split the document using a TokenTextSplitter
+        TokenTextSplitter tokenTextSplitter = new TokenTextSplitter(5000, 100, 5, 100000, true);
+        List<Document> chunks = tokenTextSplitter.apply(bookContent);
+
+        logger.info("Splitting document with Metadata: {}", bookContent.getFirst().getMetadata().toString());
+        logger.info("Chunks size: {}", chunks.size());
+
+        // insert the book data with vector embeddings
+        insertPagesBook(bookId, chunks);
+
+        return "Success";
     }
 
     public Integer insertBook(String fileName) {
@@ -104,67 +121,11 @@ public class BooksService {
         return bookId;
     }
 
-    public String createBookSummary(BufferedReader reader, String fileName) {
-        String summary = "";
-        try {
-            String bookTitle = FileUtility.getTitle(fileName);
-            bookTitle = SqlUtility.replaceUnderscoresWithSpaces(bookTitle);
-            summary = getBookSummary(bookTitle);
-            if (!summary.isEmpty()) {
-                return summary;
-            }
-            summary = "";
-            Map<String, Object> book = dao.findBook(bookTitle);
-            Integer bookId = (Integer) book.get("book_id");
-            String content="";
-            Integer page = 1;
-            char[] cbuf = new char[summaryChunkCharacters];
-            int charsRead;
-            String context = "";
-            logger.info("The prompt build summary: " +promptSubSummary.formatted(context, content));
-            while ((charsRead = reader.read(cbuf)) != -1) {
-                content = new String(cbuf, 0, charsRead);
-                try {
-                    context = vertexAIClient.promptModel(promptSubSummary.formatted(context, content), model);
-                } catch (io.grpc.StatusRuntimeException statusRuntimeException) {
-                    logger.warn("vertexAIClient.promptModel(promptSubSummary.formatted(context, content)) statusRuntimeException: {}", statusRuntimeException.getMessage());
-                    continue;
-                } catch (RuntimeException e) {
-                    logger.warn("Failed to interact with Vertex AI model: "+e.getMessage(), e);
-                    continue;
-                }
-                summary += "\n"+context;
-                if(page%10==0)
-                    logger.info("The prompt build summary: " +summary);
-                page++;
-            }
-            reader.close();
-            logger.info("The book {} has pages: {}", bookTitle, page);
-            logger.info("The summary for book {} is: {}", bookTitle, summary);
-            logger.info("The prompt summary: {}", promptSummary.formatted(summary));
-
-            summary = vertexAIClient.promptModel(promptSummary.formatted(summary), model);
-
-            // insert summary in table
-            dao.insertSummaries(bookId, summary);
-        } catch (FileNotFoundException e) {
-            logger.error("File {} not found. Failed with exception {}", fileName, e.getMessage());
-        } catch (IOException e) {
-            logger.error("Reading from file %s failure. Failed with exception {}", fileName, e.getMessage());
-        }
-        return summary;
-    }
-
     public String createBookSummary(String bucketName, String fileName, boolean overwriteIfSummaryExists) {
         String summary = "";
-        // Create a Storage client.
-        Storage storage = StorageOptions.getDefaultInstance().getService();
 
-        // Get the blob.
-        Blob blob = storage.get(BlobId.of(bucketName, fileName));
-
-        // read the book content
-        String bookText = new String(blob.getContent(), StandardCharsets.UTF_8);
+        // read the book content from Cloud Storage
+        String bookText = cloudStorageService.readFileAsString(bucketName, fileName);
 
         // extract the book title
         String bookTitle = FileUtility.getTitle(fileName);
@@ -223,76 +184,17 @@ public class BooksService {
         return summary.isEmpty() ? "" : (String) summary.get("summary");
     }
 
-    public Integer insertPagesBook(String filePath, String bookTitle) {
-        //0 = failure, 1 = success
-        Integer success = 0;
-        if( filePath == null || filePath.equals("") || bookTitle==null || bookTitle.equals("")) {
-            return success;
+    public boolean insertPagesBook(Integer bookId, List<Document> chunks) {
+        Integer page = 1;
+        List<Map<String, Object>> pages = dao.findPages(bookId);
+        if (!pages.isEmpty()) {
+            return true;
         }
 
-        Map<String, Object> book = dao.findBook(bookTitle);
-
-        if(book.isEmpty()){
-            return success;
+        for (Document chunk : chunks) {
+            dao.insertPages(bookId, chunk.getContent(), page++);
         }
 
-        BufferedReader reader = null;
-        Integer bookId = (Integer) book.get("book_id");
-        logger.info(filePath+" "+bookTitle+" bookId:"+bookId);
-        try {
-            //replace with cloud storage eventually
-            ClassPathResource classPathResource = new ClassPathResource(filePath);
-            InputStream inputStream = classPathResource.getInputStream();
-            reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-            success = insertPagesBook(reader, bookTitle);
-        }catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return success;
+        return true;
     }
-
-    public Integer insertPagesBook(BufferedReader reader, Integer bookId) {
-        Integer success = 0;
-        try {
-            String content;
-            Integer page = 1;
-            List<Map<String, Object>> pages = dao.findPages(bookId);
-            if(!pages.isEmpty()) {
-                return success;
-            }
-            char[] cbuf = new char[6000];
-            int charsRead;
-            while ((charsRead = reader.read(cbuf)) != -1) {
-                content = new String(cbuf, 0, charsRead);
-                dao.insertPages( bookId,content,page );
-                page++;
-            }
-            reader.close();
-            success=1;
-        }catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return success;
-
-    }
-
-    public Integer insertPagesBook(BufferedReader reader, String bookTitle) {
-        Integer success = 0;
-        Map<String, Object> book = dao.findBook(bookTitle);
-
-        if(book.isEmpty()){
-            return success;
-        }
-        Integer bookId = (Integer) book.get("book_id");
-        logger.info("bookId:"+bookId);
-        success = insertPagesBook(reader, bookId);
-        return success;
-
-    }
-
-
 }

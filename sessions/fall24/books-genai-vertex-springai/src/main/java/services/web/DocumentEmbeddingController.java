@@ -15,7 +15,6 @@
  */
 package services.web;
 
-import java.io.BufferedReader;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
@@ -89,18 +88,11 @@ public class DocumentEmbeddingController {
 
     logger.info("New book uploaded for embedding: {}", fileName);
 
-    // read file from Cloud Storage
-    long start = System.currentTimeMillis();
-    BufferedReader br = cloudStorageService.readFile(bucketName, fileName);
-    logger.info("Embedding flow - read book: {}ms", System.currentTimeMillis() - start);
-
     // add embedding functionality here
     // persist book info to AlloyDB
     // persist book pages as embeddings in AlloyDB
-    start = System.currentTimeMillis();
-    Integer bookId = booksService.insertBook(fileName);
-
-    booksService.insertPagesBook(br, bookId);
+    long start = System.currentTimeMillis();
+    String status = booksService.insertBook(bucketName, fileName, true);
     logger.info("Embedding flow - insert book and pages: {}ms", System.currentTimeMillis() - start);
 
     // embedding flows are executed async, latency not the same priority

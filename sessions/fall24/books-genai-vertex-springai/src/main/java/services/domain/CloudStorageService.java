@@ -18,6 +18,7 @@ import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
+import org.springframework.ai.document.Document;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -25,6 +26,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 @Service
 public class CloudStorageService {
@@ -49,6 +51,17 @@ public class CloudStorageService {
         Blob blob = storage.get(BlobId.of(bucket, fileName));
 
         return new String(blob.getContent(), StandardCharsets.UTF_8);
+    }
+
+    public List<Document> readFileAsDocument(String bucket, String fileName) {
+        // Create a Storage client.
+        Storage storage = StorageOptions.getDefaultInstance().getService();
+
+        // Get the blob.
+        Blob blob = storage.get(BlobId.of(bucket, fileName));
+
+        // return the content as a document
+        return List.of(new Document(new String(blob.getContent(), StandardCharsets.UTF_8)));
     }
 
     public byte[]  readFileAsByteString(String bucket, String fileName) throws IOException {
