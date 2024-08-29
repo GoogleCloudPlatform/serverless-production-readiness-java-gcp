@@ -59,10 +59,10 @@ public class SummaryController {
         long start = System.currentTimeMillis();
         logger.info("Book summarization flow : start");
         logger.info("Summarize book with title {} from Cloud Storage bucket {}", fileName, bucketName);
-        String summmary = booksService.createBookSummary(bucketName, fileName, true);
+        String summary = booksService.createBookSummary(bucketName, fileName, true);
         logger.info("Book summarization flow: end {}ms", System.currentTimeMillis() - start);
 
         // return the response to the caller
-        return new ResponseEntity<>(summmary, HttpStatus.OK);
+        return new ResponseEntity<>(summary, HttpStatus.OK);
     }
 }
