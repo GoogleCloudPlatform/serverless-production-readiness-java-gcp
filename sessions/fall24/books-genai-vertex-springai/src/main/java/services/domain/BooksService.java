@@ -22,7 +22,6 @@ import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import services.ai.VertexAIClient;
@@ -41,14 +40,11 @@ import java.util.Map;
 public class BooksService {
     private static final Logger logger = LoggerFactory.getLogger(BooksService.class);
 
-    @Autowired
-    DataAccess dao;
+    final DataAccess dao;
 
-    @Autowired
-    VertexAIClient vertexAIClient;
+    final VertexAIClient vertexAIClient;
 
-    @Autowired
-    CloudStorageService cloudStorageService;
+    final CloudStorageService cloudStorageService;
 
     @Value("${prompts.promptSubSummary}")
     private String promptSubSummary;
@@ -63,10 +59,18 @@ public class BooksService {
     @Value("${spring.ai.vertex.ai.gemini.chat.options.model}")
     String model;
 
+    public BooksService(DataAccess dao, VertexAIClient vertexAIClient, CloudStorageService cloudStorageService) {
+        this.dao = dao;
+        this.vertexAIClient = vertexAIClient;
+        this.cloudStorageService = cloudStorageService;
+    }
+
+    @Deprecated
     public List<Map<String, Object>>  prompt(String prompt) {
         return dao.promptForBooks(prompt, 0);
     }
 
+    @Deprecated
     public List<Map<String, Object>>  prompt(String prompt, Integer characterLimit) {
         return dao.promptForBooks(prompt, characterLimit);
     }
@@ -76,11 +80,13 @@ public class BooksService {
         return dao.promptForBooks(prompt, bookRequest.book(), bookRequest.author(), characterLimit);
     }
 
-    public String insertBook(String bucketName, String fileName, boolean overwriteIfBookExists){
+    // Insert book data in the database
+    // books, authors and vector embeddings
+    public String insertBookAndAuthorData(String bucketName, String fileName, boolean overwriteIfBookExists){
         String message;
         // insert book data in the book data
         // insert author info in the authors table
-        Integer bookId = insertBook(fileName);
+        Integer bookId = insertBookAndAuthorData(fileName);
 
         // read the document from Cloud Storage
         List<Document> bookContent = cloudStorageService.readFileAsDocument(bucketName, fileName);
@@ -98,13 +104,16 @@ public class BooksService {
         return "Success";
     }
 
-    public Integer insertBook(String fileName) {
+    // Persist data into Books and Authors tables
+    public Integer insertBookAndAuthorData(String fileName) {
         String author = FileUtility.getAuthor(fileName);
         author = SqlUtility.replaceUnderscoresWithSpaces(author);
         String title = FileUtility.getTitle(fileName);
         title = SqlUtility.replaceUnderscoresWithSpaces(title);
         String year = FileUtility.getYear(fileName);
         String publicPrivate = FileUtility.getPublicPrivate(fileName);
+
+        // lookup existing info for books and authors
         Map<String, Object> book = dao.findBook(title);
         Map<String, Object> authorMap = dao.findAuthor(author);
         Object authorId = authorMap.get("author_id");
@@ -121,6 +130,7 @@ public class BooksService {
         return bookId;
     }
 
+    // Create book summary and persist in the database
     public String createBookSummary(String bucketName, String fileName, boolean overwriteIfSummaryExists) {
         String summary = "";
 
@@ -172,6 +182,7 @@ public class BooksService {
         return summary;
     }
 
+    // Retrieve book summary from booksummaries table, if it exists
     public String getBookSummary(String bookTitle) {
         // find the book in the database by table name
         Map<String, Object> book = dao.findBook(bookTitle);
@@ -184,6 +195,7 @@ public class BooksService {
         return summary.isEmpty() ? "" : (String) summary.get("summary");
     }
 
+    // Persist book pages in the database, with vector embeddings
     public boolean insertPagesBook(Integer bookId, List<Document> chunks) {
         Integer page = 1;
         List<Map<String, Object>> pages = dao.findPages(bookId);

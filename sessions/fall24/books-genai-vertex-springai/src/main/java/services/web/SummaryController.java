@@ -39,6 +39,7 @@ public class SummaryController {
         String fileName = (String) body.get("name");
         String bucketName = (String) body.get("bucket");
 
+        // create a book summary and persist it in the database
         long start = System.currentTimeMillis();
         logger.info("Book summarization flow : start");
         logger.info("Summarize book with title {} from Cloud Storage bucket {}", fileName, bucketName);
