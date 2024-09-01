@@ -21,19 +21,14 @@ import org.springframework.ai.chat.client.AdvisedRequest;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.RequestResponseAdvisor;
 import org.springframework.ai.chat.messages.Message;
-import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.model.ChatResponse;
-import org.springframework.ai.model.Media;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatModel;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatOptions;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.util.MimeTypeUtils;
 
 /*
     VertexAIClient is a service class that interacts with the Vertex AI Chat Client.
@@ -56,19 +51,15 @@ public class VertexAIClient {
 
     // Multimedia prompt to retrieve infor from an image
     // use entities to map responses to Objects
-    public ImageDetails promptOnImage(String prompt,
-                                      String imageURL,
+    public ImageDetails promptOnImage(Message systemMessage,
+                                      Message userMessage,
                                       String model) {
         long start = System.currentTimeMillis();
-
-        // create User Message for AI framework
-        var multiModalUserMessage = new UserMessage(prompt,
-                List.of(new Media(MimeTypeUtils.parseMimeType("image/*"), imageURL)));
 
         ChatClient client = ChatClient.create(chatClient);
         ImageDetails imageData = client.prompt()
                 .advisors(new LoggingAdvisor())
-                .messages(multiModalUserMessage)
+                .messages(List.of(systemMessage, userMessage))
                 .call()
                 .entity(ImageDetails.class);
         logger.info("Multi-modal response: {}, {}", imageData.author, imageData.title);

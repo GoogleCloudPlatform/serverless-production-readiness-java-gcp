@@ -21,11 +21,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.SystemMessage;
-import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
+import org.springframework.ai.model.Media;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MimeTypeUtils;
 import services.ai.VertexAIClient;
 import services.domain.BooksDataService;
 import services.domain.CloudStorageService;
@@ -50,6 +52,27 @@ public class BooksService {
 
     @Value("${spring.ai.vertex.ai.gemini.chat.options.model}")
     String model;
+
+    @Value("classpath:/prompts/text-system-message.st")
+    Resource textSystemMessage;
+
+    @Value("classpath:/prompts/summary-user-message.st")
+    Resource summaryUserMessage;
+
+    @Value("classpath:/prompts/analysis-user-message.st")
+    Resource analysisUserMessage;
+
+    @Value("classpath:/prompts/image-system-message.st")
+    Resource imageSystemMessage;
+
+    @Value("classpath:/prompts/image-user-message.st")
+    Resource imageUserMessage;
+
+    @Value("classpath:/prompts/text-functions-system-message.st")
+    Resource textFunctionsSystemMessage;
+
+    @Value("classpath:/prompts/bookstore-user-message.st")
+    Resource bookStoreUserMessage;
 
     public BooksService(VertexAIClient vertexAIClient,
                         CloudStorageService cloudStorageService,
@@ -80,27 +103,16 @@ public class BooksService {
         Integer bookId = booksDataService.findBookByTitle(bookTitle);
 
         // create a SystemMessage
-        SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate("""
-            You are a helpful AI assistant.
-            You are an AI assistant that helps people summarize information.
-            Your name is {name}
-            You should reply to the user's request with your name and also in the style of a {voice}.
-            Strictly ignore Project Gutenberg & ignore copyright notice in summary output.
-            """
-        );
+        SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(textSystemMessage);
         Message systemMessage = systemPromptTemplate.createMessage(
                 Map.of("name", "Gemini", "voice", "literary critic"));
 
         // create a UserMessage
-        PromptTemplate userPromptTemplate = new PromptTemplate("""
-            "Please provide a concise summary covering the key points of the following text.
-                              TEXT: {content}
-                              SUMMARY:
-            """, Map.of("content", bookText));
-        Message userMessage = userPromptTemplate.createMessage();
+        PromptTemplate userPromptTemplate = new PromptTemplate(summaryUserMessage);
+        Message userMessage = userPromptTemplate.createMessage(Map.of("content", bookText));
 
+        // prompt the model for a summary
         summary = vertexAIClient.promptModel(systemMessage, userMessage, model);
-
         logger.info("The summary for book {} is: {}", bookTitle, summary);
 
         // insert summary in table
@@ -117,19 +129,13 @@ public class BooksService {
         logger.info("Book analysis flow: retrieve embeddings from AlloyDB AI: {}ms", System.currentTimeMillis() - start);
 
         // create a SystemMessage
-        SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate("""
-            You are a helpful AI assistant.
-            You are an experienced AI assistant that helps people extract detailed information from images.
-            Your name is {name}
-            You should reply to the user's request with your name and also in the style of an {voice}.
-            Strictly ignore Project Gutenberg & ignore copyright notice in summary output.
-            """
-        );
+        SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(textSystemMessage);
         Message systemMessage = systemPromptTemplate.createMessage(
-                Map.of("name", "Gemini", "voice", "image analyst"));
+                Map.of("name", "Gemini", "voice", "literary critic"));
 
         // build user prompt to query LLM with the augmented context
-        Message userMessage = new UserMessage(PromptUtility.formatPromptBookAnalysis(bookRequest, responseBook, bookRequest.keyWords()));
+        Message userMessage = PromptUtility.formatPromptBookAnalysis(analysisUserMessage,
+                bookRequest, responseBook, bookRequest.keyWords());
 
         logger.info("Book analysis flow - Model: {}", model);
 
@@ -140,12 +146,21 @@ public class BooksService {
     // Analyze book, start from book cover image
     public void analyzeImage(String bucketName, String fileName) {
         // multi-modal call to retrieve text from the uploaded image
-        // property file ```promptImage: ${PROMPT_IMAGE:Extract the title and author from the image, strictly in JSON format}```
-        String imageUserMessage = "Extract the title and author from the image, strictly in JSON format";
+        SystemPromptTemplate imageSystemPromptTemplate = new SystemPromptTemplate(imageSystemMessage);
+        Message imageSystemMessage = imageSystemPromptTemplate.createMessage(
+                Map.of("name", "Gemini", "voice", "multimedia analyst"));
+
         // bucket where image has been uploaded
         String imageURL = String.format("gs://%s/%s",bucketName, fileName);
 
-        VertexAIClient.ImageDetails imageData = vertexAIClient.promptOnImage(imageUserMessage, imageURL, model);
+        // create User Message for AI framework
+        PromptTemplate userPromptTemplate = new PromptTemplate(imageUserMessage);
+        Message imageAnalysisUserMessage = userPromptTemplate.createMessage(List.of(new Media(MimeTypeUtils.parseMimeType("image/*"), imageURL)));
+
+        VertexAIClient.ImageDetails imageData = vertexAIClient.promptOnImage(
+                imageSystemMessage,
+                imageAnalysisUserMessage,
+                model);
         logger.info("Image Analysis Result: Author {}, Title {}", imageData.author(), imageData.title());
 
         // retrieve the book summary from the database
@@ -154,19 +169,11 @@ public class BooksService {
         logger.info("End of summary of the book {},as retrieved from the database", imageData.title());
 
         // Function calling BookStoreService
-        SystemMessage systemMessage = new SystemMessage("""
-                Use Multi-turn function calling.
-                Answer with precision.
-                If the information was not fetched call the function again. Repeat at most 3 times.
-                """);
+        SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(textFunctionsSystemMessage);
+        Message systemMessage = systemPromptTemplate.createMessage(Map.of("name", "Gemini", "voice", "literary critic"));
 
-        PromptTemplate userMessageTemplate = new PromptTemplate("""
-                Write a nice note including book author, book title and availability.
-                Find out if the book with the title {title} by author {author} is available in the University bookstore.
-                Please add also this book summary to the response, with the text available after the column, prefix it with The Book Summary:  {summary}
-                """,
-                Map.of("title", imageData.title(), "author", imageData.author(), "summary", summary));
-        Message userMessage = userMessageTemplate.createMessage();
+        PromptTemplate userMessageTemplate = new PromptTemplate(bookStoreUserMessage);
+        Message userMessage = userMessageTemplate.createMessage(Map.of("title", imageData.title(), "author", imageData.author(), "summary", summary));
 
         String bookStoreResponse = vertexAIClient.promptModelWithFunctionCalls(systemMessage,
                 userMessage,
