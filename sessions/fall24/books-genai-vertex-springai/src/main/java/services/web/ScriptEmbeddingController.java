@@ -39,8 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Controller for handling document embedding requests, generating document summaries
- * and persistence to Vector and SQL databases.
+ * Controller for Terraform transformation
  */
 @RestController
 @RequestMapping("/script")
