@@ -80,7 +80,7 @@ public class SummaryController {
         // create a book summary and persist it in the database
         long start = System.currentTimeMillis();
         logger.info("Book summarization flow : start");
-        logger.info("Summarize book with title {} and author {} published in ", title, author, publicationYear);
+        logger.info("Summarize book with title {} and author {} published in {}", title, author, publicationYear);
         String summary = booksService.createBookSummaryWebGrounded(title, author, publicationYear, bucketName);
         logger.info("Book summarization flow: end {}ms", System.currentTimeMillis() - start);
 

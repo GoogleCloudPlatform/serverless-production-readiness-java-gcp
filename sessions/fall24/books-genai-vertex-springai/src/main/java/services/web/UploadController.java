@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import services.actuator.StartupCheck;
-import services.client.BooksService;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -25,12 +24,6 @@ import java.text.SimpleDateFormat;
 public class UploadController {
 
     private static final Logger logger = LoggerFactory.getLogger(UploadController.class);
-
-    private final BooksService booksService;
-
-    public UploadController(BooksService booksService) {
-        this.booksService = booksService;
-    }
 
     @PostConstruct
     public void init() {
@@ -82,7 +75,6 @@ public class UploadController {
                 // return new ResponseEntity<>(summary, HttpStatus.OK);
             }
 
-            //String summary = booksService.createBookSummary(bucketName, fileName, true);
             logger.info("Upload file: end {}ms", System.currentTimeMillis() - start);
 
             // return the response to the caller

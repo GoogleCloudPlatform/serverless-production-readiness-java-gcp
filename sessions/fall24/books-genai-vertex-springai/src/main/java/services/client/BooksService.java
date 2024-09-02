@@ -19,7 +19,11 @@ import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.WriteResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.memory.InMemoryChatMemory;
+import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 import org.springframework.ai.model.Media;
@@ -75,6 +79,12 @@ public class BooksService {
 
     @Value("classpath:/prompts/bookstore-user-message.st")
     Resource bookStoreUserMessage;
+
+    @Value("classpath:/prompts/sentiment-analysis-system-message.st")
+    Resource sentimentAnalysisSystemMessage;
+
+    @Value("classpath:/prompts/sentiment-analysis-user-message.st")
+    Resource sentimentAnalysisUserMessage;
 
     public BooksService(VertexAIClient vertexAIClient,
                         CloudStorageService cloudStorageService,
@@ -233,5 +243,59 @@ public class BooksService {
                 logger.error("Could not save picture metadata in Firestore: {}", e.getMessage());
             }
         }
+    }
+
+    // Build Few-shot history
+    private List<Message> messages = List.of(
+            new UserMessage("Lord of the Rings by J.R.R. Tolkien"),
+            new AssistantMessage("Fantasy"),
+            new UserMessage("Dune by Frank Herbert"),
+            new AssistantMessage("Science Fiction"),
+            new UserMessage("Murder on the Orient Express by Agatha Christie"),
+            new AssistantMessage("Mistery"),
+            new UserMessage("Pride and Prejudice by Jane Austen"),
+            new AssistantMessage("Romance"),
+            new UserMessage("Dracula by Bram Stoker"),
+            new AssistantMessage("Horror"),
+            new UserMessage("Gone With the Wind by Margaret Mitchell"),
+            new AssistantMessage("Historical Fiction"),
+            new UserMessage("1984 by George Orwell"),
+            new AssistantMessage("Dystopian"),
+            new UserMessage("Catch-22 by Joseph Heller"),
+            new AssistantMessage("Comedy"),
+            new UserMessage("The Autobiography of Benjamin Franklin"),
+            new AssistantMessage("Biography/Autobiography"),
+            new UserMessage("Sapiens: A Brief History of Humankind by Yuval Noah Harari"),
+            new AssistantMessage("History"),
+            new UserMessage("A Brief History of Time by Stephen Hawking"),
+            new AssistantMessage("Science"),
+            new UserMessage("How to Win Friends and Influence People by Dale Carnegie"),
+            new AssistantMessage("Self-Help"),
+            new UserMessage("The Wealth of Nations by Adam Smith\n"),
+            new AssistantMessage("Business/Economics"),
+            new UserMessage("Joy of Cooking"),
+            new AssistantMessage("Cookbook"),
+            new UserMessage("Eat, Pray, Love by Elizabeth Gilbert"),
+            new AssistantMessage("Travel")
+    );
+
+    // classify book and get sentiment analysis of main character
+    public String sentimentAnalysis(String title, String author) {
+        // create the system prompt
+        // SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(sentimentAnalysisSystemMessage);
+        PromptTemplate systemPromptTemplate = new PromptTemplate(sentimentAnalysisSystemMessage);
+        Message systemMessage = systemPromptTemplate.createMessage();
+
+        // create the memory for the few-shot history
+        ChatMemory chatMemory = new InMemoryChatMemory();
+        chatMemory.add("examples", messages);
+
+        PromptTemplate userMessageTemplate = new PromptTemplate(sentimentAnalysisUserMessage);
+        Message userMessage = userMessageTemplate.createMessage(Map.of("title", title, "author", author));
+
+        return vertexAIClient.promptModelWithMemory(systemMessage,
+                                                    userMessage,
+                                                    model,
+                                                    chatMemory);
     }
 }

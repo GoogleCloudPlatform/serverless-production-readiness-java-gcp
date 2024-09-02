@@ -20,6 +20,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.AdvisedRequest;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.RequestResponseAdvisor;
+import org.springframework.ai.chat.client.advisor.PromptChatMemoryAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatModel;
@@ -131,6 +133,33 @@ public class VertexAIClient {
 
         String output = chatResponse.getResult().getOutput().getContent();
         logger.info("Chat Model output with Function Call: {}", output);
+        return output;
+    }
+
+    public String promptModelWithMemory(Message systemMessage,
+                                        Message userMessage,
+                                        String model,
+                                        ChatMemory chatMemory) {
+        long start = System.currentTimeMillis();
+
+        ChatClient client = ChatClient.create(chatClient);
+        ChatResponse chatResponse = client.prompt()
+                .advisors(new LoggingAdvisor())
+                .messages(List.of(systemMessage, userMessage))
+                .options(VertexAiGeminiChatOptions.builder()
+                        .withTemperature(0.4f)
+                        .withModel(model)
+                        .build())
+                .call()
+                .chatResponse();
+
+        logger.info("Elapsed time ( {}, with SpringAI): {} ms", model, (System.currentTimeMillis() - start));
+
+        String output = "No response from model";
+        if (chatResponse != null && chatResponse.getResult() != null) {  // Ensure chatResponse is not null
+            output = chatResponse.getResult().getOutput().getContent();
+        }
+        logger.info("Chat model output: {} ...", output.substring(0, Math.min(1000, output.length())));
         return output;
     }
 
