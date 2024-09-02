@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.AdvisedRequest;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.RequestResponseAdvisor;
-import org.springframework.ai.chat.client.advisor.PromptChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.model.ChatResponse;
@@ -144,7 +144,8 @@ public class VertexAIClient {
 
         ChatClient client = ChatClient.create(chatClient);
         ChatResponse chatResponse = client.prompt()
-                .advisors(new LoggingAdvisor())
+                .advisors(new LoggingAdvisor(),
+                          new MessageChatMemoryAdvisor(chatMemory))
                 .messages(List.of(systemMessage, userMessage))
                 .options(VertexAiGeminiChatOptions.builder()
                         .withTemperature(0.4f)

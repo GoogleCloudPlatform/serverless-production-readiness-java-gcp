@@ -282,8 +282,7 @@ public class BooksService {
     // classify book and get sentiment analysis of main character
     public String sentimentAnalysis(String title, String author) {
         // create the system prompt
-        // SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(sentimentAnalysisSystemMessage);
-        PromptTemplate systemPromptTemplate = new PromptTemplate(sentimentAnalysisSystemMessage);
+        SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(sentimentAnalysisSystemMessage);
         Message systemMessage = systemPromptTemplate.createMessage();
 
         // create the memory for the few-shot history
