@@ -18,7 +18,6 @@ package services.web;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.messages.Message;
-import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -33,6 +32,8 @@ import services.utility.PromptUtility;
 import services.utility.RequestValidationUtility;
 
 import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
@@ -52,8 +53,8 @@ public class ScriptEmbeddingController {
 
   VertexAIClient vertexAIClient;
 
-  @Value("${prompts.promptTransformTF}")
-  private String promptTransformTF;
+  @Value("classpath:/prompts/transform-tf-system-message.st")
+  Resource promptTransformTFSystemMessage;
 
   @Value("classpath:/prompts/transform-tf-user-message.st")
   Resource promptTransformTFUserMessage;
@@ -63,6 +64,9 @@ public class ScriptEmbeddingController {
 
   @Value("classpath:/bashscripts/provision-cloud-infra.sh")
   private Resource bashscript;
+
+  @Value("classpath:/queries/tf-transform-search-query.st")
+  Resource tfTransformSearchQuery;
 
   public ScriptEmbeddingController(BooksDataService booksDataService,
                                    CloudStorageService cloudStorageService, VertexAIClient vertexAIClient) {
@@ -128,15 +132,19 @@ public class ScriptEmbeddingController {
   public String tfTransform(String script) {
     logger.info("tf transform flow - Model: {}", model);
     long start = System.currentTimeMillis();
-    List<Map<String, Object>> responseDoc = booksDataService.prompt("Find paragraphs mentioning Terraform best practices for general style, structure, and dependency management", 6000);
 
-    // create a SystemMessage
-    SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate("""
-            You are an expert in Google Cloud Platform (GCP), fluent in `gcloud` commands,
-            deeply familiar with Terraform modules for GCP."""
-    );
+    List<Map<String, Object>> responseDoc;
+    try {
+        responseDoc = booksDataService.prompt(tfTransformSearchQuery.getContentAsString(Charset.defaultCharset()), 6000);
+    } catch (IOException e) {
+        return "Could not transform the Terraform script";
+    }
+
+      // create a SystemMessage
+    SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(promptTransformTFSystemMessage);
     Message systemMessage = systemPromptTemplate.createMessage();
 
+    // create a UserMessage
     Message userMessage =  PromptUtility.formatPromptTF(responseDoc, promptTransformTFUserMessage, script);
     logger.info("TF transform: prompt LLM: {}ms", System.currentTimeMillis() - start);
     String response = vertexAIClient.promptModel(systemMessage, userMessage, model);
