@@ -1,0 +1,1 @@
+Extract the title and author from the image, strictly in JSON format

@@ -55,6 +55,9 @@ public class ScriptEmbeddingController {
   @Value("${prompts.promptTransformTF}")
   private String promptTransformTF;
 
+  @Value("classpath:/prompts/transform-tf-user-message.st")
+  Resource promptTransformTFUserMessage;
+
   @Value("${spring.ai.vertex.ai.gemini.chat.options.model}")
   private String model;
 
@@ -70,17 +73,17 @@ public class ScriptEmbeddingController {
 
   @PostConstruct
   public void init() {
-      logger.info("BookImagesApplication: DocumentEmbeddingController Post Construct Initializer {}", new SimpleDateFormat("HH:mm:ss.SSS").format(
+      logger.info("BookImagesApplication: ScriptEmbeddingController Post Construct Initializer {}", new SimpleDateFormat("HH:mm:ss.SSS").format(
               new java.util.Date(System.currentTimeMillis())));
     logger.info(
-        "BookImagesApplication: DocumentEmbeddingController Post Construct - StartupCheck can be enabled");
+        "BookImagesApplication: ScriptEmbeddingController Post Construct - StartupCheck can be enabled");
 
     StartupCheck.up();
   }
 
   @GetMapping("start")
   String start() {
-    logger.info("BookImagesApplication: DocumentEmbeddingController - Executed start endpoint request {}", new SimpleDateFormat("HH:mm:ss.SSS").format(
+    logger.info("BookImagesApplication: ScriptEmbeddingController - Executed start endpoint request {}", new SimpleDateFormat("HH:mm:ss.SSS").format(
               new java.util.Date(System.currentTimeMillis())));
     return "DocumentEmbeddingController started";
   }
@@ -134,7 +137,7 @@ public class ScriptEmbeddingController {
     );
     Message systemMessage = systemPromptTemplate.createMessage();
 
-    Message userMessage =  new UserMessage(PromptUtility.formatPromptTF(responseDoc, promptTransformTF, script));
+    Message userMessage =  PromptUtility.formatPromptTF(responseDoc, promptTransformTFUserMessage, script);
     logger.info("TF transform: prompt LLM: {}ms", System.currentTimeMillis() - start);
     String response = vertexAIClient.promptModel(systemMessage, userMessage, model);
     logger.info("TF transform flow: {}ms", System.currentTimeMillis() - start);

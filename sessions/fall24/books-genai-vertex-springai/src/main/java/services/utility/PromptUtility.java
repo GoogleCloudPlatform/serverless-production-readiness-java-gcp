@@ -52,14 +52,16 @@ public class PromptUtility {
     }
 
 
-    public static String formatPromptTF(List<Map<String, Object>> responseDoc, String promptTransformTF, String script) {
+    public static Message formatPromptTF(List<Map<String, Object>> responseDoc, Resource promptTransformTFUserMessage, String script) {
         // Check for an empty topics list
         Map<Integer, String> sortByPageNumber = getSortedPagesBasedonPageNumber(responseDoc);
         String context="";
         for(String page: sortByPageNumber.values()) {
             context += page + "\n";
         }
-        return String.format(promptTransformTF, script, context);
+
+        PromptTemplate tfUserMessage = new PromptTemplate(promptTransformTFUserMessage);
+        return tfUserMessage.createMessage(Map.of("script", script, "context", context));
     }
 
 
