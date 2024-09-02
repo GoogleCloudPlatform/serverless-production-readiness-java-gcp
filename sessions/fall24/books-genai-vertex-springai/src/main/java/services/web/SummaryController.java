@@ -59,10 +59,33 @@ public class SummaryController {
         long start = System.currentTimeMillis();
         logger.info("Book summarization flow : start");
         logger.info("Summarize book with title {} from Cloud Storage bucket {}", fileName, bucketName);
-        String summary = booksService.createBookSummary(bucketName, fileName, true);
+        String summary = booksService.createBookSummary(bucketName, fileName);
         logger.info("Book summarization flow: end {}ms", System.currentTimeMillis() - start);
 
         // return the response to the caller
         return new ResponseEntity<>(summary, HttpStatus.OK);
     }
+
+    @CrossOrigin
+    @RequestMapping(value = "/web", method = RequestMethod.POST)
+    public ResponseEntity<String> receiveMessageWebSearch(
+            @RequestBody Map<String, Object> body, @RequestHeader Map<String, String> headers) {
+
+        // get document name and bucket
+        String title = (String) body.get("title");
+        String author = (String) body.get("author");
+        String publicationYear = (String) body.get("publicationYear");
+        String bucketName = (String) body.get("bucketName");
+
+        // create a book summary and persist it in the database
+        long start = System.currentTimeMillis();
+        logger.info("Book summarization flow : start");
+        logger.info("Summarize book with title {} and author {} published in ", title, author, publicationYear);
+        String summary = booksService.createBookSummaryWebGrounded(title, author, publicationYear, bucketName);
+        logger.info("Book summarization flow: end {}ms", System.currentTimeMillis() - start);
+
+        // return the response to the caller
+        return new ResponseEntity<>(summary, HttpStatus.OK);
+    }
+
 }

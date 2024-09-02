@@ -88,7 +88,7 @@ public class DocumentEmbeddingController {
     // persist book info to AlloyDB
     // persist book pages as embeddings in AlloyDB
     long start = System.currentTimeMillis();
-    String status = booksDataService.insertBookAndAuthorData(bucketName, fileName, true);
+    String status = booksDataService.insertBookAndAuthorData(bucketName, fileName);
     logger.info("Embedding status completed with status: {}", status);
     logger.info("Embedding flow - insert book and pages: {}ms", System.currentTimeMillis() - start);
 

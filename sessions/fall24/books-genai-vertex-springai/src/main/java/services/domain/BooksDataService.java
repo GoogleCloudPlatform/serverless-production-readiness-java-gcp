@@ -64,7 +64,7 @@ public class BooksDataService {
 
     // Insert book data in the database
     // books, authors and vector embeddings
-    public String insertBookAndAuthorData(String bucketName, String fileName, boolean overwriteIfBookExists){
+    public String insertBookAndAuthorData(String bucketName, String fileName){
         String message;
         // insert book data in the book data
         // insert author info in the authors table

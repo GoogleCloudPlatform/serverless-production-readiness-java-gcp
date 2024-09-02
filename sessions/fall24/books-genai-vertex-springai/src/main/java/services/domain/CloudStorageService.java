@@ -50,7 +50,7 @@ public class CloudStorageService {
         // Get the blob.
         Blob blob = storage.get(BlobId.of(bucket, fileName));
 
-        return new String(blob.getContent(), StandardCharsets.UTF_8);
+        return (blob == null ? "" : new String(blob.getContent(), StandardCharsets.UTF_8));
     }
 
     public List<Document> readFileAsDocument(String bucket, String fileName) {

@@ -20,7 +20,6 @@ import com.google.cloud.firestore.WriteResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.messages.Message;
-import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 import org.springframework.ai.model.Media;
@@ -59,6 +58,9 @@ public class BooksService {
     @Value("classpath:/prompts/summary-user-message.st")
     Resource summaryUserMessage;
 
+    @Value("classpath:/prompts/summary-grounded-user-message.st")
+    Resource summaryGroundedUserMessage;
+
     @Value("classpath:/prompts/analysis-user-message.st")
     Resource analysisUserMessage;
 
@@ -84,18 +86,17 @@ public class BooksService {
         this.eventService = eventService;
     }
 
-    // Create book summary and persist in the database
-    public String createBookSummary(String bucketName, String fileName, boolean overwriteIfSummaryExists) {
+    // Create book summary from an existing file in  Cloud Storage and persist in the database
+    public String createBookSummary(String bucketName, String fileName) {
         // read the book content from Cloud Storage
         String bookText = cloudStorageService.readFileAsString(bucketName, fileName);
 
         // extract the book title
-        String bookTitle = FileUtility.getTitle(fileName);
-        bookTitle = SqlUtility.replaceUnderscoresWithSpaces(bookTitle);
+        String bookTitle = SqlUtility.replaceUnderscoresWithSpaces(FileUtility.getTitle(fileName));
 
         // lookup book summary in the database
         String summary = booksDataService.getBookSummary(bookTitle);
-        if (!summary.isEmpty() && !overwriteIfSummaryExists)
+        if (!summary.isEmpty())
             return summary;
 
         // find the book in the book table
@@ -107,6 +108,7 @@ public class BooksService {
         Message systemMessage = systemPromptTemplate.createMessage(
                 Map.of("name", "Gemini", "voice", "literary critic"));
 
+        // book content has been found in Cloud Storage; summarize the content
         // create a UserMessage
         PromptTemplate userPromptTemplate = new PromptTemplate(summaryUserMessage);
         Message userMessage = userPromptTemplate.createMessage(Map.of("content", bookText));
@@ -114,6 +116,48 @@ public class BooksService {
         // prompt the model for a summary
         summary = vertexAIClient.promptModel(systemMessage, userMessage, model);
         logger.info("The summary for book {} is: {}", bookTitle, summary);
+
+        // insert summary in table
+        booksDataService.insertBookSummary(bookId, summary);
+
+        return summary;
+    }
+
+    // Create book summary from a file which does not exist in Cloud Storage
+    public String createBookSummaryWebGrounded(String title, String author, String publicationYear, String bucketName) {
+        // lookup book summary in the database
+        String summary = booksDataService.getBookSummary(title);
+        if (!summary.isEmpty())
+            return summary;
+
+        // find the book in the book table
+        // extract the book id
+        Integer bookId = booksDataService.findBookByTitle(title);
+
+        // create a SystemMessage
+        SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(textSystemMessage);
+        Message systemMessage = systemPromptTemplate.createMessage(
+                Map.of("name", "Gemini", "voice", "literary critic"));
+
+        PromptTemplate userPromptTemplate;
+        Message userMessage;
+        if(bookId == null) {
+            // insert the book data in the books and authors tables
+            String defaultFormattedFileNameInCloudStorage = String.format("%s-%s-%s-public.txt", title, author, publicationYear);
+            bookId = booksDataService.insertBookAndAuthorData(defaultFormattedFileNameInCloudStorage);
+        }
+
+        // book content has not been found in Cloud Storage
+        // use grounding with Web search to get a book summary
+        userPromptTemplate = new PromptTemplate(summaryGroundedUserMessage);
+        userMessage = userPromptTemplate.createMessage(Map.of(
+                "title", title,
+                "author", author));
+
+
+        // prompt the model for a summary
+        summary = vertexAIClient.promptModelGrounded(systemMessage, userMessage, model, true);
+        logger.info("The summary for book {} is: {}", title, summary);
 
         // insert summary in table
         booksDataService.insertBookSummary(bookId, summary);

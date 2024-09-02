@@ -21,7 +21,6 @@ import org.springframework.ai.chat.client.AdvisedRequest;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.RequestResponseAdvisor;
 import org.springframework.ai.chat.messages.Message;
-import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatModel;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatOptions;
@@ -49,7 +48,7 @@ public class VertexAIClient {
     public record ImageDetails(String title, String author){
     }
 
-    // Multimedia prompt to retrieve infor from an image
+    // Multimedia prompt to retrieve information from an image
     // use entities to map responses to Objects
     public ImageDetails promptOnImage(Message systemMessage,
                                       Message userMessage,
@@ -75,6 +74,16 @@ public class VertexAIClient {
     public String promptModel(Message systemMessage,
                               Message userMessage,
                               String model) {
+        return promptModelGrounded(systemMessage, userMessage, model, false);
+    }
+
+    // prompt model with System and User Messages
+    // use grounding with Google web search | not
+    // return response as String
+    public String promptModelGrounded(Message systemMessage,
+                                      Message userMessage,
+                                      String model,
+                                      boolean useGoogleWebSearch) {
         long start = System.currentTimeMillis();
 
         ChatClient client = ChatClient.create(chatClient);
@@ -84,15 +93,11 @@ public class VertexAIClient {
                 .options(VertexAiGeminiChatOptions.builder()
                         .withTemperature(0.4f)
                         .withModel(model)
+                        .withGoogleSearchRetrieval(useGoogleWebSearch)
                         .build())
                 .call()
                 .chatResponse();
 
-//        ChatResponse chatResponse = chatClient.call(new Prompt(List.of(systemMessage, userMessage),
-//                VertexAiGeminiChatOptions.builder()
-//                        .withTemperature(0.4f)
-//                        .withModel(model)
-//                        .build()));
         logger.info("Elapsed time ( {}, with SpringAI): {} ms", model, (System.currentTimeMillis() - start));
 
         String output = "No response from model";
