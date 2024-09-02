@@ -60,6 +60,9 @@ public class VertexAIClient {
         ImageDetails imageData = client.prompt()
                 .advisors(new LoggingAdvisor())
                 .messages(List.of(systemMessage, userMessage))
+                .options(VertexAiGeminiChatOptions.builder()
+                        .withModel(model)
+                        .build())
                 .call()
                 .entity(ImageDetails.class);
         logger.info("Multi-modal response: {}, {}", imageData.author, imageData.title);
@@ -73,11 +76,23 @@ public class VertexAIClient {
                               Message userMessage,
                               String model) {
         long start = System.currentTimeMillis();
-        ChatResponse chatResponse = chatClient.call(new Prompt(List.of(systemMessage, userMessage),
-                VertexAiGeminiChatOptions.builder()
+
+        ChatClient client = ChatClient.create(chatClient);
+        ChatResponse chatResponse = client.prompt()
+                .advisors(new LoggingAdvisor())
+                .messages(List.of(systemMessage, userMessage))
+                .options(VertexAiGeminiChatOptions.builder()
                         .withTemperature(0.4f)
                         .withModel(model)
-                        .build()));
+                        .build())
+                .call()
+                .chatResponse();
+
+//        ChatResponse chatResponse = chatClient.call(new Prompt(List.of(systemMessage, userMessage),
+//                VertexAiGeminiChatOptions.builder()
+//                        .withTemperature(0.4f)
+//                        .withModel(model)
+//                        .build()));
         logger.info("Elapsed time ( {}, with SpringAI): {} ms", model, (System.currentTimeMillis() - start));
 
         String output = "No response from model";
@@ -95,11 +110,17 @@ public class VertexAIClient {
                                                String model) {
         long start = System.currentTimeMillis();
 
-        ChatResponse chatResponse = chatClient.call(new Prompt(List.of(systemMessage, userMessage),
-                VertexAiGeminiChatOptions.builder()
+        ChatClient client = ChatClient.create(chatClient);
+        ChatResponse chatResponse = client.prompt()
+                .advisors(new LoggingAdvisor())
+                .messages(List.of(systemMessage, userMessage))
+                .functions(functionName)
+                .options(VertexAiGeminiChatOptions.builder()
+                        .withTemperature(0.4f)
                         .withModel(model)
-                        .withFunction(functionName)
-                        .build()));
+                        .build())
+                .call()
+                .chatResponse();
 
         logger.info("Elapsed time ({}, with SpringAI): {} ms", model, (System.currentTimeMillis() - start));
 
