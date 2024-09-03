@@ -42,7 +42,7 @@ import java.util.Map;
  * Controller for Terraform transformation
  */
 @RestController
-@RequestMapping("/script")
+@RequestMapping("/document")
 public class ScriptEmbeddingController {
 
   private static final Logger logger = LoggerFactory.getLogger(ScriptEmbeddingController.class);

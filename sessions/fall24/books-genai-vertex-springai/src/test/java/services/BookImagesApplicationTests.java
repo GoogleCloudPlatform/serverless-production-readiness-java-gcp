@@ -26,6 +26,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
+import services.client.BooksService;
 import services.domain.dao.DataAccess;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -45,10 +46,13 @@ public class BookImagesApplicationTests {
 	@Autowired private MockMvc mockMvc;
 	String mockBody;
         
-        @MockBean
-	private DataAccess dataAccess;  
+	@MockBean
+	private DataAccess dataAccess;
+
+	@MockBean
+	private BooksService booksService;
 	
-        @BeforeEach
+	@BeforeEach
 	public void setup() throws JSONException {
 	  JSONObject message =
 		  new JSONObject()
