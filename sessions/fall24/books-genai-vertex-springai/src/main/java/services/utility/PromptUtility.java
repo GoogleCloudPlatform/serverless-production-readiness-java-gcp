@@ -23,6 +23,10 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.core.io.Resource;
 import services.web.data.BookRequest;
 
 
@@ -48,14 +52,16 @@ public class PromptUtility {
     }
 
 
-    public static String formatPromptTF(List<Map<String, Object>> responseDoc, String promptTransformTF, String script) {
+    public static Message formatPromptTF(List<Map<String, Object>> responseDoc, Resource promptTransformTFUserMessage, String script) {
         // Check for an empty topics list
         Map<Integer, String> sortByPageNumber = getSortedPagesBasedonPageNumber(responseDoc);
         String context="";
         for(String page: sortByPageNumber.values()) {
             context += page + "\n";
         }
-        return String.format(promptTransformTF, script, context);
+
+        PromptTemplate tfUserMessage = new PromptTemplate(promptTransformTFUserMessage);
+        return tfUserMessage.createMessage(Map.of("script", script, "context", context));
     }
 
 
@@ -77,14 +83,10 @@ public class PromptUtility {
         return sortByPageNumber;
     }
 
-    public static String formatPromptBookAnalysis(BookRequest bookRequest, List<Map<String, Object>> bookPages, List<String> keywords) {
-        String promptBookAnalysis = "Provide an analysis of the book %s by %s " +
-            "with the skills of a literary critic." +
-            "What factor do the following %s " +
-            "play in the narrative of the book. " +
-            "Please use these paragraphs delimited by triple backquotes from the book :\n" +
-            "```%s```";
-
+    public static Message formatPromptBookAnalysis(Resource analysisUserMessage,
+                                                   BookRequest bookRequest,
+                                                   List<Map<String, Object>> bookPages,
+                                                   List<String> keywords) {
         // Check for an empty topics list
         List<String> params = keywords.stream()
             .filter(Objects::nonNull)  // Filters out null values
@@ -92,7 +94,7 @@ public class PromptUtility {
             .collect(Collectors.toList());
 
         if ( (params==null || params.isEmpty()) && bookPages.isEmpty()) {
-            return ""; // Or other default message
+            return new UserMessage("Not information supplied to build a UserMessage. Missing data");
         }
 
         logger.info(params+"");
@@ -102,6 +104,11 @@ public class PromptUtility {
             context += page.get("page")+" ";
         }
 
-        return String.format(promptBookAnalysis, bookRequest.book(), bookRequest.author(), String.join(", ", params), context);
+        PromptTemplate userPromptTemplate = new PromptTemplate(analysisUserMessage);
+        return userPromptTemplate.createMessage(
+                Map.of("title", bookRequest.book(),
+                        "author", bookRequest.author(),
+                        "keywords", String.join(", ", params),
+                        "pages", context));
     }
 }

@@ -17,8 +17,6 @@ package services.web;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
@@ -27,12 +25,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import org.springframework.beans.factory.annotation.Value;
-
 import services.actuator.StartupCheck;
-import services.ai.VertexAIClient;
-import services.domain.BooksService;
-import services.utility.PromptUtility;
+import services.client.BooksService;
 import services.web.data.BookRequest;
 
 /**
@@ -40,7 +34,7 @@ import services.web.data.BookRequest;
  * This controller is responsible for processing the user request for book analysis.
  * The controller will prompt AlloyDB for the embeddings for the book in the request.
  * The controller will build a prompt to query LLM with the augmented context.
- * Returns the book anaylsis response to the caller.
+ * Returns the book analysis response to the caller.
  */
 @RestController
 @RequestMapping("/analysis")
@@ -48,18 +42,15 @@ public class BookAnalysisController {
   private static final Logger logger = LoggerFactory.getLogger(BookAnalysisController.class);
 
   private final BooksService booksService;
-  private final VertexAIClient vertexAIClient;
-  public BookAnalysisController(BooksService booksService, VertexAIClient vertexAIClient) {
-    this.booksService = booksService;
-    this.vertexAIClient = vertexAIClient;
-  }
 
-  @Value("${spring.ai.vertex.ai.gemini.chat.options.model}")
-  private String model;
+  public BookAnalysisController(BooksService booksService) {
+    this.booksService = booksService;
+  }
 
   @PostConstruct
   public void init() {
-    logger.info("BookImagesApplication: BookAnalysisController Post Construct Initializer " + new SimpleDateFormat("HH:mm:ss.SSS").format(new Date(System.currentTimeMillis())));
+    logger.info("BookImagesApplication: BookAnalysisController Post Construct Initializer {}",
+            new SimpleDateFormat("HH:mm:ss.SSS").format(new Date(System.currentTimeMillis())));
     logger.info("BookImagesApplication: BookAnalysisController Post Construct - StartupCheck can be enabled");
 
     StartupCheck.up();
@@ -67,24 +58,15 @@ public class BookAnalysisController {
 
   @CrossOrigin
   @PostMapping("")
-  public ResponseEntity<String> bookAnalysis(@RequestBody BookRequest bookRequest, @RequestParam(name = "contentCharactersLimit", defaultValue = "6000") Integer contentCharactersLimit){
-
+  public ResponseEntity<String> bookAnalysis(@RequestBody BookRequest bookRequest,
+                                             @RequestParam(name = "contentCharactersLimit",
+                                                     defaultValue = "6000") Integer contentCharactersLimit){
+    // analyze book by title, author and specific keywords
     long start = System.currentTimeMillis();
     logger.info("Book analysis flow : start");
-
-    // Prompt AlloyDB for the embeddings for the book in the request
-    List<Map<String, Object>> responseBook = booksService.prompt(bookRequest, contentCharactersLimit);
-    logger.info("Book analysis flow: retrieve embeddings from AlloyDB AI: " + (System.currentTimeMillis() - start) + "ms");
-
-    // build prompt to query LLM with the augmented context
-    String promptWithContext = PromptUtility.formatPromptBookAnalysis(bookRequest, responseBook, bookRequest.keyWords());
-
-    logger.info("Book analysis flow - Model: " + model);
-    start = System.currentTimeMillis();
-
-    // submit prompt to the LLM via LLM orchestration framework
-    String response = vertexAIClient.promptModel(promptWithContext, model);
-    logger.info("Book analysis flow: prompt LLM: " + (System.currentTimeMillis() - start) + "ms");
+    String response = booksService.analyzeBookByKeywords(bookRequest, contentCharactersLimit);
+    logger.info("Book analysis flow: prompt LLM: {}ms", System.currentTimeMillis() - start);
+    logger.info("Book analysis flow: done");
 
     // return the response to the caller
     return new ResponseEntity<>(response, HttpStatus.OK);

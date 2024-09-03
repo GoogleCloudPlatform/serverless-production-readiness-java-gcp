@@ -17,20 +17,19 @@ package services.ai;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.ai.chat.messages.SystemMessage;
-import org.springframework.ai.chat.messages.UserMessage;
-import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.chat.client.AdvisedRequest;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.RequestResponseAdvisor;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.model.ChatResponse;
-import org.springframework.ai.model.Media;
-import org.springframework.ai.vertexai.gemini.MimeTypeDetector;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatModel;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatOptions;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.List;
-import org.springframework.util.MimeTypeUtils;
+import java.util.Map;
 
 /*
     VertexAIClient is a service class that interacts with the Vertex AI Chat Client.
@@ -42,100 +41,150 @@ import org.springframework.util.MimeTypeUtils;
 public class VertexAIClient {
     private static final Logger logger = LoggerFactory.getLogger(VertexAIClient.class);
 
-    private VertexAiGeminiChatModel chatClient;
-    private Environment env;
+    private final VertexAiGeminiChatModel chatClient;
 
-    public VertexAIClient(VertexAiGeminiChatModel chatClient, Environment env){
+    public VertexAIClient(VertexAiGeminiChatModel chatClient){
         this.chatClient = chatClient;
-        this.env = env;
     }
 
-    public String promptOnImage(String prompt,
-                                String bucketName,
-                                String fileName,
-                                String model) throws IOException {
+    public record ImageDetails(String title, String author){
+    }
+
+    // Multimedia prompt to retrieve information from an image
+    // use entities to map responses to Objects
+    public ImageDetails promptOnImage(Message systemMessage,
+                                      Message userMessage,
+                                      String model) {
         long start = System.currentTimeMillis();
 
-        // bucket where image has been uploaded
-        String imageURL = String.format("gs://%s/%s",bucketName, fileName);
-
-        // create User Message for AI framework
-        var multiModalUserMessage = new UserMessage(prompt,
-                List.of(new Media(MimeTypeUtils.parseMimeType("image/*"), imageURL)));
-
-        // call the model of choice
-        ChatResponse multiModalResponse = chatClient.call(new Prompt(List.of(multiModalUserMessage),
-                VertexAiGeminiChatOptions.builder()
+        ChatClient client = ChatClient.create(chatClient);
+        ImageDetails imageData = client.prompt()
+                .advisors(new LoggingAdvisor())
+                .messages(List.of(systemMessage, userMessage))
+                .options(VertexAiGeminiChatOptions.builder()
                         .withModel(model)
-                        .build()));
-        String response = multiModalResponse.getResult().getOutput().getContent();
-        logger.info("Multi-modal response: " + response);
-
-        // response from Vertex is in Markdown, remove annotations
-        response = response.replaceAll("```json", "").replaceAll("```", "").replace("'", "\"");
-
+                        .build())
+                .call()
+                .entity(ImageDetails.class);
+        logger.info("Multi-modal response: {}, {}", imageData.author, imageData.title);
         logger.info("Elapsed time ({}, with SpringAI): {} ms", model, (System.currentTimeMillis() - start));
-        return response;
+        return imageData;
     }
-    public String promptModel(String prompt, String model) {
+
+    // prompt model with System and User Messages
+    // return response as String
+    public String promptModel(Message systemMessage,
+                              Message userMessage,
+                              String model) {
+        return promptModelGrounded(systemMessage, userMessage, model, false);
+    }
+
+    // prompt model with System and User Messages
+    // use grounding with Google web search | not
+    // return response as String
+    public String promptModelGrounded(Message systemMessage,
+                                      Message userMessage,
+                                      String model,
+                                      boolean useGoogleWebSearch) {
         long start = System.currentTimeMillis();
-        logger.info("Chat model prompt: {} ...", prompt.substring(0, Math.min(500, prompt.length())));
 
-        int maxRetries = 3;  // Set the maximum number of retry attempts
-        int retryCount = 0;
-        ChatResponse chatResponse = null;
-
-        while (retryCount < maxRetries) {
-            try {
-                chatResponse = chatClient.call(new Prompt(prompt,
-                        VertexAiGeminiChatOptions.builder()
-                                .withTemperature(0.4f)
-                                .withModel(model)
-                                .build())
-                );
-
-                // Check if the response is valid before exiting the loop
-                if (chatResponse.getResult() != null) {
-                    break; // Exit the loop if we have a valid response
-                } else {
-                    logger.warn("Received invalid response from model. Retrying...");
-                }
-
-            } catch (Exception exception) {
-                logger.error("Error calling chat model: ", exception);
-            }
-
-            retryCount++;
-        }
+        ChatClient client = ChatClient.create(chatClient);
+        ChatResponse chatResponse = client.prompt()
+                .advisors(new LoggingAdvisor())
+                .messages(List.of(systemMessage, userMessage))
+                .options(VertexAiGeminiChatOptions.builder()
+                        .withTemperature(0.4f)
+                        .withModel(model)
+                        .withGoogleSearchRetrieval(useGoogleWebSearch)
+                        .build())
+                .call()
+                .chatResponse();
 
         logger.info("Elapsed time ( {}, with SpringAI): {} ms", model, (System.currentTimeMillis() - start));
 
-        String output = VertexModels.RETRY_MSG;
+        String output = "No response from model";
         if (chatResponse != null && chatResponse.getResult() != null) {  // Ensure chatResponse is not null
             output = chatResponse.getResult().getOutput().getContent();
         }
-
         logger.info("Chat model output: {} ...", output.substring(0, Math.min(1000, output.length())));
         return output;
     }
 
-    public String promptModelwithFunctionCalls(SystemMessage systemMessage,
-                                               UserMessage userMessage,
-                                               String functionName, 
+    // prompt model with Tool support
+    public String promptModelWithFunctionCalls(Message systemMessage,
+                                               Message userMessage,
+                                               String functionName,
                                                String model) {
         long start = System.currentTimeMillis();
 
-        ChatResponse chatResponse = chatClient.call(new Prompt(List.of(systemMessage, userMessage),
-                VertexAiGeminiChatOptions.builder()
+        ChatClient client = ChatClient.create(chatClient);
+        ChatResponse chatResponse = client.prompt()
+                .advisors(new LoggingAdvisor())
+                .messages(List.of(systemMessage, userMessage))
+                .functions(functionName)
+                .options(VertexAiGeminiChatOptions.builder()
+                        .withTemperature(0.4f)
                         .withModel(model)
-                        .withFunction(functionName)
-                        .build()));
+                        .build())
+                .call()
+                .chatResponse();
 
         logger.info("Elapsed time ({}, with SpringAI): {} ms", model, (System.currentTimeMillis() - start));
 
         String output = chatResponse.getResult().getOutput().getContent();
-        logger.info("Chat Model output with Function Call: " + output);
+        logger.info("Chat Model output with Function Call: {}", output);
         return output;
     }
 
+    public String promptModelWithMemory(Message systemMessage,
+                                        Message userMessage,
+                                        String model,
+                                        ChatMemory chatMemory) {
+        long start = System.currentTimeMillis();
+
+        ChatClient client = ChatClient.create(chatClient);
+        ChatResponse chatResponse = client.prompt()
+                .advisors(new LoggingAdvisor(),
+                          new MessageChatMemoryAdvisor(chatMemory))
+                .messages(List.of(systemMessage, userMessage))
+                .options(VertexAiGeminiChatOptions.builder()
+                        .withTemperature(0.4f)
+                        .withModel(model)
+                        .build())
+                .call()
+                .chatResponse();
+
+        logger.info("Elapsed time ( {}, with SpringAI): {} ms", model, (System.currentTimeMillis() - start));
+
+        String output = "No response from model";
+        if (chatResponse != null && chatResponse.getResult() != null) {  // Ensure chatResponse is not null
+            output = chatResponse.getResult().getOutput().getContent();
+        }
+        logger.info("Chat model output: {} ...", output.substring(0, Math.min(1000, output.length())));
+        return output;
+    }
+
+    private static class LoggingAdvisor implements RequestResponseAdvisor {
+        private final Logger logger = LoggerFactory.getLogger(LoggingAdvisor.class);
+
+        @Override
+        public AdvisedRequest adviseRequest(AdvisedRequest request, Map<String, Object> context) {
+            logger.info("System text: \n{}", request.systemText());
+            logger.info("System params: {}", request.systemParams());
+            logger.info("User text: \n{}", request.userText());
+            logger.info("User params:{}", request.userParams());
+            logger.info("Function names: {}", request.functionNames());
+            logger.info("Messages {}", request.messages());
+
+            logger.info("Options: {}", request.chatOptions().toString());
+
+            return request;
+        }
+
+        @Override
+        public ChatResponse adviseResponse(ChatResponse response, Map<String, Object> context) {
+            logger.info("Response: {}", response);
+            return response;
+        }
+    }
 }
