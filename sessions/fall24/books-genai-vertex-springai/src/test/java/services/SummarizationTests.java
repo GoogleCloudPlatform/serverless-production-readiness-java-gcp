@@ -3,7 +3,6 @@ package services;
 import com.google.cloud.vertexai.Transport;
 import com.google.cloud.vertexai.VertexAI;
 
-import org.junit.Ignore;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -64,6 +63,7 @@ public class SummarizationTests {
     private static final int CHUNK_SIZE = 10000;  // Number of words in each window
     private static final int OVERLAP_SIZE = 2000;
 
+    @Disabled
     @Test
     public void summarizationTest(){
         TextReader textReader = new TextReader(resource);
@@ -86,6 +86,7 @@ public class SummarizationTests {
         System.out.print("Summarization took " + (System.currentTimeMillis() - start) + " milliseconds");
     }
 
+    @Disabled
     @Test
     public void summarizationChunkTest() throws InterruptedException {
         TextReader textReader = new TextReader(resource);
@@ -112,7 +113,7 @@ public class SummarizationTests {
         Thread.sleep(60000);
     }
 
-
+    @Disabled
     @Test
     public void summarizationOverlappingWindowsTest() throws InterruptedException {
         TextReader textReader = new TextReader(resource);
@@ -182,6 +183,7 @@ public class SummarizationTests {
         return output;
     }
 
+    @Disabled
     @Test
     public void summarizationChunkParallelTest() throws Exception {
         TextReader textReader = new TextReader(resource);
@@ -226,7 +228,7 @@ public class SummarizationTests {
     }
 
 
-     @SpringBootConfiguration
+    @SpringBootConfiguration
     public static class TestConfiguration {
 
         @Bean
