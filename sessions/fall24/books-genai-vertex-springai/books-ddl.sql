@@ -51,3 +51,21 @@ CREATE INDEX idx_books_author_id ON books (author_id);
 CREATE INDEX idx_books_book_id ON books (book_id);
 CREATE INDEX idx_pages_author_id ON authors (author_id);
 --CREATE INDEX idx_hnsw_co_pages_embedding ON pages USING hnsw (embedding vector_cosine_ops) WITH (m = 16, ef_construction = 64);
+
+ALTER TABLE "public"."pages"
+DROP COLUMN embedding;
+
+ALTER TABLE "public"."pages"
+ADD COLUMN embedding vector GENERATED ALWAYS AS (embedding('text-embedding-004',content)) STORED;
+
+ALTER TABLE "public"."authors"
+DROP COLUMN embedding;
+
+ALTER TABLE "public"."authors"
+ADD COLUMN embedding vector GENERATED ALWAYS AS (embedding('text-embedding-004',bio)) STORED;
+
+ALTER TABLE "public"."booksummaries"
+DROP COLUMN embedding;
+
+ALTER TABLE "public"."booksummaries"
+ADD COLUMN embedding vector GENERATED ALWAYS AS (embedding('text-embedding-004',summary)) STORED;

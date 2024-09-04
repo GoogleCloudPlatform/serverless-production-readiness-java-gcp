@@ -26,7 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import services.actuator.StartupCheck;
-import services.client.BooksService;
+import services.orchestration.BooksService;
 import services.web.data.BookRequest;
 
 /**

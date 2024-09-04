@@ -44,8 +44,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import services.actuator.StartupCheck;
-import services.ai.VertexAIClient;
-import services.client.BooksService;
+import services.orchestration.BooksService;
 import services.utility.RequestValidationUtility;
 
 /**

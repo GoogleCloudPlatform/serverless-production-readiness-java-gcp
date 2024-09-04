@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import services.client.BooksService;
+import services.orchestration.BooksService;
 import services.domain.dao.DataAccess;
 import org.json.JSONException;
 import org.json.JSONObject;
