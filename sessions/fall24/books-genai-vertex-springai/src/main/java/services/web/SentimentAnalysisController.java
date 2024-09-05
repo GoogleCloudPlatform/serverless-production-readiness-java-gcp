@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import services.actuator.StartupCheck;
-import services.client.BooksService;
+import services.orchestration.BooksService;
 
 import javax.annotation.PostConstruct;
 import java.text.SimpleDateFormat;

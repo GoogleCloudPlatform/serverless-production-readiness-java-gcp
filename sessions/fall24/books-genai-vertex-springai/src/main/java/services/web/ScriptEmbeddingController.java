@@ -21,7 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import services.actuator.StartupCheck;
-import services.client.TFService;
+import services.orchestration.TFService;
 import services.utility.RequestValidationUtility;
 
 import javax.annotation.PostConstruct;
