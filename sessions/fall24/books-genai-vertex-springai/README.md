@@ -131,17 +131,17 @@ Create a vpc called default VPC with subnet in us-central1  [here](https://cloud
 
 ## Create the GCS bucket
 ```shell
-export BUCKET_PICTURES=library_next24_images
+export BUCKET_PICTURES=library_images
 gsutil mb -l us-central1 gs://${BUCKET_PICTURES}
 gsutil uniformbucketlevelaccess set on gs://${BUCKET_PICTURES}
 gsutil iam ch allUsers:objectViewer gs://${BUCKET_PICTURES}
 
-export BUCKET_BOOKS_PUBLIC=libarary_next24_public
+export BUCKET_BOOKS_PUBLIC=libarary_public
 gsutil mb -l us-central1 gs://${BUCKET_BOOKS_PUBLIC}
 gsutil uniformbucketlevelaccess set on gs://${BUCKET_BOOKS_PUBLIC}
 gsutil iam ch allUsers:objectViewer gs://${BUCKET_BOOKS_PUBLIC}
 
-export BUCKET_BOOKS_PRIVATE=libarary_next24_private
+export BUCKET_BOOKS_PRIVATE=libarary_private
 gsutil mb -l us-central1 gs://${BUCKET_BOOKS_PRIVATE}
 gsutil uniformbucketlevelaccess set on gs://${BUCKET_BOOKS_PRIVATE}
 gsutil iam ch allUsers:objectViewer gs://${BUCKET_BOOKS_PRIVATE}
