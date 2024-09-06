@@ -85,13 +85,6 @@ echo $PROJECT_ID
 
 Tag and push the images to GCR or Artifact Registry:
 ```shell
-# Container Registry
-docker tag books-genai-jit gcr.io/${PROJECT_ID}/books-genai-jit
-docker tag books-genai-native gcr.io/${PROJECT_ID}/books-genai-native
-
-docker push gcr.io/${PROJECT_ID}/books-genai-jit
-docker push gcr.io/${PROJECT_ID}/books-genai-native
-
 # Artifact Registry
 docker tag books-genai-jit:latest us-docker.pkg.dev/${PROJECT_ID}/books-genai-jit/books-genai:latest
 docker tag books-genai-native:latest us-docker.pkg.dev/${PROJECT_ID}/books-genai-native/books-genai:latest
