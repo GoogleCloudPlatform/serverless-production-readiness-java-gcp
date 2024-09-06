@@ -37,7 +37,7 @@ public class TFService {
     @Value("classpath:/bashscripts/provision-cloud-infra.sh")
     private Resource bashscript;
 
-    @Value("classpath:/queries/tf-transform-search-query.st")
+    @Value("classpath:/prompts/tf-transform-search-query.st")
     Resource tfTransformSearchQuery;
     public TFService(BooksDataService booksDataService,
                                      CloudStorageService cloudStorageService,

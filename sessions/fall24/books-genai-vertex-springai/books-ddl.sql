@@ -7,7 +7,7 @@ create TABLE authors (
     author_id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     bio TEXT,
-    embedding public.vector GENERATED ALWAYS AS (public.embedding('textembedding-gecko@003'::text, bio)) STORED
+    embedding public.vector GENERATED ALWAYS AS (public.embedding('text-embedding-004'::text, bio)) STORED
 );
 
 -- 2. Books Table
@@ -28,7 +28,7 @@ create TABLE public.pages (
     book_id INT NOT NULL,
     page_number INT NOT NULL,
     content TEXT,
-    embedding public.vector GENERATED ALWAYS AS (public.embedding('textembedding-gecko@003'::text, content)) STORED,
+    embedding public.vector GENERATED ALWAYS AS (public.embedding('text-embedding-004'::text, content)) STORED,
     CONSTRAINT fk_pages
         FOREIGN KEY(book_id)
         REFERENCES Books(book_id)
@@ -39,7 +39,7 @@ create TABLE bookSummaries (
     summary_id SERIAL PRIMARY KEY,
     book_id INT UNIQUE NOT NULL,
     summary TEXT NOT NULL,
-    embedding public.vector GENERATED ALWAYS AS (public.embedding('textembedding-gecko@003'::text, summary)) STORED,
+    embedding public.vector GENERATED ALWAYS AS (public.embedding('text-embedding-004'::text, summary)) STORED,
     CONSTRAINT fk_book_summary
         FOREIGN KEY(book_id)
         REFERENCES Books(book_id)

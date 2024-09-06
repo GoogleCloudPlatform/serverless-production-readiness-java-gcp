@@ -130,7 +130,7 @@ public class DataAccess {
                 "        left(p.content,?) as page,\n" +
                 "        a.name,\n" +
                 "        p.page_number,\n" +
-                "        (p.embedding <=> embedding('textembedding-gecko@003', ?)::vector) as distance\n" +
+                "        (p.embedding <=> embedding('text-embedding-004', ?)::vector) as distance\n" +
                 "FROM\n" +
                 "        pages p\n" +
                 "JOIN books b on\n" +
