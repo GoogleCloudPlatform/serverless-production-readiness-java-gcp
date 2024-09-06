@@ -236,8 +236,8 @@ Deploy to Cloud Run
 ```shell
 # deploy JIT image to Cloud Run
 gcloud run deploy books-genai-jit \
-  --set-env-vars='MY_PASSWORD=<password>,MY_USER=<user>,DB_URL=<DB_URL>,VERTEX_AI_GEMINI_PROJECT_ID=${$PROJECT_ID},VERTEX_AI_GEMINI_LOCATION=us-central1,VERTEX_AI_GEMINI_MODEL=gemini-1.5-flash-001' \
-  --image ${REGION}-docker.pkg.dev/${$PROJECT_ID}/books-genai-jit/books-genai:latest  --region us-central1 \
+  --set-env-vars='MY_PASSWORD=<password>,MY_USER=<user>,DB_URL=<DB_URL>,VERTEX_AI_GEMINI_PROJECT_ID=${PROJECT_ID},VERTEX_AI_GEMINI_LOCATION=us-central1,VERTEX_AI_GEMINI_MODEL=gemini-1.5-flash-001' \
+  --image ${REGION}-docker.pkg.dev/${PROJECT_ID}/books-genai-jit/books-genai:latest  --region us-central1 \
   --memory 4Gi --cpu 4 --cpu-boost --execution-environment=gen2  \
   --set-env-vars=JAVA_TOOL_OPTIONS='-XX:+UseZGC -XX:+ZGenerational -XX:MaxRAMPercentage=75 -XX:ActiveProcessorCount=4 -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -Xss256k' \
   --allow-unauthenticated \
@@ -245,8 +245,8 @@ gcloud run deploy books-genai-jit \
 
 # deploy native Java image to Cloud Run
 gcloud run deploy books-genai-native \
-  --set-env-vars='MY_PASSWORD=<password>,MY_USER=<user>,DB_URL=<DB_URL>,VERTEX_AI_GEMINI_PROJECT_ID=${$PROJECT_ID},VERTEX_AI_GEMINI_LOCATION=us-central1,VERTEX_AI_GEMINI_MODEL=gemini-1.5-flash-001' \
-  --image ${REGION}-docker.pkg.dev/${$PROJECT_ID}/books-genai-native/books-genai:latest  --region us-central1 \
+  --set-env-vars='MY_PASSWORD=<password>,MY_USER=<user>,DB_URL=<DB_URL>,VERTEX_AI_GEMINI_PROJECT_ID=${PROJECT_ID},VERTEX_AI_GEMINI_LOCATION=us-central1,VERTEX_AI_GEMINI_MODEL=gemini-1.5-flash-001' \
+  --image ${REGION}-docker.pkg.dev/${PROJECT_ID}/books-genai-native/books-genai:latest  --region us-central1 \
   --memory 4Gi --cpu 4 --cpu-boost --execution-environment=gen2  \
   --set-env-vars=JAVA_TOOL_OPTIONS='-XX:+UseG1GC -XX:MaxRAMPercentage=75 -XX:ActiveProcessorCount=4 -XX:+TieredCompilation -XX:TieredStopAtLevel=1 -Xss256k' \
   --allow-unauthenticated \
