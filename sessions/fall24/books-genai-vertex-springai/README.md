@@ -81,16 +81,18 @@ Retrieve the Project ID, as it will be required for the next GCP operations
 ```shell
 export PROJECT_ID=$(gcloud config get-value project)
 echo $PROJECT_ID
+export REGION=us-central1
+echo $REGION
 ```
 
 Tag and push the images to GCR or Artifact Registry:
 ```shell
 # Artifact Registry
-docker tag books-genai-jit:latest us-docker.pkg.dev/${PROJECT_ID}/books-genai-jit/books-genai:latest
-docker tag books-genai-native:latest us-docker.pkg.dev/${PROJECT_ID}/books-genai-native/books-genai:latest
+docker tag books-genai-jit:latest ${REGION}-docker.pkg.dev/${PROJECT_ID}/books-genai-jit/books-genai:latest
+docker tag books-genai-native:latest ${REGION}-docker.pkg.dev/${PROJECT_ID}/books-genai-native/books-genai:latest
 
-docker push us-docker.pkg.dev/${PROJECT_ID}/books-genai-jit/books-genai:latest 
-docker push us-docker.pkg.dev/${PROJECT_ID}/books-genai-native/books-genai:latest 
+docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/books-genai-jit/books-genai:latest 
+docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/books-genai-native/books-genai:latest 
 ```
 
 ## Deploy and run workshop code
