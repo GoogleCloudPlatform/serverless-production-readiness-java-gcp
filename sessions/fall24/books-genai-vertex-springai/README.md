@@ -234,6 +234,10 @@ gcloud compute networks vpc-access connectors create alloy-connector \
 
 Deploy to Cloud Run
 ```shell
+export MY_PASSWORD='pword'
+export MY_USER=postgres
+export DB_URL='jdbc:postgresql://ip:5432/library'
+
 # deploy JIT image to Cloud Run
 gcloud run deploy books-genai-jit \
   --set-env-vars='MY_PASSWORD=<password>,MY_USER=<user>,DB_URL=<DB_URL>,VERTEX_AI_GEMINI_PROJECT_ID=${PROJECT_ID},VERTEX_AI_GEMINI_LOCATION=us-central1,VERTEX_AI_GEMINI_MODEL=gemini-1.5-flash-001' \
