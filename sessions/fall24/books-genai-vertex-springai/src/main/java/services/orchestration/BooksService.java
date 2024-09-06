@@ -26,6 +26,7 @@ import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
+import org.springframework.ai.converter.MapOutputConverter;
 import org.springframework.ai.model.Media;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -292,9 +293,28 @@ public class BooksService {
         PromptTemplate userMessageTemplate = new PromptTemplate(sentimentAnalysisUserMessage);
         Message userMessage = userMessageTemplate.createMessage(Map.of("title", title, "author", author));
 
-        return vertexAIClient.promptModelWithMemory(systemMessage,
+        return parseFromJson(
+                vertexAIClient.promptModelWithMemory(systemMessage,
                                                     userMessage,
                                                     model,
-                                                    chatMemory);
+                                                    chatMemory));
+    }
+
+    // clean up response before returning to caller
+    private static String parseFromJson(String input) {
+        MapOutputConverter converter = new MapOutputConverter();
+        String jsonRegex = "```json(.*?)```json";
+        java.util.regex.Matcher matcher = java.util.regex.Pattern.compile(jsonRegex, java.util.regex.Pattern.DOTALL).matcher(input);
+
+        String jsonString = "";
+        if (matcher.find()) {
+            jsonString = matcher.group(1).trim();
+        }  else {
+            int startIndex = input.indexOf('{') >=0 ? input.indexOf('{') : 0;
+            int endIndex = input.lastIndexOf('}');
+            jsonString = input.substring(startIndex, endIndex + 1);
+        }
+
+        return jsonString;
     }
 }
