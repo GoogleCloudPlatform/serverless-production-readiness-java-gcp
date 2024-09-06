@@ -101,11 +101,18 @@ Enable the required APIs, if they are not already enabled:
 ```shell
 gcloud services enable vision.googleapis.com
 gcloud services enable cloudfunctions.googleapis.com
-gcloud services enable cloudbuild.googleapis.com 
+gcloud services enable cloudbuild.googleapis.com
 gcloud services enable run.googleapis.com
 gcloud services enable logging.googleapis.com 
 gcloud services enable storage-component.googleapis.com 
 gcloud services enable aiplatform.googleapis.com
+gcloud services enable run.googleapis.com 
+gcloud services enable alloydb.googleapis.com 
+gcloud services enable artifactregistry.googleapis.com
+gcloud services enable vpcaccess.googleapis.com
+gcloud services enable servicenetworking.googleapis.com
+gcloud services enable eventarc.googleapis.com
+gcloud services enable firestore.googleapis.com
 ```
 
 Retrieve the Project ID and Project Number
