@@ -23,8 +23,8 @@ set -e
 #     *)       url="https://cdn.azul.com/zulu/bin/zulu17.44.55-ca-crac-jdk17.0.8.1-linux_x64.tar.gz" ;;
 # esac
 case $(uname -m) in
-    arm64)   url="https://cdn.azul.com/zulu/bin/zulu21.28.89-ca-crac-jdk21.0.0-linux_aarch64.tar.gz" ;;
-    *)       url="https://cdn.azul.com/zulu/bin/zulu21.28.89-ca-crac-jdk21.0.0-linux_x64.tar.gz" ;;
+    arm64)   url="https://cdn.azul.com/zulu/bin/zulu21.36.19-ca-crac-jdk21.0.4-linux_aarch64.tar.gz" ;;
+    *)       url="https://cdn.azul.com/zulu/bin/zulu21.36.19-ca-crac-jdk21.0.4-linux_x64.tar.gz" ;;
 esac
 
 echo "Using CRaC enabled JDK $url"
