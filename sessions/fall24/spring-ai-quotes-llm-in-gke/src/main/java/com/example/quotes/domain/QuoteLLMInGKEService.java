@@ -16,10 +16,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class QuoteLLMInGKEService {
   private OpenAiChatModel chatClient;
+  private QuoteEvalService evalService;
   private Environment env;
 
-  public QuoteLLMInGKEService(OpenAiChatModel chatClient, Environment env) {
+  public QuoteLLMInGKEService(OpenAiChatModel chatClient, 
+                              QuoteEvalService evalService,
+                              Environment env) {
     this.chatClient = chatClient;
+    this.evalService = evalService;
     this.env = env;
   }
 
@@ -48,6 +52,12 @@ public class QuoteLLMInGKEService {
 
     System.out.printf("\nLLM Model in GKE provided response: \n%s\n", input);
 
-    return Quote.parseQuoteFromJson(input);
+    // clear extraneous characters from LLM response
+    Quote sanitizedQuote = Quote.parseQuoteFromJson(input);
+
+    // validate against another LLM for veracity
+    evalService.evaluate(sanitizedQuote.getQuote(), sanitizedQuote.getBook());
+
+    return sanitizedQuote;
   }
 }
