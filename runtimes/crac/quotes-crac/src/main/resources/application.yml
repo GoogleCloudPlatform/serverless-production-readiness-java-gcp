@@ -32,12 +32,12 @@ spring:
 #    hibernate:
 #      ddl-auto: update
 
-#  datasource:
-#    url: jdbc:h2:mem:test
-#    username: user
-#    password: password
-#    driverClassName: org.h2.Driver
-#  jpa:
-#    spring.jpa.database-platform: org.hibernate.dialect.H2Dialect
-#  h2:
-#    console.enabled: true
+  datasource:
+    url: jdbc:h2:mem:test
+    username: user
+    password: password
+    driverClassName: org.h2.Driver
+  jpa:
+    spring.jpa.database-platform: org.hibernate.dialect.H2Dialect
+  h2:
+    console.enabled: true
