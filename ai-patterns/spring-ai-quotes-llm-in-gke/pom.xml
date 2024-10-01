@@ -34,7 +34,7 @@
   <properties>
     <java.version>21</java.version>
     <testcontainers.version>1.20.1</testcontainers.version>
-    <vaadin.version>24.4.10</vaadin.version>
+    <vaadin.version>24.4.13</vaadin.version>
     <spring.ai.version>1.0.0-M2</spring.ai.version>
   </properties>
   <dependencies>
