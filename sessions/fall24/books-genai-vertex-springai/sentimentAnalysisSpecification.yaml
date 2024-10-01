@@ -1,0 +1,37 @@
+openapi: 3.0.0
+info:
+  title: Sentiment Analysis API
+  version: 1.0.0
+paths:
+  /sentiment:
+    post:
+      summary: Analyze sentiment for a book
+      description: Classifies a book, analyzes sentiment, and provides recommendations.
+      operationId: receiveMessageWebSearch
+      requestBody:
+        description: Book information
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: Title of the book
+                author:
+                  type: string
+                  description: Author of the book
+              required:
+              - title
+              - author
+      responses:
+        '200':
+          description: Sentiment analysis results
+          content:
+            application/json:
+              schema:
+                type: string
+                description: JSON string containing sentiment analysis results
+        '500':
+          description: Internal server error
