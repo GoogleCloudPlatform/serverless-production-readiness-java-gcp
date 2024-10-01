@@ -107,3 +107,4 @@ target-native/
 # Vaadin
 src/main/frontend/generated/*
 node_modules/
+vite.generated.ts
