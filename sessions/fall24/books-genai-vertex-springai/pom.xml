@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.3.3</version>
+    <version>3.3.4</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <artifactId>books-genai-springai</artifactId>
@@ -145,7 +145,7 @@
           <buildArgs>
             <buildArgs>--enable-url-protocols=http</buildArgs>
 <!--                        <buildArgs>&#45;&#45;gc=G1 &#45;&#45;strict-image-heap -march=native -O3</buildArgs>-->
-            <buildArgs>-march=native --gc=G1 -Ob</buildArgs>
+            <buildArgs>-march=native --gc=G1 -O3</buildArgs>
           </buildArgs>
         </configuration>
       </plugin>

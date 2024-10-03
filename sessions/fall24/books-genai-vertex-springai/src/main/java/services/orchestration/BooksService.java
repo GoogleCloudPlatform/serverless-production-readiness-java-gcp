@@ -28,6 +28,8 @@ import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 import org.springframework.ai.converter.MapOutputConverter;
 import org.springframework.ai.model.Media;
+import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -41,6 +43,8 @@ import services.utility.PromptUtility;
 import services.utility.SqlUtility;
 import services.web.data.BookRequest;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -316,5 +320,23 @@ public class BooksService {
         }
 
         return jsonString;
+    }
+
+    public static class BookServiceRuntimeHints implements RuntimeHintsRegistrar {
+        @Override
+        public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+            // Register method for reflection
+            hints.resources().registerPattern("prompts/sentiment-analysis-system-message.st");
+            hints.resources().registerPattern("prompts/sentiment-analysis-user-message.st");
+            hints.resources().registerPattern(".*\\.st");
+            hints.resources().registerPattern("prompts/text-system-message.st");
+            hints.resources().registerPattern("prompts/summary-user-message.st");
+            hints.resources().registerPattern("prompts/summary-grounded-user-message.st");
+            hints.resources().registerPattern("prompts/image-user-message.st");
+            hints.resources().registerPattern("prompts/text-functions-system-message.st");
+            hints.resources().registerPattern("prompts/bookstore-user-message.st");
+            hints.resources().registerPattern("prompts/sentiment-analysis-system-message.st");
+            hints.resources().registerPattern("prompts/sentiment-analysis-user-message.st");
+        }
     }
 }

@@ -4,6 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
+import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -75,4 +77,18 @@ public class TFService {
         logger.info("TF transform flow: {}ms", System.currentTimeMillis() - start);
         return response;
     }
+
+    public static class TFServiceRuntimeHints implements RuntimeHintsRegistrar {
+        @Override
+        public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+            // Register method for reflection
+            hints.resources().registerPattern("prompts/transform-tf-system-message.st");
+            hints.resources().registerPattern("prompts/transform-tf-user-message.st");
+            hints.resources().registerPattern(".*\\.st");
+            hints.resources().registerPattern(".*\\.sh");
+            hints.resources().registerPattern("bashscripts/provision-cloud-infra.sh");
+            hints.resources().registerPattern("prompts/tf-transform-search-query.st");
+        }
+    }
+
 }
