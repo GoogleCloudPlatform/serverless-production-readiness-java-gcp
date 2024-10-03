@@ -27,7 +27,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@Disabled
 @SpringBootTest
 @ActiveProfiles(value = "test")
 @EnabledIfEnvironmentVariable(named = "VERTEX_AI_GEMINI_PROJECT_ID", matches = ".*")
@@ -63,7 +62,6 @@ public class SummarizationTests {
     private static final int CHUNK_SIZE = 10000;  // Number of words in each window
     private static final int OVERLAP_SIZE = 2000;
 
-    @Disabled
     @Test
     public void summarizationTest(){
         TextReader textReader = new TextReader(resource);

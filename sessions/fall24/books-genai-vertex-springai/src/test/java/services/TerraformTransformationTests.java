@@ -94,7 +94,7 @@ public class TerraformTransformationTests {
         }
 
         @Bean
-        public VertexAiGeminiChatModel vertexAiGeminiChatModel(VertexAI vertexAi) {
+        public VertexAiGeminiChatModel vertexAiGeminiChatModelTF(VertexAI vertexAi) {
             String model = System.getenv("VERTEX_AI_GEMINI_MODEL");
 
             return new VertexAiGeminiChatModel(vertexAi,

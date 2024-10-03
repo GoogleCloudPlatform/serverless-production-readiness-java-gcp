@@ -59,7 +59,8 @@ public class VertexAIClient {
 
         ChatClient client = ChatClient.create(chatClient);
         ImageDetails imageData = client.prompt()
-                .advisors(new LoggingAdvisor())
+                .advisors(new LoggingAdvisor(),
+                          new GuardrailsAdvisor())
                 .messages(List.of(systemMessage, userMessage))
                 .options(VertexAiGeminiChatOptions.builder()
                         .withModel(model)
@@ -90,7 +91,8 @@ public class VertexAIClient {
 
         ChatClient client = ChatClient.create(chatClient);
         ChatResponse chatResponse = client.prompt()
-                .advisors(new LoggingAdvisor())
+                .advisors(new LoggingAdvisor(),
+                          new GuardrailsAdvisor())
                 .messages(List.of(systemMessage, userMessage))
                 .options(VertexAiGeminiChatOptions.builder()
                         .withTemperature(0.4f)
@@ -122,7 +124,8 @@ public class VertexAIClient {
 
         ChatClient client = ChatClient.create(chatClient);
         ChatResponse chatResponse = client.prompt()
-                .advisors(new LoggingAdvisor())
+                .advisors(new LoggingAdvisor(),
+                          new GuardrailsAdvisor())
                 .messages(List.of(systemMessage, userMessage))
                 .functions(functionName)
                 .options(VertexAiGeminiChatOptions.builder()
@@ -148,7 +151,8 @@ public class VertexAIClient {
         ChatClient client = ChatClient.create(chatClient);
         ChatResponse chatResponse = client.prompt()
                 .advisors(new LoggingAdvisor(),
-                          new MessageChatMemoryAdvisor(chatMemory))
+                          new MessageChatMemoryAdvisor(chatMemory),
+                          new GuardrailsAdvisor())
                 .messages(List.of(systemMessage, userMessage))
                 .options(VertexAiGeminiChatOptions.builder()
                         .withTemperature(0.4f)
@@ -187,6 +191,30 @@ public class VertexAIClient {
         @Override
         public ChatResponse adviseResponse(ChatResponse response, Map<String, Object> context) {
             logger.info("Response: {}", response);
+            return response;
+        }
+    }
+
+    private static class GuardrailsAdvisor implements RequestResponseAdvisor {
+        private final Logger logger = LoggerFactory.getLogger(GuardrailsAdvisor.class);
+
+        @Override
+        public AdvisedRequest adviseRequest(AdvisedRequest request, Map<String, Object> context) {
+            // configure safety filters
+            logger.info("Perform prompt safety check");
+
+            // filter PII data
+            logger.info("Mask PII data from prompt");
+
+            return request;
+        }
+
+        @Override
+        public ChatResponse adviseResponse(ChatResponse response, Map<String, Object> context) {
+            // filter inappropriate response
+            // send notification in specific cases
+            logger.info("Filter inappropriate response");
+
             return response;
         }
     }
