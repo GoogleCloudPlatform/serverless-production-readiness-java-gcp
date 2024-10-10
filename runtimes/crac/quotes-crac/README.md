@@ -46,7 +46,7 @@ Deploy the image to Cloud Run and test it
 export PROJECT_ID=$(gcloud config list --format 'value(core.project)')
 echo   $PROJECT_ID
 
-gcloud run deploy quotes-crac  \
+gcloud run deploy quotes-crac:checkpoint  \
     --image=gcr.io/${PROJECT_ID}/quotes-crac  \
     --execution-environment=gen2  \
     --allow-unauthenticated \
