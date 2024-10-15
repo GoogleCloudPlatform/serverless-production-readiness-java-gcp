@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.3.3</version>
+		<version>3.3.4</version>
 		<relativePath/>
 		<!-- lookup parent from repository -->
 	</parent>
@@ -18,7 +18,7 @@
 
 	<properties>
 		<java.version>21</java.version>
-		<spring.ai.version>1.0.0-M2</spring.ai.version>
+		<spring.ai.version>1.0.0-m3</spring.ai.version>
 	</properties>
 
 	<dependencyManagement>
@@ -35,7 +35,7 @@
 				<artifactId>libraries-bom</artifactId>
 				<scope>import</scope>
 				<type>pom</type>
-				<version>26.47.0</version>
+				<version>26.48.0</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -48,7 +48,7 @@
 			<groupId>org.springframework.ai</groupId>
 			<artifactId>spring-ai-vertex-ai-gemini-spring-boot-starter</artifactId>
 		</dependency>
-		<!-- Anthropic depenency -->
+		<!-- Anthropic dependency -->
 		<dependency>
 			<groupId>org.springframework.ai</groupId>
 			<artifactId>spring-ai-anthropic-spring-boot-starter</artifactId>

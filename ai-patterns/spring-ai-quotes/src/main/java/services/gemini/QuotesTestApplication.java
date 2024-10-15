@@ -45,7 +45,7 @@ public class QuotesTestApplication {
 					.call(
 							new Prompt(prompt,
 									VertexAiGeminiChatOptions.builder()
-											.withTemperature(0.2f).build())
+											.withTemperature(0.2).build())
 					).getResult().getOutput().getContent());
 			System.out.println("VertexAI Gemini call took " + (System.currentTimeMillis() - start) + " ms");
 
@@ -55,7 +55,7 @@ public class QuotesTestApplication {
 					.call(
 							new Prompt(prompt,
 									AnthropicChatOptions.builder()
-											.withTemperature(0.2f).build())
+											.withTemperature(0.2).build())
 					).getResult().getOutput().getContent());
 			System.out.println("Anthropic SONNET call took " + (System.currentTimeMillis() - start) + " ms");
 

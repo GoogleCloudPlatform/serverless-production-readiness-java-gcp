@@ -22,7 +22,7 @@ import org.springframework.ai.embedding.DocumentEmbeddingRequest;
 import org.springframework.ai.embedding.EmbeddingOptions;
 import org.springframework.ai.embedding.EmbeddingResponse;
 import org.springframework.ai.model.Media;
-import org.springframework.ai.vertexai.embedding.VertexAiEmbeddigConnectionDetails;
+import org.springframework.ai.vertexai.embedding.VertexAiEmbeddingConnectionDetails;
 import org.springframework.ai.vertexai.embedding.multimodal.VertexAiMultimodalEmbeddingModel;
 import org.springframework.ai.vertexai.embedding.multimodal.VertexAiMultimodalEmbeddingOptions;
 import org.springframework.core.io.ClassPathResource;
@@ -35,15 +35,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class EmbeddingMultimodalController {
   @GetMapping("/ai/embedding/multimodal")
   public String embed() {
-    VertexAiEmbeddigConnectionDetails connectionDetails =
-        VertexAiEmbeddigConnectionDetails.builder()
+    VertexAiEmbeddingConnectionDetails connectionDetails =
+        VertexAiEmbeddingConnectionDetails.builder()
             .withProjectId(System.getenv("VERTEX_AI_PROJECT_ID"))
         .withLocation(System.getenv("VERTEX_AI_LOCATION"))
         .build();
 
     // default multimodal embedding model multimodalembedding@001
     VertexAiMultimodalEmbeddingOptions options = VertexAiMultimodalEmbeddingOptions.builder()
-        .withModel("multimodalembedding")
+        .withModel(VertexAiMultimodalEmbeddingOptions.DEFAULT_MODEL_NAME)
         .build();
 
     var embeddingModel = new VertexAiMultimodalEmbeddingModel(connectionDetails, options);
@@ -53,8 +53,7 @@ public class EmbeddingMultimodalController {
 
     var document = new Document("Explain what do you see on this video?", List.of(imageMedial, videoMedial), Map.of());
 
-    DocumentEmbeddingRequest embeddingRequest = new DocumentEmbeddingRequest(List.of(document),
-        EmbeddingOptions.EMPTY);
+    DocumentEmbeddingRequest embeddingRequest = new DocumentEmbeddingRequest(List.of(document));
 
     EmbeddingResponse embeddingResponse = embeddingModel.call(embeddingRequest);
 

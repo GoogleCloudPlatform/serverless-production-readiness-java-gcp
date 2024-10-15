@@ -41,7 +41,7 @@ public class QuoteLLMService {
 
     ChatResponse chatResponse = chatClient.call(new Prompt(List.of(systemMessage, userMessage),
         VertexAiGeminiChatOptions.builder()
-            .withTemperature(0.4f)
+            .withTemperature(0.4)
             .withModel(env.getProperty(VERTEX_AI_GEMINI_MODEL))
             .build())
     );

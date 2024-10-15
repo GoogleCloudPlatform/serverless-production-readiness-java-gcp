@@ -18,7 +18,7 @@ package services.embeddings;
 import java.util.List;
 import java.util.Map;
 import org.springframework.ai.embedding.EmbeddingResponse;
-import org.springframework.ai.vertexai.embedding.VertexAiEmbeddigConnectionDetails;
+import org.springframework.ai.vertexai.embedding.VertexAiEmbeddingConnectionDetails;
 import org.springframework.ai.vertexai.embedding.text.VertexAiTextEmbeddingModel;
 import org.springframework.ai.vertexai.embedding.text.VertexAiTextEmbeddingOptions;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,8 +31,8 @@ public class EmbeddingTextController {
   @GetMapping("/ai/embedding")
   public Map embed(@RequestParam(value = "message", defaultValue = "Generate a default embedding") String message) {
 
-    VertexAiEmbeddigConnectionDetails connectionDetails =
-        VertexAiEmbeddigConnectionDetails.builder()
+    VertexAiEmbeddingConnectionDetails connectionDetails =
+        VertexAiEmbeddingConnectionDetails.builder()
             .withProjectId(System.getenv("VERTEX_AI_PROJECT_ID"))
             .withLocation(System.getenv("VERTEX_AI_LOCATION"))
             .build();

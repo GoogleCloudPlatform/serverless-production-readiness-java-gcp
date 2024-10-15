@@ -6,11 +6,11 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.3.3</version>
+    <version>3.3.4</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <artifactId>summarization-langchain4j</artifactId>
-  <version>1.0.0-M2</version>
+  <version>1.0.0</version>
   <name>summarization-langchain4j</name>
   <description>Langchain4J App for Summarization</description>
   <properties>
@@ -153,7 +153,7 @@
       <dependency>
         <groupId>com.google.cloud</groupId>
         <artifactId>libraries-bom</artifactId>
-        <version>26.47.0</version>
+        <version>26.48.0</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>

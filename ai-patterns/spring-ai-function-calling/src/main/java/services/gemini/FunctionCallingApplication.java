@@ -99,7 +99,7 @@ public class FunctionCallingApplication {
 			System.out.println("VERTEX_AI_GEMINI multi-turn fn calling: " + vertexAiGemini.call(
 							new Prompt(prompt,
 									VertexAiGeminiChatOptions.builder()
-											.withTemperature(0.2f).build())
+											.withTemperature(0.2).build())
 					).getResult().getOutput().getContent().trim());
 
 			System.out.println("VertexAI Gemini multi-turn call took " + (System.currentTimeMillis() - start) + " ms");
@@ -108,7 +108,7 @@ public class FunctionCallingApplication {
 			Flux<ChatResponse> geminiStream = vertexAiGemini.stream(
 					new Prompt(prompt,
 							VertexAiGeminiChatOptions.builder()
-									.withTemperature(0.2f).build())
+									.withTemperature(0.2).build())
 			);
 
 			geminiStream.collectList().block().stream().findFirst().ifPresent(resp -> {
@@ -132,7 +132,7 @@ public class FunctionCallingApplication {
 
 
 			String token = getOauth2Token(baseURL + completionsPath);
-			String model = "google/gemini-1.5-flash-001";
+			String model = "google/gemini-1.5-pro-002";
 			// String model = "meta/llama3-405b-instruct-maas";
 
 			OpenAiApi openAiApi = new OpenAiApi(baseURL, token, completionsPath,
@@ -143,7 +143,7 @@ public class FunctionCallingApplication {
 
 			OpenAiChatModel openAIGemini = new OpenAiChatModel(openAiApi);
 			OpenAiChatOptions openAiChatOptions = OpenAiChatOptions.builder()
-					.withTemperature(0.2f)
+					.withTemperature(0.2)
 					.withModel(model)
 					.build();
 
@@ -157,7 +157,7 @@ public class FunctionCallingApplication {
 			System.out.println("\nVERTEX_AI_GEMINI parallel fn calling: " + vertexAiGemini.call(
 					new Prompt(parallelizedPrompt,
 							VertexAiGeminiChatOptions.builder()
-									.withTemperature(0.2f).build())
+									.withTemperature(0.2).build())
 			).getResult().getOutput().getContent().trim());
 
 			System.out.println("VertexAI Gemini (with parallel function calling) call took " + (System.currentTimeMillis() - start) + " ms");
@@ -166,7 +166,7 @@ public class FunctionCallingApplication {
 			geminiStream = vertexAiGemini.stream(
 					new Prompt(parallelizedPrompt,
 							VertexAiGeminiChatOptions.builder()
-									.withTemperature(0.2f).build())
+									.withTemperature(0.2).build())
 			);
 
 			geminiStream.collectList().block().stream().findFirst().ifPresent(resp -> {

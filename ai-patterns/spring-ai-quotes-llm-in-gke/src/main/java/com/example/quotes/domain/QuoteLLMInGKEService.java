@@ -38,7 +38,7 @@ public class QuoteLLMInGKEService {
 
     ChatResponse chatResponse = chatClient.call(new Prompt(List.of(systemMessage, userMessage),
         OpenAiChatOptions.builder()
-            .withTemperature(0.4f)
+            .withTemperature(0.4)
             .build())
     );
 

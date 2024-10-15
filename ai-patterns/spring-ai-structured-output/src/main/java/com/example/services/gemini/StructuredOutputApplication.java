@@ -88,7 +88,7 @@ public class StructuredOutputApplication {
 		BeanOutputConverter<BooksAuthor> beanOutputConverter = new BeanOutputConverter<>(BooksAuthor.class);
 
 		String format = beanOutputConverter.getFormat();
-		String writer = "Gabriel Garcia Marquez";
+		String writer = "Oscar Wilde";
 
 		String template = """
 				Generate the bibliography of books written by the writer {writer}.
