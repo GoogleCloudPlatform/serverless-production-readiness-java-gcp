@@ -147,7 +147,7 @@ public class DataAccess {
                 .collect(Collectors.toList());
         logger.info(params.toString());
         if ( params.size()>2 ) {
-            sql += " WHERE " + createWhereClause(book, author, cosine);
+            sql += createWhereClause(book, author, cosine);
         } else {
             sql += " WHERE distance < "+cosine;
         }
@@ -164,14 +164,14 @@ public class DataAccess {
         StringBuilder whereClause = new StringBuilder();
         whereClause.append("WHERE distance < "+cosine);
         if (book != null) {
-            if (whereClause.length() > 0) {
+            if (whereClause.length() > 5) {
                 whereClause.append(" AND ");
             }
             whereClause.append("b.title = ?");
         }
 
         if (author != null) {
-            if (whereClause.length() > 0) {
+            if (whereClause.length() > 5) {
                 whereClause.append(" AND ");
             }
             whereClause.append("a.name = ?");
