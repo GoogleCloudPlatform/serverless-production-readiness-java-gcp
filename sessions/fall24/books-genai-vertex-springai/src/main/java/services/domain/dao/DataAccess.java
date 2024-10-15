@@ -125,18 +125,21 @@ public class DataAccess {
         if (characterLimit == null || characterLimit == 0) {
             characterLimit = 2000;
         }
-        String sql = "SELECT\n" +
-                "        b.title,\n" +
-                "        left(p.content,?) as page,\n" +
-                "        a.name,\n" +
-                "        p.page_number,\n" +
-                "        (p.embedding <=> embedding('text-embedding-004', ?)::vector) as distance\n" +
-                "FROM\n" +
-                "        pages p\n" +
-                "JOIN books b on\n" +
-                "        p.book_id=b.book_id\n" +
-                "JOIN authors a on\n" +
-                "       a.author_id=b.author_id\n";
+        String cosine = environment.getProperty("spring.sql.cosine");
+        String sql = "SELECT * FROM (\n" +
+                "    SELECT\n" +
+                "            b.title,\n" +
+                "            left(p.content,?) as page,\n" +
+                "            a.name,\n" +
+                "            p.page_number,\n" +
+                "            (p.embedding <=> embedding('text-embedding-004', ?)::vector) as distance\n" +
+                "    FROM\n" +
+                "            pages p\n" +
+                "    JOIN books b on\n" +
+                "            p.book_id=b.book_id\n" +
+                "    JOIN authors a on\n" +
+                "           a.author_id=b.author_id\n" +
+                ") AS subquery\n";
         Object[] parameters = new Object[]{characterLimit, prompt, book, author};
         List<Object> params = Arrays.stream(parameters)
                 .filter(Objects::nonNull)
@@ -144,7 +147,9 @@ public class DataAccess {
                 .collect(Collectors.toList());
         logger.info(params.toString());
         if ( params.size()>2 ) {
-            sql += createWhereClause(book, author);
+            sql += " WHERE " + createWhereClause(book, author, cosine);
+        } else {
+            sql += " WHERE distance < "+cosine;
         }
         sql += " ORDER BY\n" +
                 "distance ASC\n" +
@@ -155,10 +160,13 @@ public class DataAccess {
         return rows;
     }
 
-    private String createWhereClause(String book, String author) {
+    private String createWhereClause(String book, String author, String cosine) {
         StringBuilder whereClause = new StringBuilder();
-        whereClause.append("WHERE ");
+        whereClause.append("WHERE distance < "+cosine);
         if (book != null) {
+            if (whereClause.length() > 0) {
+                whereClause.append(" AND ");
+            }
             whereClause.append("b.title = ?");
         }
 
