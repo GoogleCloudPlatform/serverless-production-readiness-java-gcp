@@ -138,8 +138,7 @@ public class DataAccess {
                 "    JOIN books b on\n" +
                 "            p.book_id=b.book_id\n" +
                 "    JOIN authors a on\n" +
-                "           a.author_id=b.author_id\n" +
-                ") AS subquery\n";
+                "           a.author_id=b.author_id\n";
         Object[] parameters = new Object[]{characterLimit, prompt, book, author};
         List<Object> params = Arrays.stream(parameters)
                 .filter(Objects::nonNull)
@@ -147,10 +146,11 @@ public class DataAccess {
                 .collect(Collectors.toList());
         logger.info(params.toString());
         if ( params.size()>2 ) {
-            sql += createWhereClause(book, author, cosine);
-        } else {
-            sql += " WHERE distance < "+cosine;
+            sql += createWhereClause(book, author);
         }
+        sql+= ") AS subquery\n";
+
+        sql += " WHERE distance < "+cosine;
         sql += " ORDER BY\n" +
                 "distance ASC\n" +
                 "LIMIT 10;";
@@ -160,13 +160,10 @@ public class DataAccess {
         return rows;
     }
 
-    private String createWhereClause(String book, String author, String cosine) {
+    private String createWhereClause(String book, String author) {
         StringBuilder whereClause = new StringBuilder();
-        whereClause.append("WHERE distance < "+cosine);
+        whereClause.append("WHERE ");
         if (book != null) {
-            if (whereClause.length() > 5) {
-                whereClause.append(" AND ");
-            }
             whereClause.append("b.title = ?");
         }
 
