@@ -126,31 +126,31 @@ public class DataAccess {
             characterLimit = 2000;
         }
         String cosine = environment.getProperty("spring.sql.cosine");
-        String sql = "SELECT * FROM (\n" +
-                "    SELECT\n" +
-                "            b.title,\n" +
-                "            left(p.content,?) as page,\n" +
-                "            a.name,\n" +
-                "            p.page_number,\n" +
-                "            (p.embedding <=> embedding('text-embedding-004', ?)::vector) as distance\n" +
-                "    FROM\n" +
-                "            pages p\n" +
-                "    JOIN books b on\n" +
-                "            p.book_id=b.book_id\n" +
-                "    JOIN authors a on\n" +
-                "           a.author_id=b.author_id\n";
-        Object[] parameters = new Object[]{characterLimit, prompt, book, author};
+        String sql = "SELECT\n" +
+                "        b.title,\n" +
+                "        left(p.content,?) as page,\n" +
+                "        a.name,\n" +
+                "        p.page_number,\n" +
+                "        (p.embedding <=> embedding('text-embedding-004', ?)::vector) as distance\n" +
+                "FROM\n" +
+                "        pages p\n" +
+                "JOIN books b on\n" +
+                "        p.book_id=b.book_id\n" +
+                "JOIN authors a on\n" +
+                "       a.author_id=b.author_id\n";
+        Object[] parameters = new Object[]{characterLimit, prompt, book, author, prompt};
         List<Object> params = Arrays.stream(parameters)
                 .filter(Objects::nonNull)
                 .filter(p -> p instanceof String ? !((String) p).isEmpty() : true)
                 .collect(Collectors.toList());
         logger.info(params.toString());
-        if ( params.size()>2 ) {
+        if ( params.size()>3 ) {
             sql += createWhereClause(book, author);
         }
-        sql+= ") AS subquery\n";
 
-        sql += " WHERE distance < "+cosine;
+        // Add "WHERE" if no other conditions, otherwise add "AND"
+        sql += (params.size() > 2 ? " AND" : " WHERE") +
+                " (p.embedding <=> embedding('text-embedding-004', ?)::vector) < " + cosine;
         sql += " ORDER BY\n" +
                 "distance ASC\n" +
                 "LIMIT 10;";
@@ -164,14 +164,14 @@ public class DataAccess {
         StringBuilder whereClause = new StringBuilder();
         whereClause.append("WHERE ");
         if (book != null) {
-            whereClause.append("b.title = ?");
+            whereClause.append("b.title = ? ");
         }
 
         if (author != null) {
-            if (whereClause.length() > 5) {
+            if (whereClause.length() > 6) {
                 whereClause.append(" AND ");
             }
-            whereClause.append("a.name = ?");
+            whereClause.append("a.name = ? ");
         }
 
         return whereClause.toString();
