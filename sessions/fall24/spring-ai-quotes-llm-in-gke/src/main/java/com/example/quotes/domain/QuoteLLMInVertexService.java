@@ -73,7 +73,7 @@ public class QuoteLLMInVertexService {
 
     OpenAiChatModel openAIGemini = new OpenAiChatModel(openAiApi);
     OpenAiChatOptions openAiChatOptions = OpenAiChatOptions.builder()
-        .withTemperature(0.2f)
+        .withTemperature(0.2)
         .withModel(model)
         .build();
 

@@ -72,7 +72,7 @@ public class TerraformTransformationTests {
         long start = System.currentTimeMillis();
         ChatResponse response = chatClient.call(new Prompt(List.of(userMessage),
             VertexAiGeminiChatOptions.builder()
-                .withTemperature(0.4f)
+                .withTemperature(0.4)
                 .build()));
 
         System.out.println(response.getResult().getOutput().getContent());

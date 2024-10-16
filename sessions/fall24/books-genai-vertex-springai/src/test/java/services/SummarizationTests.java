@@ -77,7 +77,7 @@ public class SummarizationTests {
         long start = System.currentTimeMillis();
         ChatResponse response = chatClient.call(new Prompt(List.of(userMessage, systemMessage),
             VertexAiGeminiChatOptions.builder()
-                .withTemperature(0.4f)
+                .withTemperature(0.4)
                 .build()));
 
         System.out.println(response.getResult().getOutput().getContent());
@@ -146,7 +146,7 @@ public class SummarizationTests {
 
         ChatResponse response = chatClient.call(new Prompt(List.of(userMessage, systemMessage),
                 VertexAiGeminiChatOptions.builder()
-                        .withTemperature(0.4f)
+                        .withTemperature(0.4)
                         .build()));
         System.out.println("Summarization took " + (System.currentTimeMillis() - start) + " milliseconds");
         return response.getResult().getOutput().getContent();
@@ -173,7 +173,7 @@ public class SummarizationTests {
 
         ChatResponse response = chatClient.call(new Prompt(List.of(userMessage, systemMessage),
                 VertexAiGeminiChatOptions.builder()
-                        .withTemperature(0.4f)
+                        .withTemperature(0.4)
                         .build()));
         System.out.println("Summarization took " + (System.currentTimeMillis() - start) + " milliseconds");
         String output = response.getResult().getOutput().getContent();

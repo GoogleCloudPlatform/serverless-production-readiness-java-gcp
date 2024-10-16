@@ -17,7 +17,7 @@ package services.ai;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.ai.chat.client.AdvisedRequest;
+import org.springframework.ai.chat.client.advisor.api.AdvisedRequest;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.RequestResponseAdvisor;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
@@ -95,10 +95,10 @@ public class VertexAIClient {
                           new GuardrailsAdvisor())
                 .messages(List.of(systemMessage, userMessage))
                 .options(VertexAiGeminiChatOptions.builder()
-                        .withTemperature(0.4f)
+                        .withTemperature(0.4)
                         .withMaxOutputTokens(8192)
                         .withTopK(3f)
-                        .withTopP(0.5f)
+                        .withTopP(0.5)
                         .withModel(model)
                         .withGoogleSearchRetrieval(useGoogleWebSearch)
                         .build())
@@ -129,7 +129,7 @@ public class VertexAIClient {
                 .messages(List.of(systemMessage, userMessage))
                 .functions(functionName)
                 .options(VertexAiGeminiChatOptions.builder()
-                        .withTemperature(0.4f)
+                        .withTemperature(0.4)
                         .withModel(model)
                         .build())
                 .call()
@@ -155,7 +155,7 @@ public class VertexAIClient {
                           new GuardrailsAdvisor())
                 .messages(List.of(systemMessage, userMessage))
                 .options(VertexAiGeminiChatOptions.builder()
-                        .withTemperature(0.4f)
+                        .withTemperature(0.4)
                         .withModel(model)
                         .build())
                 .call()
@@ -193,6 +193,11 @@ public class VertexAIClient {
             logger.info("Response: {}", response);
             return response;
         }
+
+        @Override
+        public int getOrder() {
+            return 0;
+        }
     }
 
     private static class GuardrailsAdvisor implements RequestResponseAdvisor {
@@ -216,6 +221,11 @@ public class VertexAIClient {
             logger.info("Filter inappropriate response");
 
             return response;
+        }
+
+        @Override
+        public int getOrder() {
+            return 0;
         }
     }
 }
