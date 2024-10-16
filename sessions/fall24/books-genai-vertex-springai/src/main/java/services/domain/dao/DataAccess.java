@@ -149,7 +149,7 @@ public class DataAccess {
         }
 
         // Add "WHERE" if no other conditions, otherwise add "AND"
-        sql += (params.size() > 3 ? " AND" : " WHERE") +
+        sql += (sql.contains("Where") ? " AND" : " WHERE") +
                 " (p.embedding <=> embedding('text-embedding-004', ?)::vector) < " + cosine;
         sql += " ORDER BY\n" +
                 "distance ASC\n" +
