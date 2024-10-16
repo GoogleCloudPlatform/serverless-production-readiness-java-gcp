@@ -144,12 +144,14 @@ public class DataAccess {
                 .filter(p -> p instanceof String ? !((String) p).isEmpty() : true)
                 .collect(Collectors.toList());
         logger.info(params.toString());
+        String whereClause = "WHERE";
         if ( params.size() > 3 ) {
             sql += createWhereClause(book, author);
+            whereClause = "AND";
         }
 
         // Add "WHERE" if no other conditions, otherwise add "AND"
-        sql += (sql.contains("Where") ? " AND" : " WHERE") +
+        sql += whereClause +
                 " (p.embedding <=> embedding('text-embedding-004', ?)::vector) < " + cosine;
         sql += " ORDER BY\n" +
                 "distance ASC\n" +
