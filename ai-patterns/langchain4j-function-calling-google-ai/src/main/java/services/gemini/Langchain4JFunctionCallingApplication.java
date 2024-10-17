@@ -14,15 +14,10 @@
  * limitations under the License.
  */
 package services.gemini;
-import com.google.cloud.vertexai.Transport;
-import com.google.cloud.vertexai.VertexAI;
-import com.google.cloud.vertexai.api.GenerationConfig;
-import com.google.cloud.vertexai.generativeai.GenerativeModel;
 import dev.langchain4j.agent.tool.P;
 import dev.langchain4j.agent.tool.Tool;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel;
-import dev.langchain4j.model.vertexai.VertexAiGeminiChatModel;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.service.AiServices;
 import dev.langchain4j.service.SystemMessage;

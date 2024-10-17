@@ -49,7 +49,7 @@ Lets add the boot starters for 4 AI Models that support function calling:
 </dependency>
 <dependency>
     <groupId>dev.langchain4j</groupId>
-    <artifactId>langchain4j-vertex-ai-gemini</artifactId>
+    <artifactId>langchain4j-google-ai-gemini</artifactId>
     <version>${langchain4j.version}</version>
 </dependency>
 <dependency>
