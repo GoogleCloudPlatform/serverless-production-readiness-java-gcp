@@ -34,10 +34,8 @@ Let's build the checkpointed CRaC image and deploy it to Cloud Run.
 # tag the image
 export PROJECT_ID=$(gcloud config list --format 'value(core.project)')
 echo   $PROJECT_ID
-docker tag quotes-crac:checkpoint gcr.io/${PROJECT_ID}/quotes-crac
-
-# push the image to GCR
-docker push gcr.io/${PROJECT_ID}/quotes-crac
+docker tag quotes-crac:checkpoint  ${REGION}-docker.pkg.dev/${PROJECT_ID}/crac/quotes-crac:checkpoint
+docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/crac/quotes-crac:checkpoint
 ```
 
 Deploy the image to Cloud Run and test it
@@ -46,18 +44,13 @@ Deploy the image to Cloud Run and test it
 export PROJECT_ID=$(gcloud config list --format 'value(core.project)')
 echo   $PROJECT_ID
 
-gcloud run deploy quotes-crac:checkpoint  \
-    --image=gcr.io/${PROJECT_ID}/quotes-crac  \
-    --execution-environment=gen2  \
-    --allow-unauthenticated \
-    --region=us-central1 \
-    --memory 2Gi --cpu 2 --args="--cap-add CHECKPOINT_RESTORE --cap-add SETPCAP -XX:+UnlockExperimentalVMOptions -XX:+IgnoreCPUFeatures"
-
-# There are cases where you would have to ignore CPUFeatures in your architecture of choice.
-# https://docs.azul.com/core/crac/cpu-features#xxignorecpufeatures
-# Add the following arguments to the deploy command
-# --args="-XX:+UnlockExperimentalVMOptions -XX:+IgnoreCPUFeatures"
-
+gcloud run deploy quotes-crac      \
+  --image=us-central1-docker.pkg.dev/${PROJECT_ID}/crac/quotes-crac:checkpoint      \
+  --execution-environment=gen1      \
+  --allow-unauthenticated     \
+  --region=us-central1     \
+  --memory 2Gi --cpu 2 --args="--cap-add CHECKPOINT_RESTORE --cap-add SETPCAP "
+     
 # observe the deploy output
 ...
   ✓ Deploying... Done.                                                                                                                                
