@@ -1,0 +1,8 @@
+FROM ubuntu:22.04
+
+EXPOSE 8080
+
+RUN mkdir -p /opt/app
+COPY target/quotes /opt/app/quotes
+
+ENTRYPOINT /opt/app/quotes
