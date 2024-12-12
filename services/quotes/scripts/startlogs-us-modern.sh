@@ -10,6 +10,7 @@ for service in $services; do
 
   echo
   echo "Service: $service"
-  gcloud alpha run services logs read $service --region us-central1 --limit=100 | grep "Started QuotesApplication" | cut -d ']'  -f 2-
+  gcloud alpha run services logs read $service --region us-central1 --project=spring-io --limit=100 | grep "Started QuotesApplication" | cut -d ']'  -f 2-
+  gcloud alpha run services logs read $service --region us-central1 --project=spring-io --limit=100 | grep "Restored QuotesApplication" | cut -d ']'  -f 2-
   echo
 done

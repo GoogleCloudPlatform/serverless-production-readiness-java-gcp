@@ -7,7 +7,7 @@ echo $services
 
 # Loop through each service
 for service in $services; do
-      if ! [[ "$service" =~ "pgo" || "$service" =~ "native" || "$service" =~ "cds" || "$service" =~ "leyden" ]]; then
+      if ! [[ "$service" =~ "pgo" || "$service" =~ "native" || "$service" =~ "crac" || "$service" =~ "cds" || "$service" =~ "leyden" ]]; then
         echo
       echo "Service: $service"
 

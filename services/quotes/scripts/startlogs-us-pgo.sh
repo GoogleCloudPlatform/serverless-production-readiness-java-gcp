@@ -10,7 +10,7 @@ for service in $services; do
 if ! [[ "$service" =~ "pgo" ||  "$service" =~ "leyden" ]]; then
   echo
   echo "Service: $service"
-  gcloud alpha run services logs read $service --region europe-west1 --limit=100 | grep "Started QuotesApplication" | cut -d ']'  -f 2-
+  gcloud alpha run services logs read $service --region us-central1 --limit=100 | grep "Started QuotesApplication" | cut -d ']'  -f 2-
   echo
 fi
 done

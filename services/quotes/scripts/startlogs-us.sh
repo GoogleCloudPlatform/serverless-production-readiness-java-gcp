@@ -7,7 +7,7 @@ echo $services
 
 # Loop through each service
 for service in $services; do
-  if ! [[ "$service" =~ "pgo" || "$service" =~ "native" || "$service" =~ "cds" || "$service" =~ "leyden" ]]; then
+  if ! [[ "$service" =~ "pgo" || "$service" =~ "native" || "$service" =~ "crac" || "$service" =~ "cds" || "$service" =~ "leyden" ]]; then
     echo
     echo "Service: $service"
     gcloud alpha run services logs read $service --region us-central1 --limit=100 | grep "Started QuotesApplication" | cut -d ']'  -f 3-
