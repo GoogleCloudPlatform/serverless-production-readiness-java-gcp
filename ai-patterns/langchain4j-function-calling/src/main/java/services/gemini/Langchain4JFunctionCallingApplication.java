@@ -67,6 +67,11 @@ public class Langchain4JFunctionCallingApplication {
 			System.out.println();
 			return DATASET.get(new Transaction(transaction));
 		}
+
+		@Tool("Number to the power of")
+		public double powerFunction(double number, double power) {
+			return Math.pow(number, power);
+		}
 	}
 
 	// @AiService
@@ -79,10 +84,21 @@ public class Langchain4JFunctionCallingApplication {
 	ApplicationRunner applicationRunner() {
 		return args -> {
 			String userMessage = """
-   							Please use multi-turn conversation to answer the following questions:
+   							Please answer the following questions:
    							What is the status of my payment transactions 002, 001, 003?
    							Please indicate the status for each transaction and return the results in JSON format.
    							""";
+			// String userMessage = """
+			//
+   		// 					Use the result of 1.5 to the power of 4.5, then use the value to calculate to the power 2
+   		// 					""";
+			// String userMessage = """
+			// 		Please use multi-turn conversation to answer the following questions:
+			// 		Use the result of 1.5 to the power of 4.5, then use the value to calculate to the power 2
+			// 		""";
+			// String userMessage = """
+			// 		Take the result of 1.5 to the power of 4.5 and take it to the power of 2
+			// 		   							""";
 
 			// test with VertexAI Gemini using REST API
 			functionCallGeminiWithREST(userMessage);
@@ -123,7 +139,17 @@ public class Langchain4JFunctionCallingApplication {
 			GenerativeModel generativeModel = new GenerativeModel(chatModel, vertexAi);
 			GenerationConfig generationConfig = GenerationConfig.newBuilder().setTemperature(0.2f).setMaxOutputTokens(1000).build();
 
-			ChatLanguageModel model = new VertexAiGeminiChatModel(generativeModel, generationConfig, 1);
+			// ChatLanguageModel model = new VertexAiGeminiChatModel(generativeModel, generationConfig, 1);
+		ChatLanguageModel model = VertexAiGeminiChatModel. builder()
+				.project(project)
+				.location(location)
+				.modelName(chatModel)
+				.temperature(0.2f)
+				.maxOutputTokens(1000)
+				.logRequests(true)
+				.logResponses(true)
+				.build();
+
 
 			FunctionCallingService service = new FunctionCallingService();
 
