@@ -51,6 +51,18 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
 --member="serviceAccount:service-${PROJECT_NUMBER}@gcp-sa-alloydb.iam.gserviceaccount.com" \
 --role="roles/aiplatform.user"
 
+# Create a temporary Eventarc trigger to force the creation of the default service account *note this command doesn't have to be successsful
+gcloud eventarc triggers create placeholder-trigger \
+  --destination-run-service=books-genai \
+  --destination-run-region=us-central1 \
+  --location=us-central1 \
+  --event-filters="type=google.cloud.storage.object.v1.finalized"  \
+  --event-filters="bucket=library-bucket" \
+  --service-account=${PROJECT_NUMBER}-compute@developer.gserviceaccount.com
+
+# In case the temp trigger does get created successfully. Delete it. 
+gcloud eventarc triggers delete placeholder-trigger --location=us-central1
+
 #Apply eventarc permissions when you see in tf Error 400: Invalid resource state for "": Permission denied while using the Eventarc Service Agent. 
 gcloud projects add-iam-policy-binding ${PROJECT_ID} \
     --member="serviceAccount:service-${PROJECT_NUMBER}@gcp-sa-eventarc.iam.gserviceaccount.com" \
@@ -91,10 +103,12 @@ terraform apply
 ## Terraform must be run twice. The first run creates the infrastructure such as artifact registry, VPC, firewall, VPC peering, GCE psql client, firestore, & alloydb.
 ## After the first time you run TF & the above infra is created. Tag and push the cloud run images to the artifact registry you just created. Example below:
 ```shell
-docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/books-genai-jit/books-genai:latest
 docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/books-genai-native/books-genai:latest
 ```
 ## Once the images are there then the cloud run instances will be ready to deploy on the second terraform apply.. (First run will fail here)
 
-## Issues & TODOs
-## CI to build the images and push to artifact registry
+## CI to build the images and push to artifact registry instead of manually running docker cmds
+```shell
+cd path-of-repo-for-svc-cloudbuild.yaml
+gcloud builds submit --machine-type E2-HIGHCPU-32
+```
