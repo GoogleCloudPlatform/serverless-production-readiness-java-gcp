@@ -33,7 +33,7 @@
   <description>Quotes service in Spring Boot accessing LLM deployed in GKE</description>
   <properties>
     <java.version>21</java.version>
-    <testcontainers.version>1.20.1</testcontainers.version>
+    <testcontainers.version>1.20.4</testcontainers.version>
     <vaadin.version>24.4.13</vaadin.version>
     <spring.ai.version>1.0.0-m4</spring.ai.version>
   </properties>
