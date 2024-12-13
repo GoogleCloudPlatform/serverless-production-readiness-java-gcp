@@ -56,6 +56,12 @@ public class FunctionCallingApplication {
 	record Status(String name) {
 	}
 
+	record Request(double number, double power){
+	}
+
+	record Response(double value){
+	}
+
 	// record Transactions(List<Transaction> transactions) {
 	// }
 	//
@@ -74,6 +80,12 @@ public class FunctionCallingApplication {
 			return transaction -> DATASET.get(transaction);
 		}
 
+	@Bean
+	@Description("Number to the power of")
+	public Function<Request, Response> powerFunction() {
+		return request -> new Response(Math.pow(request.number, request.power));
+	}
+
 	// @Bean
 	// @Description("Get the list statuses of a list of payment transactions")
 	// public Function<Transactions, Statuses> paymentStatuses() {
@@ -89,10 +101,13 @@ public class FunctionCallingApplication {
 
 		//--- Multi-turn function calling ---
 		return args -> {
+			// String prompt = """
+   							// Please use multi-turn invocation to answer the following question:
+   							// What is the status of my payment transactions 002, 001 and 003?
+   							// Please indicate the status for each transaction and return the results in JSON format
+   							// """;
 			String prompt = """
-   							Please use multi-turn invocation to answer the following question:
-   							What is the status of my payment transactions 002, 001 and 003?
-   							Please indicate the status for each transaction and return the results in JSON format
+						Take the result of 1.5 to the power of 4.5 and take it to the power of 2
    							""";
 
 			long start = System.currentTimeMillis();
