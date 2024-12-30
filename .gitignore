@@ -52,7 +52,7 @@ crash.*.log
 # Language Specific
 # ...
 **/target/*
-genai/image-vision-vertex-langchain/test-results-native/test/TEST-junit-jupiter.xml
+ml-demos/image-vision-vertex-langchain/test-results-native/test/TEST-junit-jupiter.xml
 sessions/next24/books-genai-vertex/.vscode/settings.json
 
 # ignore build files
