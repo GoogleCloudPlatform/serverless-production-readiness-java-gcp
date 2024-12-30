@@ -39,6 +39,7 @@ import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,10 +59,11 @@ public class SummarizationTests {
     @Autowired
     private VertexAiGeminiChatModel chatModel;
 
-    @Value("classpath:/books/The_Wasteland-TSEliot-public.txt")
+    // @Value("classpath:/books/The_Wasteland-TSEliot-public.txt")
+    @Value("classpath:/books/berlin-wikipedia.txt")
     private Path resource;
 
-    public static final String DEFAULT_CHUNK_SIZE = "10000";
+    public static final String DEFAULT_CHUNK_SIZE = "5000";
     private static final int CHUNK_SIZE = Integer.parseInt(System.getenv().getOrDefault("CHUNK_SIZE", DEFAULT_CHUNK_SIZE));  // Number of words in each chunk
     public static final String DEFAULT_OVERLAP_SIZE = "500";
     private static final int OVERLAP_SIZE = Integer.parseInt(System.getenv().getOrDefault("OVERLAP_SIZE", DEFAULT_OVERLAP_SIZE)); // Number of words between chunks
@@ -135,6 +137,7 @@ public class SummarizationTests {
     */
 
     // --- Summarization using Stuffing ---
+    @Order(1)
     @Test
     public void summarizationStuffTest() {
         // load the document
@@ -149,32 +152,8 @@ public class SummarizationTests {
         System.out.printf("\nSummarization (stuffing test) took %d milliseconds", (System.currentTimeMillis() - start));
     }
 
-    // --- Summarization using Refine with overlapping chunks ---
-    @Test
-    public void summarizationRefineWithChunksTest(){
-        // load the document
-        Document document = loadDocument(resource, new TextDocumentParser());
-
-        // Overlap window size between chunks set to OVERLAP_SIZE - can be configured
-        // from 0 - text.length()
-        DocumentSplitter splitter = new DocumentByParagraphSplitter(CHUNK_SIZE, OVERLAP_SIZE);
-        List<TextSegment> chunks = splitter.split(document);
-
-        // process each individual chunk in order
-        // summary refined in each step by adding the summary of the current chunk
-        long start = System.currentTimeMillis();
-        StringBuilder context = new StringBuilder();
-        chunks.forEach(segment -> summarizeChunk(context, segment.text()));
-
-        // process the final summary  of the text
-        String output = buildFinalSummary(context.toString());
-
-        System.out.println(output);
-        System.out.printf("\nChunks: %d, Chunk size: %d, Overlap size: %d", chunks.size(), CHUNK_SIZE, OVERLAP_SIZE);
-        System.out.printf("\nSummarization (refine, with chunking test) took %d milliseconds", (System.currentTimeMillis() - start));
-    }
-
     // --- Summarization using MapReduce  with overlapping chunks ---
+    @Order(2)
     @Test
     public void summarizationMapReduceChunksTest() throws Exception {
         // load the document
@@ -201,7 +180,7 @@ public class SummarizationTests {
 
         // Wait for all futures to complete and collect the results in resultMap
         CompletableFuture<Void> allDone = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-                .thenAccept(v -> futures.forEach(f -> f.thenAccept(resultMap::putAll)));
+            .thenAccept(v -> futures.forEach(f -> f.thenAccept(resultMap::putAll)));
 
         allDone.get(); // Wait for all processing to complete
 
@@ -220,6 +199,32 @@ public class SummarizationTests {
         System.out.printf("\nSummarization (map-reduce) took %d milliseconds", (System.currentTimeMillis() - start));
 
         executor.shutdown(); // Shutdown the executor
+    }
+
+    // --- Summarization using Refine with overlapping chunks ---
+    @Order(3)
+    @Test
+    public void summarizationRefineWithChunksTest(){
+        // load the document
+        Document document = loadDocument(resource, new TextDocumentParser());
+
+        // Overlap window size between chunks set to OVERLAP_SIZE - can be configured
+        // from 0 - text.length()
+        DocumentSplitter splitter = new DocumentByParagraphSplitter(CHUNK_SIZE, OVERLAP_SIZE);
+        List<TextSegment> chunks = splitter.split(document);
+
+        // process each individual chunk in order
+        // summary refined in each step by adding the summary of the current chunk
+        long start = System.currentTimeMillis();
+        StringBuilder context = new StringBuilder();
+        chunks.forEach(segment -> summarizeChunk(context, segment.text()));
+
+        // process the final summary  of the text
+        String output = buildFinalSummary(context.toString());
+
+        System.out.println(output);
+        System.out.printf("\nChunks: %d, Chunk size: %d, Overlap size: %d", chunks.size(), CHUNK_SIZE, OVERLAP_SIZE);
+        System.out.printf("\nSummarization (refine, with chunking test) took %d milliseconds", (System.currentTimeMillis() - start));
     }
 
     /*
@@ -262,6 +267,7 @@ public class SummarizationTests {
         return outputWithIndex;
     }
 
+    @Order(4)
     @Test
     public void testGetTokenCount() throws IOException {
         try (VertexAI vertexAI = new VertexAI(System.getenv("VERTEX_AI_GEMINI_PROJECT_ID"),
