@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.4.0</version>
+		<version>3.4.2</version>
 		<relativePath/>
 		<!-- lookup parent from repository -->
 	</parent>
@@ -18,7 +18,7 @@
 
 	<properties>
 		<java.version>21</java.version>
-		<langchain4j.version>0.37.0-SNAPSHOT</langchain4j.version>
+		<langchain4j.version>1.0.0-alpha1</langchain4j.version>
 	</properties>
 
 	<dependencyManagement>
@@ -28,7 +28,7 @@
 				<artifactId>libraries-bom</artifactId>
 				<scope>import</scope>
 				<type>pom</type>
-				<version>26.50.0</version>
+				<version>26.53.0</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -54,11 +54,11 @@
 			<artifactId>langchain4j-spring-boot-starter</artifactId>
 			<version>${langchain4j.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>dev.langchain4j</groupId>
-			<artifactId>langchain4j-google-ai-gemini-spring-boot-starter</artifactId>
-			<version>${langchain4j.version}</version>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>dev.langchain4j</groupId>-->
+<!--			<artifactId>langchain4j-google-ai-gemini-spring-boot-starter</artifactId>-->
+<!--			<version>${langchain4j.version}</version>-->
+<!--		</dependency>-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-autoconfigure-processor</artifactId>

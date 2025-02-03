@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.4.0</version>
+    <version>3.4.2</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <artifactId>summarization-langchain4j-openai-api</artifactId>
@@ -166,7 +166,7 @@
       <dependency>
         <groupId>com.google.cloud</groupId>
         <artifactId>libraries-bom</artifactId>
-        <version>26.48.0</version>
+        <version>26.53.0</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
