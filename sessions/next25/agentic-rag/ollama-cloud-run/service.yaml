@@ -1,0 +1,29 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: llama-service-model-preloaded # Replace with your desired service name
+  annotations:
+    run.googleapis.com/launch-stage: ALPHA
+spec:
+  template:
+    metadata:
+      annotations:
+        run.googleapis.com/execution-environment: gen2
+        autoscaling.knative.dev/maxScale: '1'
+        run.googleapis.com/cpu-throttling: 'false'
+        run.googleapis.com/startup-cpu-boost: 'true'
+    spec: 
+      nodeSelector:
+        run.googleapis.com/accelerator: "nvidia-l4"
+      containers:
+        - name: ollama
+          image: gcr.io/genai-playground24/ollama-preloaded:tag1 
+          ports:
+            - containerPort: 11434
+          env:
+          resources:
+            limits:
+              cpu: '6.0'
+              memory: '24Gi'
+              nvidia.com/gpu: '1'
+
