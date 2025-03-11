@@ -73,14 +73,14 @@ public class QuoteLLMInVertexService {
 
     OpenAiChatModel openAIGemini = new OpenAiChatModel(openAiApi);
     OpenAiChatOptions openAiChatOptions = OpenAiChatOptions.builder()
-        .withTemperature(0.2)
-        .withModel(model)
+        .temperature(0.2)
+        .model(model)
         .build();
 
     long start = System.currentTimeMillis();
     String input = openAIGemini.call(
             new Prompt(List.of(systemMessage,userMessage), openAiChatOptions))
-            .getResult().getOutput().getContent();
+            .getResult().getOutput().getText();
 
     System.out.printf("\nLLM Model in VertexAI provided response: \n%s\n", input);
     System.out.printf("Call took %s ms", (System.currentTimeMillis() - start));

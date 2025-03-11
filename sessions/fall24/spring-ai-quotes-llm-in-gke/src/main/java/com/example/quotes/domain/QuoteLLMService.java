@@ -41,12 +41,12 @@ public class QuoteLLMService {
 
     ChatResponse chatResponse = chatClient.call(new Prompt(List.of(systemMessage, userMessage),
         VertexAiGeminiChatOptions.builder()
-            .withTemperature(0.4)
-            .withModel(env.getProperty(VERTEX_AI_GEMINI_MODEL))
+            .temperature(0.4)
+            .model(env.getProperty(VERTEX_AI_GEMINI_MODEL))
             .build())
     );
     Generation generation = chatResponse.getResult();
-    String input = generation.getOutput().getContent();
+    String input = generation.getOutput().getText();
 
 
     System.out.printf("\nGemini Model provided response: \n%s\n", input);

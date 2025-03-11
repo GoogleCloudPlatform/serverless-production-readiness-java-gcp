@@ -15,8 +15,14 @@
  */
 package services.gemini;
 
+import com.google.auth.oauth2.AccessToken;
+import com.google.auth.oauth2.GoogleCredentials;
+import java.io.IOException;
+import java.util.Date;
 import org.springframework.ai.anthropic.AnthropicChatModel;
 import org.springframework.ai.anthropic.AnthropicChatOptions;
+import org.springframework.ai.anthropic.api.AnthropicApi;
+import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatModel;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatOptions;
@@ -59,7 +65,35 @@ public class QuotesTestApplication {
 					).getResult().getOutput().getContent());
 			System.out.println("Anthropic SONNET call took " + (System.currentTimeMillis() - start) + " ms");
 
+			String baseURL = String.format("https://us-east5-aiplatform.googleapis.com/v1/projects/genai-playground/locations/us-east5/publishers/anthropic/models/claude-3-5-sonnet-20240620");
+			var anthropicApi = new AnthropicApi(baseURL, getOauth2Token(baseURL));
+
+			var chatModel = new AnthropicChatModel(anthropicApi,
+					AnthropicChatOptions.builder()
+							.withModel("claude-3-5-sonnet-20240620")
+							.withTemperature(0.4)
+							.withMaxTokens(200)
+							.build());
+
+			ChatResponse response = chatModel.call(
+					new Prompt("Generate the names of 5 famous pirates."));
 		};
+	}
+
+	private static String getOauth2Token(String target) throws IOException {
+		// Load credentials from the environment (default)
+		GoogleCredentials credentials = GoogleCredentials.getApplicationDefault();
+
+		// Refresh if necessary
+		if (credentials.getAccessToken() == null || credentials.getAccessToken().getExpirationTime().before(new Date())) {
+			credentials.refresh();
+		}
+
+		// Get the access token
+		AccessToken accessToken = credentials.getAccessToken();
+		System.out.println("Generated short-lived Access Token: " + accessToken.getTokenValue());
+
+		return accessToken.getTokenValue();
 	}
 
 	public static void main(String[] args) {

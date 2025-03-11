@@ -42,12 +42,12 @@ public class QuoteLLMInGKEService {
 
     ChatResponse chatResponse = chatClient.call(new Prompt(List.of(systemMessage, userMessage),
         OpenAiChatOptions.builder()
-            .withTemperature(0.4)
+            .temperature(0.4)
             .build())
     );
 
     Generation generation = chatResponse.getResult();
-    String input = generation.getOutput().getContent();
+    String input = generation.getOutput().getText();
 
 
     System.out.printf("\nLLM Model in GKE provided response: \n%s\n", input);

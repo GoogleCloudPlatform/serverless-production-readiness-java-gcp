@@ -33,11 +33,11 @@ public class QuoteEvalService {
         Message userMessage = userMessageTemplate.createMessage(Map.of("quote", quote, "book", book));
         Prompt prompt = new Prompt(List.of(systemMessage, userMessage),
                                     AnthropicChatOptions.builder()
-                                        .withTemperature(0.2).build());
+                                        .temperature(0.2).build());
 
         // test against Anthropic SONNET (3.5)
         long start = System.currentTimeMillis();
-        String response =  anthropicChatModel.call(prompt).getResult().getOutput().getContent();
+        String response =  anthropicChatModel.call(prompt).getResult().getOutput().getText();
 
         System.out.println("ANTHROPIC_SONNET: " + response);
         System.out.println("Anthropic SONNET call took " + (System.currentTimeMillis() - start) + " ms");
