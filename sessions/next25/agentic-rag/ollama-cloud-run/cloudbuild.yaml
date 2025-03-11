@@ -1,0 +1,7 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  script: |
+    docker build -t gcr.io/genai-playground24/ollama-preloaded:tag1 .
+  automapSubstitutions: true
+images:
+- 'gcr.io/genai-playground24/ollama-preloaded:tag1'
