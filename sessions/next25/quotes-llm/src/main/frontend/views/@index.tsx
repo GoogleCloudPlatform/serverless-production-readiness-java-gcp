@@ -29,6 +29,25 @@ export default function QuotesView() {
               Search by Author in database
             </Button>
 
+            {/*<TextField*/}
+            {/*    value={book}*/}
+            {/*    onChange={e => setBook(e.target.value)}*/}
+            {/*    label="Book Name"*/}
+            {/*/>*/}
+            {/*<Button*/}
+            {/*    onClick={e => QuoteEndpoint.quoteByBook(book).then(setQuotes)}>*/}
+            {/*  Search by Book in database*/}
+            {/*</Button>*/}
+
+            {/*<Button*/}
+            {/*    onClick={e => QuoteEndpoint.randomQuote().then(q => setQuotes([q]))}>*/}
+            {/*  Get random quote from database*/}
+            {/*</Button>*/}
+          </div>
+          <div
+              className="flex gap-s items-baseline border border-b border-dashed border-contrast-50 p-l rounded-l">
+            <Icon icon="vaadin:database"/>
+
             <TextField
                 value={book}
                 onChange={e => setBook(e.target.value)}
@@ -38,13 +57,16 @@ export default function QuotesView() {
                 onClick={e => QuoteEndpoint.quoteByBook(book).then(setQuotes)}>
               Search by Book in database
             </Button>
-
+          </div>
+          <div
+              className="flex gap-s items-baseline border border-b border-dashed border-contrast-50 p-l rounded-l">
+            <Icon icon="vaadin:database"/>
             <Button
                 onClick={e => QuoteEndpoint.randomQuote().then(q => setQuotes([q]))}>
               Get random quote from database
             </Button>
           </div>
-          <div
+            <div
               className="flex gap-s items-baseline border border-b border-dashed border-contrast-50 p-l rounded-l">
             <Icon icon="vaadin:cloud"/>
             <Button
@@ -63,6 +85,7 @@ export default function QuotesView() {
                 onCheckedChanged={e => setShowCrud(e.detail.value)}/>
           </div>
         </div>
+        <div className="built-with">UI built in Java with <a href="https://vaadin.com/" target="_blank">Vaadin</a></div>
         {(!!quotes.length && !showCrud) && quotes.map(quote => <QuoteCard
             key={quote.id} quote={quote}/>)}
         {showCrud && <AutoCrud service={QuoteEndpoint} model={QuoteModel}
