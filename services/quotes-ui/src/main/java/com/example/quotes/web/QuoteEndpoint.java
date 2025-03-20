@@ -90,4 +90,13 @@ public class QuoteEndpoint implements CrudService<Quote, Long> {
         return quoteService.list(pageable, jpaFilterConverter.toSpec(filter, Quote.class));
     }
 }
+#Generate error flows    @Override
+    public long count(@Nullable Filter filter) {
+        return quoteService.count(jpaFilterConverter.toSpec(filter, Quote.class));
+    }
+
+    @Override
+    public Quote findById(Long id) {
+        return quoteService.findById(id).orElseThrow();
+    }
 
