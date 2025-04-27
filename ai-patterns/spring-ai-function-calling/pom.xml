@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.4.2</version>
+		<version>3.4.4</version>
 		<relativePath/>
 		<!-- lookup parent from repository -->
 	</parent>
@@ -18,7 +18,7 @@
 
 	<properties>
 		<java.version>21</java.version>
-		<spring.ai.version>1.0.0-m4</spring.ai.version>
+		<spring-ai.version>1.0.0-M7</spring-ai.version>
 	</properties>
 
 	<dependencyManagement>
@@ -26,7 +26,7 @@
 			<dependency>
 				<groupId>org.springframework.ai</groupId>
 				<artifactId>spring-ai-bom</artifactId>
-				<version>${spring.ai.version}</version>
+				<version>${spring-ai.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -35,7 +35,7 @@
 				<artifactId>libraries-bom</artifactId>
 				<scope>import</scope>
 				<type>pom</type>
-				<version>26.53.0</version>
+				<version>26.59.0</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -46,11 +46,13 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.ai</groupId>
-			<artifactId>spring-ai-vertex-ai-gemini-spring-boot-starter</artifactId>
+			<artifactId>spring-ai-starter-model-vertex-ai-gemini</artifactId>
+			<version>${spring-ai.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.ai</groupId>
-			<artifactId>spring-ai-openai-spring-boot-starter</artifactId>
+			<artifactId>spring-ai-starter-model-openai</artifactId>
+			<version>${spring-ai.version}</version>
 		</dependency>
 
 		<dependency>
