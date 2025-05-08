@@ -90,3 +90,4 @@ public class QuoteEndpoint implements CrudService<Quote, Long> {
         return quoteService.list(pageable, jpaFilterConverter.toSpec(filter, Quote.class));
     }
 }
+
