@@ -1,0 +1,18 @@
+INSERT INTO dog(id, name, description) values (97, 'Rocky', 'A brown Chihuahua known for being protective.');
+INSERT INTO dog(id, name, description) values (87, 'Bailey', 'A tan Dachshund known for being playful.');
+INSERT INTO dog(id, name, description) values (89, 'Charlie', 'A black Bulldog known for being curious.');
+INSERT INTO dog(id, name, description) values (67, 'Cooper', 'A tan Boxer known for being affectionate.');
+INSERT INTO dog(id, name, description) values (73, 'Max', 'A brindle Dachshund known for being energetic.');
+INSERT INTO dog(id, name, description) values (3, 'Buddy', 'A Poodle known for being calm.');
+INSERT INTO dog(id, name, description) values (93, 'Duke', 'A white German Shepherd known for being friendly.');
+INSERT INTO dog(id, name, description) values (63, 'Jasper', 'A grey Shih Tzu known for being protective.');
+INSERT INTO dog(id, name, description) values (69, 'Toby', 'A grey Doberman known for being playful.');
+INSERT INTO dog(id, name, description) values (101, 'Nala', 'A spotted German Shepherd known for being loyal.');
+INSERT INTO dog(id, name, description) values (61, 'Penny', 'A white Great Dane known for being protective.');
+INSERT INTO dog(id, name, description) values (1, 'Bella', 'A golden Poodle known for being calm.');
+INSERT INTO dog(id, name, description) values (91, 'Willow', 'A brindle Great Dane known for being calm.');
+INSERT INTO dog(id, name, description) values (5, 'Daisy', 'A spotted Poodle known for being affectionate.');
+INSERT INTO dog(id, name, description) values (95, 'Mia', 'A grey Great Dane known for being loyal.');
+INSERT INTO dog(id, name, description) values (71, 'Molly', 'A golden Chihuahua known for being curious.');
+INSERT INTO dog(id, name, description) values (65, 'Ruby', 'A white Great Dane known for being protective.');
+INSERT INTO dog(id, name, description) values (45, 'Prancer', 'A silly, goofy dog who slobbers all over everyone');
