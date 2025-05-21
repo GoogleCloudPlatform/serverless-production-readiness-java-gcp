@@ -1,4 +1,4 @@
-# Codebase for the Google cloud and Spring AI blog
+# Codebase for the Google Cloud and Spring AI blog
 
 **Google Cloud and Spring AI 1.0, a Match Made in the Clouds!** 
 
