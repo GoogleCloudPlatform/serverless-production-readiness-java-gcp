@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,6 +42,7 @@ import java.util.Date;
  * Controller to handle requests for Quote CRUD operations
  */
 @RestController
+@CrossOrigin(origins = "*")
 public class QuoteController {
     private static final Logger logger = LoggerFactory.getLogger(QuoteController.class);
 
@@ -70,7 +72,7 @@ public class QuoteController {
         return quoteService.findRandomQuote();
     }
 
-    @GetMapping("/quotes") 
+    @GetMapping("/quotes")
     public ResponseEntity<List<Quote>> allQuotes()
     {
         try {
@@ -78,12 +80,12 @@ public class QuoteController {
 
             if (quotes.isEmpty())
                 return new ResponseEntity<List<Quote>>(HttpStatus.NO_CONTENT);
-                
+
             return new ResponseEntity<List<Quote>>(quotes, HttpStatus.OK);
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return new ResponseEntity<List<Quote>>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }        
+        }
     }
 
     @GetMapping("/quotes/author/{author}")
@@ -111,13 +113,13 @@ public class QuoteController {
             System.out.println(e.getMessage());
             return new ResponseEntity<Quote>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-    }     
+    }
 
     @PutMapping("/quotes/{id}")
     public ResponseEntity<Quote> updateQuote(@PathVariable("id") Long id, @RequestBody Quote quote) {
         try {
             Optional<Quote> existingQuote = quoteService.findById(id);
-            
+
             if(existingQuote.isPresent()){
                 Quote updatedQuote = existingQuote.get();
                 updatedQuote.setAuthor(quote.getAuthor());
@@ -132,18 +134,5 @@ public class QuoteController {
             System.out.println(e.getMessage());
             return new ResponseEntity<Quote>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-    }     
-
-    @DeleteMapping("/quotes/{id}")
-    public ResponseEntity<HttpStatus> deleteQuote(@PathVariable("id") Long id) {
-        try {
-            quoteService.deleteById(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch(EmptyResultDataAccessException e){
-            return new ResponseEntity<HttpStatus>(HttpStatus.NOT_FOUND);
-        } catch (RuntimeException e) {
-            System.out.println(e.getMessage());
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }    
+    }
 }
