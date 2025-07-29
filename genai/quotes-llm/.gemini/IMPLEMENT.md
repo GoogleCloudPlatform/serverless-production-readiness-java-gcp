@@ -42,4 +42,5 @@ You are **forbidden** from entering Implement Mode unless the following two cond
 
 4.  **Completion and Handoff:**
     *   Announce the final result: "All checks passed. The implementation is complete and the system is stable."
+    *   Recite the plan you have implemented for the user
     *   Return to a neutral, listening state, awaiting the user's next command.
