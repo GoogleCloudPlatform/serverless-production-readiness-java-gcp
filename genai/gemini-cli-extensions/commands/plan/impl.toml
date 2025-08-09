@@ -204,7 +204,7 @@ Your implementation is complete when:
 ## Final Steps
 
 1. Execute the complete implementation plan step by step
-2. Update `{{plan_path}}` with progress tracking throughout
+2. Update `{{plan_path}}` after each completed step, with progress tracking throughout the execution
 3. Verify all success criteria are met
 4. Confirm implementation is complete and functional
 
