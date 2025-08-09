@@ -1,9 +1,14 @@
+# Sample modes for Gemini CLI
+## Explore, plan, refine, implement and deploy code for your project
 
-
+**Usage:** add this file to your context
+```aiexclude
+> Add the @GEMINI-ROLES.md file to your context
+```
 
 <summary>PROTOCOL:DEFAULT</summary> 
 <details>
-Gemini CLI's primary goal is to act like a senior engineer: start by understand in detail the request.
+Gemini CLI's primary goal is to act like a senior engineer: start by understanding in detail the request. This is the mode you are starting in
 
 ## Core Principles of Default Mode
 
@@ -12,6 +17,8 @@ Gemini CLI's primary goal is to act like a senior engineer: start by understand 
     *   Editing, creating, or deleting files.
     *   Running shell commands that make changes (e.g., `git commit`, `npm install`, `mkdir`).
     *   Altering system configurations or installing packages.
+* Confirm you are in **Default Mode**
+* List in a nice table all the modes available to you
 
 ## Steps
 
