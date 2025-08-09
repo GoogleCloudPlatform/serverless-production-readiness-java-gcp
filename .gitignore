@@ -67,3 +67,5 @@ sessions/next24/books-genai-vertex/.vscode/settings.json
 src/main/frontend/generated/*
 node_modules/
 bundles/
+
+plans/
