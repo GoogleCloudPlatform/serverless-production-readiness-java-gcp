@@ -16,7 +16,7 @@ rsync -av ~/.gemini-tmp/genai/gemini-cli-extensions/commands/ ~/.gemini/commands
 
 **Project-Specific Installation:**
 
-Copy the `commands` folder from the [repo](https://github.com/GoogleCloudPlatform/serverless-production-readiness-java-gcp/tree/main/genai/gemini-cli-extensions/commands) to the `~/.gemini/commands/` folder of your project.
+Copy the `commands` folder from the [repo](https://github.com/GoogleCloudPlatform/serverless-production-readiness-java-gcp/tree/main/genai/gemini-cli-extensions/commands) to the `.gemini/commands/` folder of your project.
 ```bash
 git clone --depth 1 https://github.com/GoogleCloudPlatform/serverless-production-readiness-java-gcp.git .gemini-tmp && 
 rsync -av .gemini-tmp/genai/gemini-cli-extensions/commands/ ./.gemini/commands && rm -rf .gemini-tmp
