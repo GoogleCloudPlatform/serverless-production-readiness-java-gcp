@@ -1,9 +1,9 @@
-# Sample modes for Gemini CLI
+# Sample Modes for Gemini CLI
 ## Explore, plan, refine, implement and deploy code for your project
 
 **Usage:** add this file to your context
 ```aiexclude
-> Add the @GEMINI-ROLES.md file to your context
+> Add the @GEMINI-MODES.md file to your context
 ```
 
 <summary>PROTOCOL:DEFAULT</summary> 
