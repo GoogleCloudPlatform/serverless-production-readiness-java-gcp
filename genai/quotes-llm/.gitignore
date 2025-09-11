@@ -108,3 +108,5 @@ target-native/
 src/main/frontend/generated/*
 node_modules/
 vite.generated.ts
+
+temp/

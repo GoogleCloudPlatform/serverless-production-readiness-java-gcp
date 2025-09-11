@@ -12,7 +12,7 @@ Like other programming style guides, the issues covered span not only aesthetic 
 
 In this document, unless otherwise clarified:
 
-1.  The term _class_ is used inclusively to mean a normal class, record class, enum class, interface or annotation type (`@interface`).
+1.  The term _class_ is used inclusively to mean a normal class, record class, enum class, interface or annotation type (`\@interface`).
 2.  The term _member_ (of a class) is used inclusively to mean a nested class, field, method, _or constructor_; that is, all top-level contents of a class except initializers.
 3.  The term _comment_ always refers to _implementation_ comments. We do not use the phrase "documentation comments", and instead use the common term "Javadoc."
 
@@ -192,7 +192,7 @@ return () -> {
 };
 
 return new MyClass() {
-  @Override public void method() {
+  \@Override public void method() {
     if (condition()) {
       try {
         something();
@@ -326,7 +326,7 @@ Beyond where required by the language or other style rules, and apart from withi
 1.  Separating any keyword, such as `if`, `for` or `catch`, from an open parenthesis (`(`) that follows it on that line
 2.  Separating any keyword, such as `else` or `catch`, from a closing curly brace (`}`) that precedes it on that line
 3.  Before any open curly brace (`{`), with two exceptions:
-    *   `@SomeAnnotation({a, b})` (no space is used)
+    *   `\@SomeAnnotation({a, b})` (no space is used)
     *   `String[][] x = {{"foo"}};` (no space is required between `{{`, by item 10 below)
 4.  On both sides of any binary or ternary operator. This also applies to the following "operator-like" symbols:
     
@@ -377,7 +377,7 @@ After the comma that follows an enum constant, a line break is optional. Additio
 
 private enum Answer {
   YES {
-    @Override public String toString() {
+    \@Override public String toString() {
       return "yes";
     }
   },
@@ -486,48 +486,48 @@ Switch expressions must be new-style switches:
 
 ##### 4.8.5.1 Type-use annotations
 
-Type-use annotations appear immediately before the annotated type. An annotation is a type-use annotation if it is meta-annotated with `@Target(ElementType.TYPE_USE)`. Example:
+Type-use annotations appear immediately before the annotated type. An annotation is a type-use annotation if it is meta-annotated with `\@Target(ElementType.TYPE_USE)`. Example:
 
-final @Nullable String name;
+final \@Nullable String name;
 
-public @Nullable Person getPersonByName(String name);
+public \@Nullable Person getPersonByName(String name);
 
 ##### 4.8.5.2 Class, package, and module annotations
 
 Annotations applying to a class, package, or module declaration appear immediately after the documentation block, and each annotation is listed on a line of its own (that is, one annotation per line). These line breaks do not constitute line-wrapping (Section 4.5, [Line-wrapping](#s4.5-line-wrapping)), so the indentation level is not increased. Examples:
 
 /\*\* This is a class. \*/
-@Deprecated
-@CheckReturnValue
+\@Deprecated
+\@CheckReturnValue
 public final class Frozzler { ... }
 
 /\*\* This is a package. \*/
-@Deprecated
-@CheckReturnValue
+\@Deprecated
+\@CheckReturnValue
 package com.example.frozzler;
 
 /\*\* This is a module. \*/
-@Deprecated
-@SuppressWarnings("CheckReturnValue")
+\@Deprecated
+\@SuppressWarnings("CheckReturnValue")
 module com.example.frozzler { ... }
 
 ##### 4.8.5.3 Method and constructor annotations
 
 The rules for annotations on method and constructor declarations are the same as the [previous section](#s4.8.5.2-class-annotation-style). Example:
 
-@Deprecated
-@Override
+\@Deprecated
+\@Override
 public String getNameIfPresent() { ... }
 
 **Exception:** A _single_ parameterless annotation _may_ instead appear together with the first line of the signature, for example:
 
-@Override public int hashCode() { ... }
+\@Override public int hashCode() { ... }
 
 ##### 4.8.5.4 Field annotations
 
 Annotations applying to a field also appear immediately after the documentation block, but in this case, _multiple_ annotations (possibly parameterized) may be listed on the same line; for example:
 
-@Partial @Mock DataLoader loader;
+\@Partial \@Mock DataLoader loader;
 
 ##### 4.8.5.5 Parameter and local variable annotations
 
@@ -564,7 +564,7 @@ The purpose is to have a consistent `TODO` format that can be searched to find o
 
 Avoid adding TODOs that refer to an individual or team as the context:
 
-// TODO: @yourusername - File an issue and use a '\*' for repetition.
+// TODO: \@yourusername - File an issue and use a '\*' for repetition.
 
 If your `TODO` is of the form "At a future date do something" make sure that you either include a very specific date ("Fix by November 2005") or a very specific event ("Remove this code when all clients can handle XML responses.").
 
@@ -744,11 +744,11 @@ Incorrect
 6 Programming Practices
 -----------------------
 
-### 6.1 `@Override`: always used
+### 6.1 `\@Override`: always used
 
-A method is marked with the `@Override` annotation whenever it is legal. This includes a class method overriding a superclass method, a class method implementing an interface method, an interface method respecifying a superinterface method, and an explicitly declared accessor method for a record component.
+A method is marked with the `\@Override` annotation whenever it is legal. This includes a class method overriding a superclass method, a class method implementing an interface method, an interface method respecifying a superinterface method, and an explicitly declared accessor method for a record component.
 
-**Exception:** `@Override` may be omitted when the parent method is `@Deprecated`.
+**Exception:** `\@Override` may be omitted when the parent method is `\@Deprecated`.
 
 ### 6.2 Caught exceptions: not ignored
 
@@ -796,7 +796,7 @@ public int method(String p1) { ... }
 
 /\*\* An especially short bit of Javadoc. \*/
 
-The basic form is always acceptable. The single-line form may be substituted when the entirety of the Javadoc block (including comment markers) can fit on a single line. Note that this only applies when there are no block tags such as `@param`.
+The basic form is always acceptable. The single-line form may be substituted when the entirety of the Javadoc block (including comment markers) can fit on a single line. Note that this only applies when there are no block tags such as `\@param`.
 
 #### 7.1.2 Paragraphs
 
@@ -804,15 +804,15 @@ One blank line—that is, a line containing only the aligned leading asterisk (`
 
 #### 7.1.3 Block tags
 
-Any of the standard "block tags" that are used appear in the order `@param`, `@return`, `@throws`, `@deprecated`, and these four types never appear with an empty description. When a block tag doesn't fit on a single line, continuation lines are indented four (or more) spaces from the position of the `@`.
+Any of the standard "block tags" that are used appear in the order `\@param`, `\@return`, `\@throws`, `\@deprecated`, and these four types never appear with an empty description. When a block tag doesn't fit on a single line, continuation lines are indented four (or more) spaces from the position of the `\@`.
 
 ### 7.2 The summary fragment
 
 Each Javadoc block begins with a brief **summary fragment**. This fragment is very important: it is the only part of the text that appears in certain contexts such as class and method indexes.
 
-This is a fragment—a noun phrase or verb phrase, not a complete sentence. It does **not** begin with `A {@code Foo} is a...`, or `This method returns...`, nor does it form a complete imperative sentence like `Save the record.`. However, the fragment is capitalized and punctuated as if it were a complete sentence.
+This is a fragment—a noun phrase or verb phrase, not a complete sentence. It does **not** begin with `A {\@code Foo} is a...`, or `This method returns...`, nor does it form a complete imperative sentence like `Save the record.`. However, the fragment is capitalized and punctuated as if it were a complete sentence.
 
-**Tip:** A common mistake is to write simple Javadoc in the form `/** @return the customer ID */`. This is incorrect, and should be changed to `/** Returns the customer ID. */` or `/** {@return the customer ID} */`.
+**Tip:** A common mistake is to write simple Javadoc in the form `/** \@return the customer ID */`. This is incorrect, and should be changed to `/** Returns the customer ID. */` or `/** {\@return the customer ID} */`.
 
 ### 7.3 Where Javadoc is used
 
@@ -824,7 +824,7 @@ Additional Javadoc content may also be present, as explained in Section 7.3.4, [
 
 Javadoc is optional for "simple, obvious" members and record components, such as a `getFoo()` method, _if_ there _really and truly_ is nothing else worthwhile to say but "the foo".
 
-**Important:** it is not appropriate to cite this exception to justify omitting relevant information that a typical reader might need to know. For example, for a record component named `canonicalName`, don't omit its documentation (with the rationale that it would say only `@param canonicalName the canonical name`) if a typical reader may have no idea what the term "canonical name" means!
+**Important:** it is not appropriate to cite this exception to justify omitting relevant information that a typical reader might need to know. For example, for a record component named `canonicalName`, don't omit its documentation (with the rationale that it would say only `\@param canonicalName the canonical name`) if a typical reader may have no idea what the term "canonical name" means!
 
 #### 7.3.2 Exception: overrides
 
