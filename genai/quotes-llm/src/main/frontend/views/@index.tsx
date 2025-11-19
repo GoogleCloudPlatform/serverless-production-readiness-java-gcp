@@ -71,7 +71,7 @@ export default function QuotesView() {
             <Icon icon="vaadin:cloud"/>
             <Button
                 onClick={e => QuoteEndpoint.randomLLMQuote().then(q => setQuotes([q]))}>
-              Random Quote from Gemini Flash 2.0 Model in VertexAI
+              Random Quote - use Gemini Flash 2.5 Model
             </Button>
             <Button
                 onClick={e => QuoteEndpoint.randomLLMInVertexQuote().then(q => setQuotes([q]))}>
