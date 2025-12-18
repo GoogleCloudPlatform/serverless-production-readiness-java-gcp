@@ -17,13 +17,14 @@ package com.example.quotes;
 
 import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.theme.Theme;
+import org.springframework.ai.model.anthropic.autoconfigure.AnthropicChatAutoConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
  * Application to manage book quotes
  */
-@SpringBootApplication
+@SpringBootApplication(exclude = {AnthropicChatAutoConfiguration.class})
 @Theme("quotes")
 public class QuotesApplication implements AppShellConfigurator {
 

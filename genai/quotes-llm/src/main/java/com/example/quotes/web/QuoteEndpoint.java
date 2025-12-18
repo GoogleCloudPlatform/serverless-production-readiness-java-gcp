@@ -19,7 +19,7 @@ import com.example.quotes.actuator.StartupCheck;
 import com.example.quotes.domain.*;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.hilla.BrowserCallable;
-import com.vaadin.hilla.Nullable;
+import org.jspecify.annotations.Nullable;
 import com.vaadin.hilla.crud.CrudService;
 import com.vaadin.hilla.crud.JpaFilterConverter;
 import com.vaadin.hilla.crud.filter.Filter;
@@ -45,14 +45,10 @@ public class QuoteEndpoint implements CrudService<Quote, Long> {
     private final QuoteLLMService quoteLLMService;
     private final QuoteLLMInVertexService quoteLLMInVertexService;
 
-    private final JpaFilterConverter jpaFilterConverter;
-
     public QuoteEndpoint(QuoteService quoteService,
                          QuoteLLMService quoteLLMService,
-                         QuoteLLMInVertexService quoteLLMInVertexService,
-                         JpaFilterConverter jpaFilterConverter) {
+                         QuoteLLMInVertexService quoteLLMInVertexService) {
         this.quoteService = quoteService;
-        this.jpaFilterConverter = jpaFilterConverter;
         this.quoteLLMService = quoteLLMService;
         this.quoteLLMInVertexService = quoteLLMInVertexService;
     }
@@ -81,6 +77,10 @@ public class QuoteEndpoint implements CrudService<Quote, Long> {
         return quoteService.getByAuthor(author);
     }
 
+    public List<Quote> quoteByBook(String book) {
+        return quoteService.getByAuthor("Leo Tolstoy");
+    }
+
     @Override
     public Quote save(Quote quote) {
         if (quote.getId() == null) {
@@ -97,6 +97,6 @@ public class QuoteEndpoint implements CrudService<Quote, Long> {
 
     @Override
     public List<Quote> list(Pageable pageable, @Nullable Filter filter) {
-        return quoteService.list(pageable, jpaFilterConverter.toSpec(filter, Quote.class));
+        return quoteService.list(pageable, JpaFilterConverter.toSpec(filter, Quote.class));
     }
 }

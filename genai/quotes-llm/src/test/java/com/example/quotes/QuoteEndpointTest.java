@@ -5,7 +5,6 @@ import com.example.quotes.domain.QuoteLLMInVertexService;
 import com.example.quotes.domain.QuoteLLMService;
 import com.example.quotes.domain.QuoteService;
 import com.example.quotes.web.QuoteEndpoint;
-import com.vaadin.hilla.crud.JpaFilterConverter;
 import com.vaadin.hilla.crud.filter.Filter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,9 +33,6 @@ class QuoteEndpointTest {
 
     @Mock
     private QuoteLLMInVertexService quoteLLMInVertexService;
-
-    @Mock
-    private JpaFilterConverter jpaFilterConverter;
 
     @InjectMocks
     private QuoteEndpoint quoteEndpoint;
@@ -146,16 +143,13 @@ class QuoteEndpointTest {
     @Test
     void list() {
         Pageable pageable = Pageable.unpaged();
-        Filter filter = new Filter();
-        Specification<Quote> spec = Specification.where(null);
+        Filter filter = null; // null filter results in a simple Specification
 
-        when(jpaFilterConverter.toSpec(filter, Quote.class)).thenReturn(spec);
-        when(quoteService.list(pageable, spec)).thenReturn(quotes);
+        when(quoteService.list(eq(pageable), any())).thenReturn(quotes);
 
         List<Quote> result = quoteEndpoint.list(pageable, filter);
         assertEquals(quotes, result);
-        verify(jpaFilterConverter, times(1)).toSpec(filter, Quote.class);
-        verify(quoteService, times(1)).list(pageable, spec);
+        verify(quoteService, times(1)).list(eq(pageable), any());
     }
 
 }

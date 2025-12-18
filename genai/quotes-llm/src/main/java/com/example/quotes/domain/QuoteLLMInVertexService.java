@@ -8,14 +8,13 @@ import java.util.List;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.model.ApiKey;
+import org.springframework.ai.model.SimpleApiKey;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
-import org.springframework.ai.retry.RetryUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 public class QuoteLLMInVertexService {
@@ -59,13 +58,18 @@ public class QuoteLLMInVertexService {
       return quote;
     }
 
-    OpenAiApi openAiApi = new OpenAiApi(baseURL, token, completionsPath,
-        "/v1/embeddings",
-        RestClient.builder(),
-        WebClient.builder(),
-        RetryUtils.DEFAULT_RESPONSE_ERROR_HANDLER);
+    ApiKey apiKey = new SimpleApiKey(token);
+    OpenAiApi openAiApi = OpenAiApi.builder()
+        .baseUrl(baseURL)
+        .apiKey(apiKey)
+        .completionsPath(completionsPath)
+        .embeddingsPath("/v1/embeddings")
+        .build();
 
-    OpenAiChatModel openAIGemini = new OpenAiChatModel(openAiApi);
+    OpenAiChatModel openAIGemini = OpenAiChatModel.builder()
+        .openAiApi(openAiApi)
+        .defaultOptions(OpenAiChatOptions.builder().build())
+        .build();
     OpenAiChatOptions openAiChatOptions = OpenAiChatOptions.builder()
         .temperature(0.2)
         .model(model)
