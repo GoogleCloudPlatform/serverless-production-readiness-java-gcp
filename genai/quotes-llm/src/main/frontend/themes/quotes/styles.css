@@ -1,0 +1,587 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Literary Luminary Theme - A refined editorial aesthetic for Quotes
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   CSS Custom Properties - Design Tokens
+   ───────────────────────────────────────────────────────────────────────────── */
+:root {
+  /* Typography */
+  --font-display: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Color Palette - Warm Ivory & Ink */
+  --color-ivory: #FDFBF7;
+  --color-ivory-warm: #FAF6EE;
+  --color-cream: #F5F0E6;
+  --color-parchment: #EDE6D6;
+  --color-ink: #1A1A2E;
+  --color-ink-light: #2D2D44;
+  --color-ink-muted: #6B6B7B;
+  --color-gold: #C9A227;
+  --color-gold-light: #E8D48B;
+  --color-gold-subtle: rgba(201, 162, 39, 0.12);
+  --color-success: #2D6A4F;
+  --color-success-bg: rgba(45, 106, 79, 0.08);
+
+  /* Shadows - Refined and layered */
+  --shadow-subtle: 0 1px 3px rgba(26, 26, 46, 0.04);
+  --shadow-soft: 0 4px 12px rgba(26, 26, 46, 0.06), 0 1px 3px rgba(26, 26, 46, 0.04);
+  --shadow-medium: 0 8px 24px rgba(26, 26, 46, 0.08), 0 2px 6px rgba(26, 26, 46, 0.04);
+  --shadow-elevated: 0 16px 48px rgba(26, 26, 46, 0.12), 0 4px 12px rgba(26, 26, 46, 0.06);
+  --shadow-gold: 0 4px 16px rgba(201, 162, 39, 0.2);
+
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-spring: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Vaadin Component Overrides - Lumo Variables
+   ───────────────────────────────────────────────────────────────────────────── */
+html {
+  --lumo-font-family: var(--font-body);
+  --lumo-base-color: var(--color-ivory);
+  --lumo-tint: var(--color-ivory-warm);
+  --lumo-shade: var(--color-ink);
+  --lumo-primary-color: var(--color-gold);
+  --lumo-primary-color-50pct: rgba(201, 162, 39, 0.5);
+  --lumo-primary-color-10pct: rgba(201, 162, 39, 0.1);
+  --lumo-primary-text-color: var(--color-gold);
+  --lumo-header-text-color: var(--color-ink);
+  --lumo-body-text-color: var(--color-ink-light);
+  --lumo-secondary-text-color: var(--color-ink-muted);
+  --lumo-contrast: var(--color-ink);
+  --lumo-contrast-90pct: rgba(26, 26, 46, 0.9);
+  --lumo-contrast-80pct: rgba(26, 26, 46, 0.8);
+  --lumo-contrast-70pct: rgba(26, 26, 46, 0.7);
+  --lumo-contrast-60pct: rgba(26, 26, 46, 0.6);
+  --lumo-contrast-50pct: rgba(26, 26, 46, 0.5);
+  --lumo-contrast-40pct: rgba(26, 26, 46, 0.4);
+  --lumo-contrast-30pct: rgba(26, 26, 46, 0.3);
+  --lumo-contrast-20pct: rgba(26, 26, 46, 0.2);
+  --lumo-contrast-10pct: rgba(26, 26, 46, 0.1);
+  --lumo-contrast-5pct: rgba(26, 26, 46, 0.05);
+  --lumo-border-radius-s: var(--radius-sm);
+  --lumo-border-radius-m: var(--radius-md);
+  --lumo-border-radius-l: var(--radius-lg);
+  --lumo-box-shadow-s: var(--shadow-subtle);
+  --lumo-box-shadow-m: var(--shadow-soft);
+  --lumo-box-shadow-l: var(--shadow-medium);
+  --lumo-box-shadow-xl: var(--shadow-elevated);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Base Styles
+   ───────────────────────────────────────────────────────────────────────────── */
+body {
+  background: linear-gradient(180deg, var(--color-ivory) 0%, var(--color-cream) 100%);
+  min-height: 100vh;
+  font-family: var(--font-body);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Subtle texture overlay */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.015;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Main Application Container
+   ───────────────────────────────────────────────────────────────────────────── */
+.quotes-app {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var(--space-xl) var(--space-lg);
+  animation: fadeIn 600ms ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Header Section
+   ───────────────────────────────────────────────────────────────────────────── */
+.app-header {
+  text-align: center;
+  margin-bottom: var(--space-3xl);
+  animation: fadeIn 600ms ease-out;
+}
+
+.app-header h1 {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 5vw, 3.5rem);
+  font-weight: 600;
+  color: var(--color-ink);
+  margin: 0 0 var(--space-sm);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.app-header .subtitle {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--color-ink-muted);
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Decorative divider */
+.header-divider {
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
+  margin: var(--space-lg) auto 0;
+  border-radius: 1px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Search Sections
+   ───────────────────────────────────────────────────────────────────────────── */
+.search-sections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-bottom: var(--space-2xl);
+}
+
+.search-section {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-soft);
+  border: 1px solid rgba(26, 26, 46, 0.04);
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  transition: var(--transition-smooth);
+  animation: slideUp 500ms ease-out backwards;
+}
+
+.search-section:nth-child(1) { animation-delay: 100ms; }
+.search-section:nth-child(2) { animation-delay: 150ms; }
+.search-section:nth-child(3) { animation-delay: 200ms; }
+.search-section:nth-child(4) { animation-delay: 250ms; }
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.search-section:hover {
+  box-shadow: var(--shadow-medium);
+  transform: translateY(-2px);
+}
+
+/* Section Icons */
+.section-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-gold-subtle);
+  border-radius: var(--radius-md);
+  color: var(--color-gold);
+  flex-shrink: 0;
+}
+
+.section-icon.llm-icon {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.section-icon vaadin-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Section Labels */
+.section-label {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-ink-muted);
+  background: var(--color-cream);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  margin-right: auto;
+}
+
+.section-label.llm-label {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Vaadin TextField Styling
+   ───────────────────────────────────────────────────────────────────────────── */
+vaadin-text-field {
+  --vaadin-input-field-background: var(--color-ivory-warm);
+  --vaadin-input-field-border-radius: var(--radius-md);
+  --vaadin-input-field-border-color: var(--color-parchment);
+  --vaadin-input-field-focused-border-color: var(--color-gold);
+  flex: 1;
+  min-width: 180px;
+}
+
+vaadin-text-field::part(input-field) {
+  background: var(--color-ivory-warm);
+  border: 1px solid var(--color-parchment);
+  transition: var(--transition-smooth);
+}
+
+vaadin-text-field:hover::part(input-field) {
+  background: white;
+  border-color: var(--color-gold-light);
+}
+
+vaadin-text-field[focused]::part(input-field) {
+  background: white;
+  border-color: var(--color-gold);
+  box-shadow: 0 0 0 3px var(--color-gold-subtle);
+}
+
+vaadin-text-field::part(label) {
+  font-family: var(--font-body);
+  font-weight: 500;
+  color: var(--color-ink-light);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Vaadin Button Styling
+   ───────────────────────────────────────────────────────────────────────────── */
+vaadin-button {
+  --vaadin-button-border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-weight: 500;
+  transition: var(--transition-smooth);
+}
+
+/* Primary Button (default) */
+vaadin-button:not([theme]) {
+  background: var(--color-ink);
+  color: white;
+  border: none;
+  padding: var(--space-sm) var(--space-lg);
+}
+
+vaadin-button:not([theme]):hover {
+  background: var(--color-ink-light);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-soft);
+}
+
+vaadin-button:not([theme]):active {
+  transform: translateY(0);
+}
+
+/* LLM Button - Distinguished styling */
+.llm-button {
+  background: linear-gradient(135deg, var(--color-success), #1E4D3A) !important;
+  color: white !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.llm-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: var(--transition-smooth);
+}
+
+.llm-button:hover::before {
+  left: 100%;
+}
+
+.llm-button:hover {
+  box-shadow: var(--shadow-medium), 0 4px 16px rgba(45, 106, 79, 0.3) !important;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Quote Cards Container
+   ───────────────────────────────────────────────────────────────────────────── */
+.quotes-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  margin-top: var(--space-xl);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Quote Card - Literary Elegance
+   ───────────────────────────────────────────────────────────────────────────── */
+.quote-card {
+  background: white;
+  border-radius: var(--radius-xl);
+  padding: var(--space-2xl);
+  box-shadow: var(--shadow-soft);
+  border: 1px solid rgba(26, 26, 46, 0.04);
+  position: relative;
+  overflow: hidden;
+  transition: var(--transition-smooth);
+  animation: cardReveal 600ms ease-out backwards;
+}
+
+@keyframes cardReveal {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.quote-card:hover {
+  box-shadow: var(--shadow-elevated);
+  transform: translateY(-4px);
+}
+
+/* Decorative quote mark */
+.quote-card::before {
+  content: '"';
+  position: absolute;
+  top: var(--space-md);
+  left: var(--space-lg);
+  font-family: var(--font-display);
+  font-size: 6rem;
+  line-height: 1;
+  color: var(--color-gold-subtle);
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* Left accent border */
+.quote-card::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background: linear-gradient(180deg, var(--color-gold), var(--color-gold-light));
+  border-radius: 0 2px 2px 0;
+}
+
+/* Quote text */
+.quote-text {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.6;
+  color: var(--color-ink);
+  margin: 0 0 var(--space-lg);
+  padding-left: var(--space-xl);
+  position: relative;
+  z-index: 1;
+}
+
+/* Quote attribution */
+.quote-attribution {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding-left: var(--space-xl);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--color-ink-muted);
+}
+
+.quote-author {
+  font-weight: 600;
+  color: var(--color-ink-light);
+}
+
+.quote-divider {
+  width: 24px;
+  height: 1px;
+  background: var(--color-parchment);
+}
+
+.quote-book {
+  font-style: italic;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Checkbox & CRUD Toggle
+   ───────────────────────────────────────────────────────────────────────────── */
+.crud-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--color-cream);
+  border-radius: var(--radius-md);
+  margin-top: var(--space-md);
+  animation: slideUp 500ms ease-out 300ms backwards;
+}
+
+vaadin-checkbox {
+  --vaadin-checkbox-size: 18px;
+  --vaadin-checkbox-border-radius: 4px;
+  font-family: var(--font-body);
+}
+
+vaadin-checkbox::part(checkbox) {
+  border-color: var(--color-parchment);
+}
+
+vaadin-checkbox[checked]::part(checkbox) {
+  background: var(--color-gold);
+  border-color: var(--color-gold);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   AutoCrud Styling
+   ───────────────────────────────────────────────────────────────────────────── */
+vaadin-auto-crud {
+  --vaadin-grid-cell-background: white;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-medium);
+  animation: fadeIn 500ms ease-out;
+}
+
+vaadin-grid {
+  --lumo-header-text-color: var(--color-ink);
+  font-family: var(--font-body);
+}
+
+vaadin-grid::part(header-cell) {
+  background: var(--color-cream);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+vaadin-grid::part(cell) {
+  padding: var(--space-md);
+}
+
+vaadin-grid::part(row):hover::part(cell) {
+  background: var(--color-ivory-warm);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Built With Footer
+   ───────────────────────────────────────────────────────────────────────────── */
+.built-with {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: var(--color-ink-muted);
+  text-align: center;
+  padding: var(--space-xl) 0 var(--space-md);
+  margin-top: auto;
+  animation: fadeIn 600ms ease-out 400ms backwards;
+}
+
+.built-with a {
+  color: var(--color-gold);
+  text-decoration: none;
+  font-weight: 500;
+  transition: var(--transition-fast);
+}
+
+.built-with a:hover {
+  color: var(--color-ink);
+  text-decoration: underline;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Responsive Adjustments
+   ───────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .quotes-app {
+    padding: var(--space-md);
+  }
+
+  .search-section {
+    padding: var(--space-md);
+    gap: var(--space-sm);
+  }
+
+  .section-label {
+    width: 100%;
+    margin: 0 0 var(--space-sm);
+  }
+
+  .quote-card {
+    padding: var(--space-lg);
+  }
+
+  .quote-card::before {
+    font-size: 4rem;
+  }
+
+  .quote-text {
+    font-size: 1.25rem;
+    padding-left: var(--space-lg);
+  }
+
+  .quote-attribution {
+    padding-left: var(--space-lg);
+    flex-wrap: wrap;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Dark Mode Support (Optional - can be activated later)
+   ───────────────────────────────────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  /* Dark mode styles can be enabled by removing body theme="light" */
+}

@@ -15,8 +15,12 @@
  */
 package com.example.quotes;
 
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.page.AppShellConfigurator;
+import com.vaadin.flow.component.page.ColorScheme;
+import com.vaadin.flow.component.page.ColorScheme.Value;
 import com.vaadin.flow.theme.Theme;
+import com.vaadin.flow.theme.aura.Aura;
 import org.springframework.ai.model.anthropic.autoconfigure.AnthropicChatAutoConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -26,6 +30,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  */
 @SpringBootApplication(exclude = {AnthropicChatAutoConfiguration.class})
 @Theme("quotes")
+@StyleSheet(Aura.STYLESHEET)
+@StyleSheet("styles/custom.css")
+@ColorScheme(Value.LIGHT)
 public class QuotesApplication implements AppShellConfigurator {
 
   public static void main(String[] args) {

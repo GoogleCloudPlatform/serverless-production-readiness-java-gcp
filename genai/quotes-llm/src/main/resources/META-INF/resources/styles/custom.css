@@ -1,0 +1,39 @@
+/* Custom Aura theme adjustments */
+
+:root {
+  /* Increase base size for more generous spacing (default is 16) */
+  --aura-base-size: 20;
+
+  /* Increase border radius for group containers */
+  --aura-base-radius: 6;
+
+  /* Increase contrast level for better visibility (default is 1, range 0-3) */
+  --aura-contrast-level: 1;
+
+  /* Darker background so light buttons are visible */
+  /*--aura-background-color-dark: oklch(0.95 0.01 248);*/
+  --aura-background-color-light: oklch(0.95 0.01 248);
+
+}
+
+/* Make buttons more visible against the background */
+vaadin-button {
+  --vaadin-button-background: rgba(255, 255, 255, 0.9) !important;
+  --vaadin-button-text-color: #1a1a1a !important;
+  --vaadin-button-border-color: var(--vaadin-border-color) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Group containers with visible dashed borders */
+.border.border-dashed.border-contrast-50 {
+  border: 1px dashed var(--vaadin-border-color) !important;
+  border-radius: var(--vaadin-radius-l) !important;
+}
+
+/* Ensure gap utilities have generous spacing */
+.gap-s { gap: var(--vaadin-gap-s) !important; }
+.gap-m { gap: 2.5rem !important; }  /* Increased from default for visible separation */
+
+/* Ensure padding utilities are generous */
+.p-l { padding: var(--vaadin-padding-l) !important; }
+.p-m { padding: var(--vaadin-padding-m) !important; }

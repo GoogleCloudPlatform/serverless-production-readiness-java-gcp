@@ -1,10 +1,10 @@
-import {Button, Checkbox, Icon, TextField} from "@vaadin/react-components";
+import { Button, Checkbox, Icon, TextField } from "@vaadin/react-components";
 import Quote from "Frontend/generated/com/example/quotes/domain/Quote";
-import {useState} from "react";
+import { useState } from "react";
 import QuoteCard from "Frontend/components/QuoteCard";
-import {AutoCrud} from "@vaadin/hilla-react-crud";
+import { AutoCrud } from "@vaadin/hilla-react-crud";
 import QuoteModel from "Frontend/generated/com/example/quotes/domain/QuoteModel";
-import {QuoteEndpoint} from "Frontend/generated/endpoints";
+import { QuoteEndpoint } from "Frontend/generated/endpoints";
 import "@vaadin/icons";
 
 export default function QuotesView() {
@@ -14,82 +14,128 @@ export default function QuotesView() {
   const [showCrud, setShowCrud] = useState(false);
 
   return (
-      <div className="p-m flex flex-col items-start gap-m h-full box-border">
-        <div className="flex flex-col gap-m">
-          <div
-              className="flex gap-s items-baseline border border-b border-dashed border-contrast-50 p-l rounded-l">
-            <Icon icon="vaadin:database"/>
-            <TextField
-                value={author}
-                onChange={e => setAuthor(e.target.value)}
-                label="Book Author"
-            />
-            <Button
-                onClick={e => QuoteEndpoint.quoteByAuthor(author).then(setQuotes)}>
-              Search by Author in database
-            </Button>
+    <div className="quotes-app">
+      {/* Header */}
+      <header className="app-header">
+        <h1>Literary Quotes</h1>
+        <p className="subtitle">Wisdom from the Written Word</p>
+        <div className="header-divider" aria-hidden="true"></div>
+      </header>
 
-            {/*<TextField*/}
-            {/*    value={book}*/}
-            {/*    onChange={e => setBook(e.target.value)}*/}
-            {/*    label="Book Name"*/}
-            {/*/>*/}
-            {/*<Button*/}
-            {/*    onClick={e => QuoteEndpoint.quoteByBook(book).then(setQuotes)}>*/}
-            {/*  Search by Book in database*/}
-            {/*</Button>*/}
+      {/* Search Sections */}
+      <div className="search-sections">
+        {/* Search by Author */}
+        <section className="search-section">
+          <div className="section-icon">
+            <Icon icon="vaadin:user" />
+          </div>
+          <span className="section-label">Database</span>
+          <TextField
+            value={author}
+            onChange={(e) => setAuthor(e.target.value)}
+            label="Book Author"
+            placeholder="Enter author name..."
+          />
+          <Button
+            onClick={() => QuoteEndpoint.quoteByAuthor(author).then(setQuotes)}
+          >
+            Search by Author
+          </Button>
+        </section>
 
-            {/*<Button*/}
-            {/*    onClick={e => QuoteEndpoint.randomQuote().then(q => setQuotes([q]))}>*/}
-            {/*  Get random quote from database*/}
-            {/*</Button>*/}
+        {/* Search by Book */}
+        <section className="search-section">
+          <div className="section-icon">
+            <Icon icon="vaadin:book" />
           </div>
-          <div
-              className="flex gap-s items-baseline border border-b border-dashed border-contrast-50 p-l rounded-l">
-            <Icon icon="vaadin:database"/>
+          <span className="section-label">Database</span>
+          <TextField
+            value={book}
+            onChange={(e) => setBook(e.target.value)}
+            label="Book Name"
+            placeholder="Enter book title..."
+          />
+          <Button
+            onClick={() => QuoteEndpoint.quoteByBook(book).then(setQuotes)}
+          >
+            Search by Book
+          </Button>
+        </section>
 
-            <TextField
-                value={book}
-                onChange={e => setBook(e.target.value)}
-                label="Book Name"
-            />
-            <Button
-                onClick={e => QuoteEndpoint.quoteByBook(book).then(setQuotes)}>
-              Search by Book in database
-            </Button>
+        {/* Random from Database */}
+        <section className="search-section">
+          <div className="section-icon">
+            <Icon icon="vaadin:random" />
           </div>
-          <div
-              className="flex gap-s items-baseline border border-b border-dashed border-contrast-50 p-l rounded-l">
-            <Icon icon="vaadin:database"/>
-            <Button
-                onClick={e => QuoteEndpoint.randomQuote().then(q => setQuotes([q]))}>
-              Get random quote from database
-            </Button>
+          <span className="section-label">Database</span>
+          <Button
+            onClick={() =>
+              QuoteEndpoint.randomQuote().then((q) => setQuotes([q]))
+            }
+          >
+            Get Random Quote
+          </Button>
+        </section>
+
+        {/* LLM Generated Quotes */}
+        <section className="search-section">
+          <div className="section-icon llm-icon">
+            <Icon icon="vaadin:magic" />
           </div>
-            <div
-              className="flex gap-s items-baseline border border-b border-dashed border-contrast-50 p-l rounded-l">
-            <Icon icon="vaadin:cloud"/>
-            <Button
-                onClick={e => QuoteEndpoint.randomLLMQuote().then(q => setQuotes([q]))}>
-              Random Quote - use Gemini Flash 2.5 Model
-            </Button>
-            <Button
-                onClick={e => QuoteEndpoint.randomLLMInVertexQuote().then(q => setQuotes([q]))}>
-              Random quote from LLama3.1 Open-Model LLM in VertexAI
-            </Button>
-          </div>
-          <div>
-            <Checkbox
-                label="Manage book quotes in DB"
-                checked={showCrud}
-                onCheckedChanged={e => setShowCrud(e.detail.value)}/>
-          </div>
+          <span className="section-label llm-label">AI Generated</span>
+          <Button
+            className="llm-button"
+            onClick={() =>
+              QuoteEndpoint.randomLLMQuote().then((q) => setQuotes([q]))
+            }
+          >
+            Gemini Flash 2.5
+          </Button>
+          <Button
+            className="llm-button"
+            onClick={() =>
+              QuoteEndpoint.randomLLMInVertexQuote().then((q) => setQuotes([q]))
+            }
+          >
+            LLama 3.1 on Vertex AI
+          </Button>
+        </section>
+
+        {/* CRUD Toggle */}
+        <div className="crud-toggle">
+          <Checkbox
+            label="Manage quotes in database"
+            checked={showCrud}
+            onCheckedChanged={(e) => setShowCrud(e.detail.value)}
+          />
         </div>
-        <div className="built-with">UI built in Java with <a href="https://vaadin.com/" target="_blank">Vaadin</a></div>
-        {(!!quotes.length && !showCrud) && quotes.map(quote => <QuoteCard
-            key={quote.id} quote={quote}/>)}
-        {showCrud && <AutoCrud service={QuoteEndpoint} model={QuoteModel}
-                               className="flex-grow self-stretch"/>}
       </div>
+
+      {/* Quote Results */}
+      {!!quotes.length && !showCrud && (
+        <section className="quotes-container">
+          {quotes.map((quote, index) => (
+            <QuoteCard key={quote.id} quote={quote} index={index} />
+          ))}
+        </section>
+      )}
+
+      {/* CRUD Interface */}
+      {showCrud && (
+        <AutoCrud
+          service={QuoteEndpoint}
+          model={QuoteModel}
+          className="flex-grow self-stretch"
+        />
+      )}
+
+      {/* Footer */}
+      <footer className="built-with">
+        UI built in Java with{" "}
+        <a href="https://vaadin.com/" target="_blank" rel="noopener noreferrer">
+          Vaadin
+        </a>
+      </footer>
+    </div>
   );
-};
+}
