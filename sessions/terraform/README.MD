@@ -23,7 +23,7 @@ gcloud services enable firestore.googleapis.com
 
 gcloud projects add-iam-policy-binding ${PROJECT_ID}     --member="serviceAccount:${SERVICE_ACCOUNT}"     --role='roles/storage.objectViewer'
 
-export SERVICE_ACCOUNT_KMS="$(gsutil kms serviceaccount -p ${PROJECT_ID})"
+export SERVICE_ACCOUNT_KMS="$(gcloud storage service-agent --project ${PROJECT_ID})"
 
 gcloud projects add-iam-policy-binding ${PROJECT_ID} \
     --member="serviceAccount:${SERVICE_ACCOUNT_KMS}" \

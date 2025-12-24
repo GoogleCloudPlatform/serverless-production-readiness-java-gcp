@@ -13,7 +13,7 @@
 # limitations under the License.
 steps:
 - id: 'download-cached-maven-dependencies'
-  name: gcr.io/cloud-builders/gsutil
+  name: gcr.io/cloud-builders/gcloud
   entrypoint: bash
   volumes:
   - name: 'maven-repository'
@@ -21,7 +21,7 @@ steps:
   args:
   - '-c'
   - |
-    gsutil cp gs://${PROJECT_ID}-cache-dependencies/cache/maven-dependencies.tgz maven-dependencies.tgz || exit 0
+    gcloud storage cp gs://${PROJECT_ID}-cache-dependencies/cache/maven-dependencies.tgz maven-dependencies.tgz || exit 0
     tar -zxf maven-dependencies.tgz --directory / || exit 0
 - id: 'test'
   name: maven:3.9-eclipse-temurin-17
@@ -48,7 +48,7 @@ steps:
   args: ["tag", "audit-native", "gcr.io/$PROJECT_ID/audit-native"]
 - id: 'upload-cached-maven-dependencies'
   waitFor: [ 'build-project']
-  name: gcr.io/cloud-builders/gsutil
+  name: gcr.io/cloud-builders/gcloud
   entrypoint: bash
   volumes:
   - name: 'maven-repository'
@@ -57,5 +57,5 @@ steps:
   - '-c'
   - |
     tar -zcf maven-dependencies.tgz /root/.m2
-    gsutil cp maven-dependencies.tgz gs://${PROJECT_ID}-cache-dependencies/cache/maven-dependencies.tgz
+    gcloud storage cp maven-dependencies.tgz gs://${PROJECT_ID}-cache-dependencies/cache/maven-dependencies.tgz
 images: ["gcr.io/$PROJECT_ID/audit-native"]

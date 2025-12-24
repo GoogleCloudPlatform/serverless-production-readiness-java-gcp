@@ -14,7 +14,7 @@
 steps:
 # restore Maven dependencies for faster builds
 - id: 'download-cached-maven-dependencies'
-  name: gcr.io/cloud-builders/gsutil
+  name: gcr.io/cloud-builders/gcloud
   entrypoint: bash
   volumes:
   - name: 'maven-repository'
@@ -22,7 +22,7 @@ steps:
   args:
   - '-c'
   - |
-    gsutil cp gs://${PROJECT_ID}-cache-dependencies/cache/maven-dependencies.tgz maven-dependencies.tgz || exit 0
+    gcloud storage cp gs://${PROJECT_ID}-cache-dependencies/cache/maven-dependencies.tgz maven-dependencies.tgz || exit 0
     tar -zxf maven-dependencies.tgz --directory / || exit 0
 
   # run tests first
@@ -52,7 +52,7 @@ steps:
   # store Maven dependencies
 - id: 'upload-cached-maven-dependencies'
   waitFor: [ 'build-project']
-  name: gcr.io/cloud-builders/gsutil
+  name: gcr.io/cloud-builders/gcloud
   entrypoint: bash
   volumes:
   - name: 'maven-repository'
@@ -61,5 +61,5 @@ steps:
   - '-c'
   - |
     tar -zcf maven-dependencies.tgz /root/.m2
-    gsutil cp maven-dependencies.tgz gs://${PROJECT_ID}-cache-dependencies/cache/maven-dependencies.tgz
+    gcloud storage cp maven-dependencies.tgz gs://${PROJECT_ID}-cache-dependencies/cache/maven-dependencies.tgz
 images: ["gcr.io/$PROJECT_ID/quotes-docker"]

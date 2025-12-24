@@ -13,9 +13,9 @@ gcloud services enable aiplatform.googleapis.com
 
 
 export BUCKET_PICTURES=library_next24_images
-gsutil mb -l us-central1 gs://${BUCKET_PICTURES}
-gsutil uniformbucketlevelaccess set on gs://${BUCKET_PICTURES}
-gsutil iam ch allUsers:objectViewer gs://${BUCKET_PICTURES}
+gcloud storage buckets create --location=us-central1 gs://${BUCKET_PICTURES}
+gcloud storage buckets update --uniform-bucket-level-access gs://${BUCKET_PICTURES}
+gcloud storage buckets add-iam-policy-binding gs://${BUCKET_PICTURES} --member=allUsers --role=objectViewer
 
 gcloud compute addresses create psa-range \
     --global \
