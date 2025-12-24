@@ -132,24 +132,24 @@ Create a vpc called default VPC with subnet in us-central1  [here](https://cloud
 ## Create the GCS bucket
 ```shell
 export BUCKET_PICTURES=library_images
-gsutil mb -l us-central1 gs://${BUCKET_PICTURES}
-gsutil uniformbucketlevelaccess set on gs://${BUCKET_PICTURES}
-gsutil iam ch allUsers:objectViewer gs://${BUCKET_PICTURES}
+gcloud storage buckets create gs://${BUCKET_PICTURES} --location us-central1
+gcloud storage buckets update gs://${BUCKET_PICTURES} --uniform-bucket-level-access
+gcloud storage buckets add-iam-policy-binding gs://${BUCKET_PICTURES} --member=allUsers --role=objectViewer
 
 export BUCKET_BOOKS_PUBLIC=libarary_public
-gsutil mb -l us-central1 gs://${BUCKET_BOOKS_PUBLIC}
-gsutil uniformbucketlevelaccess set on gs://${BUCKET_BOOKS_PUBLIC}
-gsutil iam ch allUsers:objectViewer gs://${BUCKET_BOOKS_PUBLIC}
+gcloud storage buckets create gs://${BUCKET_BOOKS_PUBLIC} --location us-central1
+gcloud storage buckets update gs://${BUCKET_BOOKS_PUBLIC} --uniform-bucket-level-access
+gcloud storage buckets add-iam-policy-binding gs://${BUCKET_BOOKS_PUBLIC} --member=allUsers --role=objectViewer
 
 export BUCKET_BOOKS_PRIVATE=libarary_private
-gsutil mb -l us-central1 gs://${BUCKET_BOOKS_PRIVATE}
-gsutil uniformbucketlevelaccess set on gs://${BUCKET_BOOKS_PRIVATE}
-gsutil iam ch allUsers:objectViewer gs://${BUCKET_BOOKS_PRIVATE}
+gcloud storage buckets create gs://${BUCKET_BOOKS_PRIVATE} --location us-central1
+gcloud storage buckets update gs://${BUCKET_BOOKS_PRIVATE} --uniform-bucket-level-access
+gcloud storage buckets add-iam-policy-binding gs://${BUCKET_BOOKS_PRIVATE} --member=allUsers --role=objectViewer
 
 export BUCKET_BOOKS_SUMMARY=library_summary
-gsutil mb -l us-central1 gs://${BUCKET_BOOKS_SUMMARY}
-gsutil uniformbucketlevelaccess set on gs://${BUCKET_BOOKS_SUMMARY}
-gsutil iam ch allUsers:objectViewer gs://${BUCKET_BOOKS_SUMMARY}
+gcloud storage buckets create gs://${BUCKET_BOOKS_SUMMARY} --location us-central1
+gcloud storage buckets update gs://${BUCKET_BOOKS_SUMMARY} --uniform-bucket-level-access
+gcloud storage buckets add-iam-policy-binding gs://${BUCKET_BOOKS_SUMMARY} --member=allUsers --role=objectViewer
 ```
 
 ## Create the database
@@ -181,7 +181,7 @@ Grant permission to compute sa used by cloud run to accept events, ability to ac
 ```shell
 gcloud projects add-iam-policy-binding ${PROJECT_ID}     --member="serviceAccount:${SERVICE_ACCOUNT}"     --role='roles/storage.objectViewer'
 
-export SERVICE_ACCOUNT_KMS="$(gsutil kms serviceaccount -p ${PROJECT_ID})"
+export SERVICE_ACCOUNT_KMS="$(gcloud storage service-agent --project ${PROJECT_ID})"
 
 gcloud projects add-iam-policy-binding ${PROJECT_ID} \
     --member="serviceAccount:${SERVICE_ACCOUNT_KMS}" \
@@ -310,8 +310,8 @@ gcloud eventarc triggers create books-genai-jit-trigger-summary \
 
 Test the trigger
 ```shell
-gsutil cp books/The_Jungle_Book-Rudyard_Kipling-1894-public.txt gs://${BUCKET_BOOKS_PUBLIC}
-gsutil cp books/Meditations-Marcus_Aurelius-0161-public.txt gs://${BUCKET_BOOKS_PUBLIC}
+gcloud storage cp books/The_Jungle_Book-Rudyard_Kipling-1894-public.txt gs://${BUCKET_BOOKS_PUBLIC}
+gcloud storage cp books/Meditations-Marcus_Aurelius-0161-public.txt gs://${BUCKET_BOOKS_PUBLIC}
 
 gcloud logging read "resource.labels.service_name=books-genai-jit AND textPayload:GeekHour" --format=json
 gcloud logging read "resource.labels.service_name=books-genai-jit AND textPayload:CloudRun" --format=json
@@ -322,4 +322,3 @@ Log capture:
  gcloud logging read "resource.labels.service_name=books-genai-jit AND textPayload:CloudRun" --format=json
  gcloud logging read "resource.labels.service_name=books-genai-native AND textPayload:CloudRun" --format=json
 ```
-
