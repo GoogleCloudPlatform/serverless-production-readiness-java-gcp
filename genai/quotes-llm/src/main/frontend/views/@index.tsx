@@ -89,7 +89,7 @@ export default function QuotesView() {
               QuoteEndpoint.randomLLMQuote().then((q) => setQuotes([q]))
             }
           >
-            Gemini Flash 2.5
+            Gemini Flash 3.0 Preview
           </Button>
           <Button
             className="llm-button"

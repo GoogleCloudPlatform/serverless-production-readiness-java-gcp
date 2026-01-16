@@ -191,7 +191,7 @@ body::before {
   box-shadow: var(--shadow-soft);
   border: 1px solid rgba(26, 26, 46, 0.04);
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: var(--space-md);
   flex-wrap: wrap;
   transition: var(--transition-smooth);
@@ -230,6 +230,7 @@ body::before {
   border-radius: var(--radius-md);
   color: var(--color-gold);
   flex-shrink: 0;
+  margin-bottom: 0; /* Ensure no bottom margin affects alignment */
 }
 
 .section-icon.llm-icon {
@@ -251,9 +252,13 @@ body::before {
   letter-spacing: 0.08em;
   color: var(--color-ink-muted);
   background: var(--color-cream);
-  padding: var(--space-xs) var(--space-sm);
-  border-radius: var(--radius-sm);
+  padding: 0 var(--space-md);
+  height: 40px; /* Fixed height to match inputs */
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius-md);
   margin-right: auto;
+  margin-bottom: 0; /* Ensure no bottom margin affects alignment */
 }
 
 .section-label.llm-label {
@@ -269,14 +274,19 @@ vaadin-text-field {
   --vaadin-input-field-border-radius: var(--radius-md);
   --vaadin-input-field-border-color: var(--color-parchment);
   --vaadin-input-field-focused-border-color: var(--color-gold);
+  /* Ensure consistent height for alignment */
+  --vaadin-text-field-size: 40px; 
   flex: 1;
   min-width: 180px;
+  padding: 0; /* Remove default padding that might affect alignment */
 }
 
 vaadin-text-field::part(input-field) {
   background: var(--color-ivory-warm);
   border: 1px solid var(--color-parchment);
   transition: var(--transition-smooth);
+  height: 40px; /* Force input field height */
+  box-sizing: border-box;
 }
 
 vaadin-text-field:hover::part(input-field) {
@@ -304,6 +314,8 @@ vaadin-button {
   font-family: var(--font-body);
   font-weight: 500;
   transition: var(--transition-smooth);
+  height: 40px; /* Force button height */
+  margin: 0; /* Reset margins */
 }
 
 /* Primary Button (default) */
@@ -311,7 +323,7 @@ vaadin-button:not([theme]) {
   background: var(--color-ink);
   color: white;
   border: none;
-  padding: var(--space-sm) var(--space-lg);
+  padding: 0 var(--space-lg); /* Adjust padding for fixed height */
 }
 
 vaadin-button:not([theme]):hover {
