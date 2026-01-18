@@ -6,21 +6,17 @@ import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatModel;
-import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatOptions;
+import org.springframework.ai.google.genai.GoogleGenAiChatModel;
+import org.springframework.ai.google.genai.GoogleGenAiChatOptions;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 @Service
 public class QuoteLLMService {
-  private VertexAiGeminiChatModel chatClient;
+  private GoogleGenAiChatModel chatClient;
   private Environment env;
 
-  public static final String VERTEX_AI_GEMINI_PROJECT_ID = "VERTEX_AI_GEMINI_PROJECT_ID";
-  public static final String VERTEX_AI_GEMINI_LOCATION = "VERTEX_AI_GEMINI_LOCATION";
-  public static final String VERTEX_AI_GEMINI_MODEL = "VERTEX_AI_GEMINI_MODEL";
-
-  public QuoteLLMService(VertexAiGeminiChatModel chatClient, Environment env) {
+  public QuoteLLMService(GoogleGenAiChatModel chatClient, Environment env) {
     this.chatClient = chatClient;
     this.env = env;
   }
@@ -38,9 +34,7 @@ public class QuoteLLMService {
         """);
 
     ChatResponse chatResponse = chatClient.call(new Prompt(List.of(systemMessage, userMessage),
-        VertexAiGeminiChatOptions.builder()
-            .temperature(0.4)
-            .model(env.getProperty(VERTEX_AI_GEMINI_MODEL))
+        GoogleGenAiChatOptions.builder()
             .build())
     );
     Generation generation = chatResponse.getResult();
