@@ -42,7 +42,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 class QuotesRepositoryTest {
   @Container
   @ServiceConnection
-  private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15.3-alpine");
+  private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15.15-alpine");
 
   @Autowired
   private QuoteRepository quoteRepository;
