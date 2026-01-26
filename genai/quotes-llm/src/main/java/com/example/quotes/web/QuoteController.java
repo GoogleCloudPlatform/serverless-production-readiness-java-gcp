@@ -119,6 +119,22 @@ public class QuoteController {
         }
     }
 
+    @GetMapping("/quotes/book/{book}")
+    public ResponseEntity<List<Quote>> quoteByBook(@PathVariable("book") String book) {
+        try {
+            List<Quote> quotes = quoteService.getByBook(book);
+
+            if(!quotes.isEmpty()){
+                return new  ResponseEntity<List<Quote>>(quotes, HttpStatus.OK);
+            } else {
+                return new  ResponseEntity<List<Quote>>(HttpStatus.NOT_FOUND);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return new  ResponseEntity<List<Quote>>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @PostMapping("/quotes")
     public ResponseEntity<Quote> createQuote(@RequestBody Quote quote) {
         try {

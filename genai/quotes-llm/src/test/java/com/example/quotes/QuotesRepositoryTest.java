@@ -101,4 +101,19 @@ class QuotesRepositoryTest {
     assertDoesNotThrow(() -> quoteRepository.deleteById(result.getId()));
   }
 
+  @Test
+  @DisplayName("Find quotes by book")
+  void testFindByBook(){
+    var quote = new Quote();
+    quote.setAuthor("J.K. Rowling");
+    quote.setQuote("It does not do to dwell on dreams and forget to live.");
+    quote.setBook("Harry Potter and the Sorcerer's Stone");
+
+    this.quoteService.createQuote(quote);
+
+    var result = this.quoteRepository.findByBook("Harry Potter and the Sorcerer's Stone");
+    assertThat(result).hasSize(1);
+    assertThat(result.get(0).getBook()).isEqualTo("Harry Potter and the Sorcerer's Stone");
+  }
+
 }

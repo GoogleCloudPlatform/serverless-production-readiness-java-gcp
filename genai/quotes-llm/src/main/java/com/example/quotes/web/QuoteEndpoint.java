@@ -78,7 +78,7 @@ public class QuoteEndpoint implements CrudService<Quote, Long> {
     }
 
     public List<Quote> quoteByBook(String book) {
-        return quoteService.getByAuthor("Leo Tolstoy");
+        return quoteService.getByBook(book);
     }
 
     @Override

@@ -107,6 +107,16 @@ class QuoteEndpointTest {
     }
 
     @Test
+    void quoteByBook() {
+        String book = "Book 1";
+        List<Quote> expectedQuotes = List.of(quote1);
+        when(quoteService.getByBook(book)).thenReturn(expectedQuotes);
+        List<Quote> result = quoteEndpoint.quoteByBook(book);
+        assertEquals(expectedQuotes, result);
+        verify(quoteService, times(1)).getByBook(book);
+    }
+
+    @Test
     void save_create() {
         Quote newQuote = new Quote();
         newQuote.setAuthor("New Author");

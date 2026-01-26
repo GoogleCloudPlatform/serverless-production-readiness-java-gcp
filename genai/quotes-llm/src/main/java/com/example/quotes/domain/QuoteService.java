@@ -59,6 +59,10 @@ public class QuoteService {
     return quoteRepository.findByAuthor(author);
   }
 
+  public List<Quote> getByBook(String book) {
+    return quoteRepository.findByBook(book);
+  }
+
   public void deleteById(Long id){
     quoteRepository.deleteById(id);
   }
