@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Google LLC
+ * Copyright 2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,83 +15,174 @@
  */
 package services.gemini;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.auth.oauth2.GoogleCredentials;
+import java.io.IOException;
+import java.net.URI;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import org.springframework.ai.anthropic.AnthropicChatModel;
+import org.springframework.ai.anthropic.AnthropicChatOptions;
+import org.springframework.ai.anthropic.api.AnthropicApi;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.google.genai.GoogleGenAiChatModel;
+import org.springframework.ai.model.SimpleApiKey;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpRequest;
+import org.springframework.http.client.ClientHttpRequestExecution;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.web.client.RestClient;
 
-// @SpringBootApplication(exclude = {
-// 		org.springframework.ai.model.google.genai.autoconfigure.embedding.GoogleGenAiEmbeddingConnectionAutoConfiguration.class
-// })
 @SpringBootApplication
 public class QuotesTestApplication {
-	@Bean
-	ApplicationRunner applicationRunner(
-      GoogleGenAiChatModel geminiChatModel) {
 
+	@Value("${vertex.ai.anthropic.project-id}")
+	private String projectId;
+
+	@Value("${vertex.ai.anthropic.location}")
+	private String location;
+
+	@Value("${vertex.ai.anthropic.model}")
+	private String model;
+
+	@Value("${vertex.ai.anthropic.temperature}")
+	private double temperature;
+
+	@Value("${vertex.ai.anthropic.max-tokens}")
+	private int maxTokens;
+
+	@Bean
+	AnthropicApi anthropicApi() throws IOException {
+		String baseUrl = String.format(
+				"https://aiplatform.googleapis.com/v1/projects/%s/locations/%s/publishers/anthropic/models/%s",
+				projectId, location, model);
+
+		String token = getOauth2Token();
+
+		RestClient.Builder restClientBuilder = RestClient.builder()
+				.defaultHeader("Authorization", "Bearer " + token)
+				.requestInterceptor(new VertexAiRequestInterceptor(new ObjectMapper()));
+
+		return AnthropicApi.builder()
+				.baseUrl(baseUrl)
+				.completionsPath(":rawPredict")
+				.apiKey(new SimpleApiKey(""))
+				.anthropicVersion("vertex-2023-10-16")
+				.anthropicBetaFeatures("")
+				.restClientBuilder(restClientBuilder)
+				.build();
+	}
+
+	@Bean
+	AnthropicChatModel anthropicChatModel(AnthropicApi anthropicApi) {
+		AnthropicChatOptions options = AnthropicChatOptions.builder()
+				.model(model)
+				.temperature(temperature)
+				.maxTokens(maxTokens)
+				.build();
+
+		return AnthropicChatModel.builder()
+				.anthropicApi(anthropicApi)
+				.defaultOptions(options)
+				.build();
+	}
+
+	@Bean
+	ApplicationRunner applicationRunner(AnthropicChatModel chatModel) {
 		return args -> {
 			String book = "The Jungle Book";
-			// sample prompt
-			// String prompt = String.format("You are an experienced literary critic. Please write a summary of the book %s", book);
-			String userMsg = String.format("You are an experienced literary critic. Please extract a famous quote from the book %s", book);
+			String userMsg = String.format(
+					"You are an experienced literary critic. Please extract a famous quote from the book %s", book);
 
-			// test against Gemini (Flash|Pro) 1.5
 			long start = System.currentTimeMillis();
-      Prompt prompt = new Prompt(List.of(new UserMessage(userMsg)));
+			Prompt prompt = new Prompt(List.of(new UserMessage(userMsg)));
 
-			System.out.println("GOOGLE_GEN_AI: " + geminiChatModel
+			System.out.println("ANTHROPIC (Vertex AI): " + chatModel
 					.call(prompt).getResult().getOutput().getText());
-			System.out.println("GOOGLE_GEN_AI Gemini call took " + (System.currentTimeMillis() - start) + " ms");
-
-			// test against Anthropic SONNET (3.5)
-			// start = System.currentTimeMillis();
-			// System.out.println("ANTHROPIC_SONNET: " + anthropicChatModel
-			// 		.call(
-			// 				new Prompt(prompt,
-			// 						AnthropicChatOptions.builder()
-			// 								.withTemperature(0.2).build())
-			// 		).getResult().getOutput().getContent());
-			// System.out.println("Anthropic SONNET call took " + (System.currentTimeMillis() - start) + " ms");
-      //
-			// String baseURL = String.format("https://us-east5-aiplatform.googleapis.com/v1/projects/genai-playground/locations/us-east5/publishers/anthropic/models/claude-3-5-sonnet-20240620");
-			// var anthropicApi = new AnthropicApi(baseURL, getOauth2Token(baseURL));
-      //
-			// var chatModel = new AnthropicChatModel(anthropicApi,
-			// 		AnthropicChatOptions.builder()
-			// 				.withModel("claude-3-5-sonnet-20240620")
-			// 				.withTemperature(0.4)
-			// 				.withMaxTokens(200)
-			// 				.build());
-      //
-			// ChatResponse response = chatModel.call(
-			// 		new Prompt("Generate the names of 5 famous pirates."));
+			System.out.println("Anthropic Claude call took " + (System.currentTimeMillis() - start) + " ms");
 		};
 	}
 
-	// private static String getOauth2Token(String target) throws IOException {
-	// 	// Load credentials from the environment (default)
-	// 	GoogleCredentials credentials = GoogleCredentials.getApplicationDefault();
-  //
-	// 	// Refresh if necessary
-	// 	if (credentials.getAccessToken() == null || credentials.getAccessToken().getExpirationTime().before(new Date())) {
-	// 		credentials.refresh();
-	// 	}
-  //
-	// 	// Get the access token
-	// 	AccessToken accessToken = credentials.getAccessToken();
-	// 	System.out.println("Generated short-lived Access Token: " + accessToken.getTokenValue());
-  //
-	// 	return accessToken.getTokenValue();
-	// }
+	private static String getOauth2Token() throws IOException {
+		GoogleCredentials credentials = GoogleCredentials.getApplicationDefault();
+		credentials.refresh();
+		System.out.println("Generated OAuth2 access token for Vertex AI");
+		return credentials.getAccessToken().getTokenValue();
+	}
 
 	public static void main(String[] args) {
 		new SpringApplicationBuilder(QuotesTestApplication.class)
 				.web(WebApplicationType.NONE)
 				.run(args);
+	}
+
+	/**
+	 * Intercepts outgoing requests to transform Spring AI's Anthropic-native
+	 * format into what Vertex AI's rawPredict endpoint expects.
+	 */
+	private static class VertexAiRequestInterceptor implements ClientHttpRequestInterceptor {
+
+		private static final Set<String> HEADERS_TO_STRIP = Set.of(
+				"anthropic-version", "anthropic-beta", "x-api-key");
+
+		private final ObjectMapper objectMapper;
+
+		VertexAiRequestInterceptor(ObjectMapper objectMapper) {
+			this.objectMapper = objectMapper;
+		}
+
+		@Override
+		public ClientHttpResponse intercept(HttpRequest request, byte[] body,
+				ClientHttpRequestExecution execution) throws IOException {
+
+			// --- Modify the JSON body ---
+			Map<String, Object> bodyMap = objectMapper.readValue(body,
+					new TypeReference<LinkedHashMap<String, Object>>() {});
+			bodyMap.put("anthropic_version", "vertex-2023-10-16");
+			bodyMap.remove("model");
+			byte[] modifiedBody = objectMapper.writeValueAsBytes(bodyMap);
+
+			// --- Strip problematic headers ---
+			HttpRequest wrapper = new HttpRequest() {
+				@Override
+				public HttpMethod getMethod() {
+					return request.getMethod();
+				}
+
+				@Override
+				public URI getURI() {
+					return request.getURI();
+				}
+
+				@Override
+				public Map<String, Object> getAttributes() {
+					return request.getAttributes();
+				}
+
+				@Override
+				public HttpHeaders getHeaders() {
+					HttpHeaders filtered = new HttpHeaders();
+					request.getHeaders().forEach((name, values) -> {
+						if (!HEADERS_TO_STRIP.contains(name.toLowerCase())) {
+							filtered.addAll(name, values);
+						}
+					});
+					return filtered;
+				}
+			};
+
+			return execution.execute(wrapper, modifiedBody);
+		}
 	}
 }

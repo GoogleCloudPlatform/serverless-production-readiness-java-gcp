@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.5.5</version>
+		<version>4.0.3</version>
 		<relativePath/>
 		<!-- lookup parent from repository -->
 	</parent>
@@ -18,7 +18,7 @@
 
 	<properties>
 		<java.version>21</java.version>
-		<spring.ai.version>1.1.0-SNAPSHOT</spring.ai.version>
+		<spring.ai.version>2.0.0-M2</spring.ai.version>
 	</properties>
 
 	<dependencyManagement>
@@ -30,13 +30,13 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
-<!--			<dependency>-->
-<!--				<groupId>com.google.cloud</groupId>-->
-<!--				<artifactId>libraries-bom</artifactId>-->
-<!--				<scope>import</scope>-->
-<!--				<type>pom</type>-->
-<!--				<version>26.53.0</version>-->
-<!--			</dependency>-->
+			<dependency>
+				<groupId>com.google.cloud</groupId>
+				<artifactId>libraries-bom</artifactId>
+				<scope>import</scope>
+				<type>pom</type>
+				<version>26.73.0</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<dependencies>
@@ -44,18 +44,15 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
 		</dependency>
+		<!-- Anthropic dependency - used with Vertex AI rawPredict endpoint -->
 		<dependency>
 			<groupId>org.springframework.ai</groupId>
-			<artifactId>spring-ai-starter-model-google-genai</artifactId>
-      <version>${spring.ai.version}</version>
+			<artifactId>spring-ai-starter-model-anthropic</artifactId>
 		</dependency>
-
-		<!-- Anthropic dependency -->
-<!--		<dependency>-->
-<!--			<groupId>org.springframework.ai</groupId>-->
-<!--			<artifactId>spring-ai-anthropic-spring-boot-starter</artifactId>-->
-<!--      <version>${spring.ai.version}</version>-->
-<!--		</dependency>-->
+		<dependency>
+			<groupId>com.google.auth</groupId>
+			<artifactId>google-auth-library-oauth2-http</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
