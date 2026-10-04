@@ -20,6 +20,7 @@ import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 import org.springframework.ai.document.Document;
 import org.springframework.stereotype.Service;
+import services.utility.RequestValidationUtility;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -30,7 +31,19 @@ import java.util.List;
 
 @Service
 public class CloudStorageService {
+
+    private void validateBucketAndFile(String bucket, String fileName) {
+        if (!RequestValidationUtility.isValidBucket(bucket)) {
+            throw new IllegalArgumentException("Invalid or unauthorized bucket: " + bucket);
+        }
+        if (!RequestValidationUtility.isValidFileName(fileName)) {
+            throw new IllegalArgumentException("Invalid file name: " + fileName);
+        }
+    }
+
     public BufferedReader readFile(String bucket, String fileName) {
+        validateBucketAndFile(bucket, fileName);
+
         // Create a Storage client.
         Storage storage = StorageOptions.getDefaultInstance().getService();
 
@@ -44,6 +57,8 @@ public class CloudStorageService {
     }
 
     public String readFileAsString(String bucket, String fileName) {
+        validateBucketAndFile(bucket, fileName);
+
         // Create a Storage client.
         Storage storage = StorageOptions.getDefaultInstance().getService();
 
@@ -54,6 +69,8 @@ public class CloudStorageService {
     }
 
     public List<Document> readFileAsDocument(String bucket, String fileName) {
+        validateBucketAndFile(bucket, fileName);
+
         // Create a Storage client.
         Storage storage = StorageOptions.getDefaultInstance().getService();
 
@@ -65,6 +82,8 @@ public class CloudStorageService {
     }
 
     public byte[]  readFileAsByteString(String bucket, String fileName) throws IOException {
+        validateBucketAndFile(bucket, fileName);
+
         // Create a Storage client.
         Storage storage = StorageOptions.getDefaultInstance().getService();
 

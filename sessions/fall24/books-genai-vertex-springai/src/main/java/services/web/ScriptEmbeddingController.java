@@ -75,6 +75,12 @@ public class ScriptEmbeddingController {
     String fileName = (String) body.get("name");
     String bucketName = (String) body.get("bucket");
 
+    if (!RequestValidationUtility.isValidBucket(bucketName) || !RequestValidationUtility.isValidFileName(fileName)) {
+      String error = "Invalid or unauthorized bucket or file name.";
+      logger.error("Document Embedding Request failed: {}", error);
+      return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
     logger.info("New script to transform:{}", fileName);
 
     String response = tfService.tfTransform(bucketName, fileName);

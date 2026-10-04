@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import services.actuator.StartupCheck;
+import services.utility.RequestValidationUtility;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -42,6 +43,10 @@ public class UploadController {
             @RequestParam("file") MultipartFile file,
             @RequestParam("bucketName") String bucketName) {
 
+        if (!RequestValidationUtility.isValidBucket(bucketName)) {
+            return new ResponseEntity<>("Invalid or unauthorized bucket.", HttpStatus.BAD_REQUEST);
+        }
+
         // create a book summary and persist it in the database
         long start = System.currentTimeMillis();
         logger.info("Book summarization flow : start");
@@ -53,6 +58,9 @@ public class UploadController {
 
             // Create a unique file name
             String fileName = file.getOriginalFilename();
+            if (!RequestValidationUtility.isValidFileName(fileName)) {
+                return new ResponseEntity<>("Invalid file name.", HttpStatus.BAD_REQUEST);
+            }
 
             // Create a BlobId
             BlobId blobId = BlobId.of(bucketName, fileName);

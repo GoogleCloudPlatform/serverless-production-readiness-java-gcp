@@ -118,6 +118,9 @@ public class ImageProcessingController {
 
         String fileName = (String)body.get("name");
         String bucketName = (String)body.get("bucket");
+        if (!RequestValidationUtility.isValidBucket(bucketName) || !RequestValidationUtility.isValidFileName(fileName)) {
+            return new ResponseEntity<>("Invalid or unauthorized bucket or file name.", HttpStatus.BAD_REQUEST);
+        }
 
         logger.info("New picture uploaded to Cloud Storage" + fileName);
 

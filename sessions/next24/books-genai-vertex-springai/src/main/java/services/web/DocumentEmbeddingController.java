@@ -101,6 +101,9 @@ public class DocumentEmbeddingController {
   @RequestMapping(value = "/category/books", method = RequestMethod.POST)
   public ResponseEntity<Integer> insertTable(@RequestBody Map<String, Object> body) {
     String fileName = (String) body.get("fileName");
+    if (!RequestValidationUtility.isValidBookFileName(fileName)) {
+      return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
     booksService.insertBook(fileName);
     return new ResponseEntity<>(HttpStatus.OK);
   }
@@ -116,6 +119,9 @@ public class DocumentEmbeddingController {
     // get document name and bucket
     String fileName = (String) body.get("name");
     String bucketName = (String) body.get("bucket");
+    if (!RequestValidationUtility.isValidBucket(bucketName) || !RequestValidationUtility.isValidFileName(fileName)) {
+      return new ResponseEntity<>("Invalid or unauthorized bucket or file name.", HttpStatus.BAD_REQUEST);
+    }
 
     logger.info("New script to transform:" + fileName);
 
@@ -162,6 +168,13 @@ public class DocumentEmbeddingController {
     // get document name and bucket
     String fileName = (String) body.get("name");
     String bucketName = (String) body.get("bucket");
+
+    if (!RequestValidationUtility.isValidBucket(bucketName)) {
+      return new ResponseEntity<>("Invalid or unauthorized bucket.", HttpStatus.BAD_REQUEST);
+    }
+    if (!RequestValidationUtility.isValidBookFileName(fileName)) {
+      return new ResponseEntity<>("Invalid book file name format.", HttpStatus.BAD_REQUEST);
+    }
 
     logger.info("New book uploaded for embedding:" + fileName);
 

@@ -19,6 +19,7 @@ import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 import org.springframework.stereotype.Service;
+import services.utility.RequestValidationUtility;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -26,7 +27,19 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 @Service
 public class CloudStorageService {
+
+    private void validateBucketAndFile(String bucket, String fileName) {
+        if (!RequestValidationUtility.isValidBucket(bucket)) {
+            throw new IllegalArgumentException("Invalid or unauthorized bucket: " + bucket);
+        }
+        if (!RequestValidationUtility.isValidFileName(fileName)) {
+            throw new IllegalArgumentException("Invalid file name: " + fileName);
+        }
+    }
+
     public BufferedReader readFile(String bucket, String fileName) {
+        validateBucketAndFile(bucket, fileName);
+
         // Create a Storage client.
         Storage storage = StorageOptions.getDefaultInstance().getService();
 
@@ -40,6 +53,8 @@ public class CloudStorageService {
     }
 
     public byte[]  readFileAsByteString(String bucket, String fileName) throws IOException {
+        validateBucketAndFile(bucket, fileName);
+
         // Create a Storage client.
         Storage storage = StorageOptions.getDefaultInstance().getService();
 

@@ -70,4 +70,59 @@ public class RequestValidationUtilityTests {
         String ErrMsg = RequestValidationUtility.validateRequest(body, headers);
         assertEquals(ErrMsg, "Missing expected body element: file name");
     }
+
+    @Test
+    public void testValidateRequestFailUnauthorizedBucket() {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("ce-id", "value1");
+        headers.put("ce-source", "value2");
+        headers.put("ce-type", "value2");
+        headers.put("ce-subject", "value2");
+        headers.put("ce-specversion", "value2");
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("name", "Meditations-Marcus_Aurelius-0161-public.txt");
+        body.put("bucket", "target_bucket");
+        String errMsg = RequestValidationUtility.validateRequest(body, headers);
+        assertEquals("Invalid or unauthorized bucket.", errMsg);
+    }
+
+    @Test
+    public void testValidateRequestAllowedBucketSuccess() {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("ce-id", "value1");
+        headers.put("ce-source", "value2");
+        headers.put("ce-type", "value2");
+        headers.put("ce-subject", "value2");
+        headers.put("ce-specversion", "value2");
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("name", "Meditations-Marcus_Aurelius-0161-public.txt");
+        body.put("bucket", "library_public");
+        String errMsg = RequestValidationUtility.validateRequest(body, headers);
+        assertEquals("", errMsg);
+    }
+
+    @Test
+    public void testValidateRequestFailPathTraversalFileName() {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("ce-id", "value1");
+        headers.put("ce-source", "value2");
+        headers.put("ce-type", "value2");
+        headers.put("ce-subject", "value2");
+        headers.put("ce-specversion", "value2");
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("name", "../secret.txt");
+        body.put("bucket", "library_public");
+        String errMsg = RequestValidationUtility.validateRequest(body, headers);
+        assertEquals("Invalid body element: file name", errMsg);
+    }
+
+    @Test
+    public void testIsValidBookFileName() {
+        assertEquals(true, RequestValidationUtility.isValidBookFileName("Meditations-Marcus_Aurelius-0161-public.txt"));
+        assertEquals(false, RequestValidationUtility.isValidBookFileName("title-author-year-publicPrivate-sensitive_file.txt"));
+        assertEquals(false, RequestValidationUtility.isValidBookFileName("../Meditations-Marcus_Aurelius-0161-public.txt"));
+    }
 }

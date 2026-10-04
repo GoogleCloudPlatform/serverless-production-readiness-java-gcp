@@ -54,6 +54,9 @@ public class SummaryController {
         // get document name and bucket
         String fileName = (String) body.get("name");
         String bucketName = (String) body.get("bucket");
+        if (!RequestValidationUtility.isValidBucket(bucketName) || !RequestValidationUtility.isValidBookFileName(fileName)) {
+            return new ResponseEntity<>("Invalid or unauthorized bucket or file name.", HttpStatus.BAD_REQUEST);
+        }
 
         // create a book summary and persist it in the database
         long start = System.currentTimeMillis();

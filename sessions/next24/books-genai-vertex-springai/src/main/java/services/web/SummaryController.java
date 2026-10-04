@@ -47,6 +47,9 @@ public class SummaryController {
         // get document name and bucket
         String fileName = (String) body.get("name");
         String bucketName = (String) body.get("bucket");
+        if (!RequestValidationUtility.isValidBucket(bucketName) || !RequestValidationUtility.isValidBookFileName(fileName)) {
+            return new ResponseEntity<>("Invalid or unauthorized bucket or file name.", HttpStatus.BAD_REQUEST);
+        }
         BufferedReader br = cloudStorageService.readFile(bucketName, fileName);
         long start = System.currentTimeMillis();
         logger.info("Book summarization flow : start");
